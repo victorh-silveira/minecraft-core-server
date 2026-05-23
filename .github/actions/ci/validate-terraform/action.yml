@@ -22,10 +22,11 @@ runs:
     - name: TFLint
       shell: bash
       run: |
-        tflint --config=$(pwd)/linters/.tflint.hcl \
-          --minimum-failure-severity=error \
-          infra/terraform/bootstrap \
-          infra/terraform/live/prod
+        CONFIG="$(pwd)/linters/.tflint.hcl"
+        for dir in infra/terraform/bootstrap infra/terraform/live/prod; do
+          echo ">>> tflint ${dir}"
+          (cd "${dir}" && tflint --config="${CONFIG}" --minimum-failure-severity=error)
+        done
 
     - name: Instalar tfsec
       shell: bash
