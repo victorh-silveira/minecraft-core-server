@@ -6,9 +6,21 @@ on:
 
   workflow_dispatch:
     inputs:
-      image_tag:
-        description: Tag da imagem (ex. v1.0.0). Nao use latest.
+      mode:
+        description: Modo de execucao
         required: true
+        type: choice
+        options:
+          - deploy-app
+          - deploy-infra
+      image_tag:
+        description: Tag da imagem (deploy-app). Nao use latest.
+        required: false
+        type: string
+      confirm_infra:
+        description: Digite APPLY_INFRA (deploy-infra)
+        required: false
+        type: string
 
 concurrency:
   group: cd-${{ github.workflow }}-${{ github.ref }}
@@ -19,8 +31,29 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  deploy-infra:
+    name: CD - Deploy Infra
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-infra'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production-infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy infraestrutura
+        uses: ./.github/actions/cd/deploy-infra
+        with:
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          confirm_token: ${{ inputs.confirm_infra }}
+
+  deploy-app:
     name: CD - Deploy App
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-app')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -40,6 +73,10 @@ jobs:
           else
             TAG="${{ inputs.image_tag }}"
           fi
+          if [ -z "$TAG" ]; then
+            echo "Informe image_tag para deploy-app manual."
+            exit 1
+          fi
           if [ "$TAG" = "latest" ]; then
             echo "Tag 'latest' nao e permitida. Use uma tag semantica (ex. v1.0.0)."
             exit 1
@@ -58,7 +95,8 @@ jobs:
 
   post-deploy:
     name: CD - Post Deploy
-    needs: [deploy]
+    needs: [deploy-app]
+    if: always() && needs.deploy-app.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production

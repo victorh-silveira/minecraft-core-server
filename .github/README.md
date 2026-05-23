@@ -5,8 +5,7 @@
 | Workflow | Gatilho | Jobs |
 |----------|---------|------|
 | [ci.yml](workflows/ci.yml) | push `main`, manual | `linter`, `validate`, `release` |
-| [cd.yml](workflows/cd.yml) | release publicado, manual | `deploy` (app), `post-deploy` |
-| [cd-infra.yml](workflows/cd-infra.yml) | **somente manual** | `deploy-infra` (Terraform) |
+| [cd.yml](workflows/cd.yml) | release ou manual (`deploy-app` / `deploy-infra`) | `deploy-app`, `deploy-infra`, `post-deploy` |
 | [destroy.yml](workflows/destroy.yml) | **somente manual** | `destroy` |
 
 ## Actions
@@ -56,12 +55,12 @@
 | Environment | Workflow | Protecao recomendada |
 |-------------|----------|----------------------|
 | `production` | CD app | Required reviewers |
-| `production-infra` | CD Infra | Required reviewers + confirm `APPLY_INFRA` |
+| `production-infra` | CD (`deploy-infra`) | Required reviewers + confirm `APPLY_INFRA` |
 | `production-destroy` | Destroy | Required reviewers + confirm `DESTROY` |
 
 ## Fluxo recomendado
 
-1. **Primeira vez:** `CD Infra` com `APPLY_INFRA` (AKS, ACR, rede).
+1. **Primeira vez:** `CD` manual, modo `deploy-infra`, confirmar `APPLY_INFRA` (AKS, ACR, rede).
 2. **Cada release:** CI gera tag; `CD` publica imagem e faz rollout no AKS.
 3. **RCON:** `kubectl port-forward -n mc-prod svc/mc-server-rcon 25575:25575` (ClusterIP, sem LB extra).
 4. **Destroy:** Actions > Destroy > `DESTROY`; revise artifact `terraform-destroy-plan-*` antes de aprovar o environment.

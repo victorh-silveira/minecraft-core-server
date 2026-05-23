@@ -164,22 +164,15 @@ Documentacao completa: [`.github/README.md`](../.github/README.md)
 | `validate` | `ci/test`, `ci/security`, `ci/validate-docker`, `ci/validate-kubernetes`, `ci/validate-terraform` |
 | `release` | `ci/sync-tags`, `ci/release` (apenas push em `main`) |
 
-### CD App ([`cd.yml`](../.github/workflows/cd.yml))
+### CD ([`cd.yml`](../.github/workflows/cd.yml))
 
-| Job | Actions |
-|-----|---------|
-| `deploy` | `cd/deploy-app` (build/push ACR, secret RCON, kubectl rollout) |
-| `post-deploy` | `cd/post-deploy` (`test-aks.sh` + TCP na porta do jogo) |
+| Job | Actions | Gatilho |
+|-----|---------|---------|
+| `deploy-app` | `cd/deploy-app` | release ou manual (`mode=deploy-app`) |
+| `post-deploy` | `cd/post-deploy` | apos `deploy-app` |
+| `deploy-infra` | `cd/deploy-infra` | manual (`mode=deploy-infra`, confirm `APPLY_INFRA`) |
 
-Gatilhos: release publicado ou `workflow_dispatch` (tag semantica; `latest` proibido).
-
-### CD Infra ([`cd-infra.yml`](../.github/workflows/cd-infra.yml))
-
-| Job | Actions |
-|-----|---------|
-| `deploy-infra` | `cd/deploy-infra` (apply com confirm `APPLY_INFRA`) |
-
-**Somente manual.** Use na primeira provisionagem ou mudancas de rede/AKS.
+Release publicado dispara `deploy-app`. Manual: escolha `deploy-app` (informe `image_tag`) ou `deploy-infra` (informe `APPLY_INFRA`). Tag `latest` proibida.
 
 ### Destroy ([`destroy.yml`](../.github/workflows/destroy.yml))
 

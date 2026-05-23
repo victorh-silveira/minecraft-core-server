@@ -175,7 +175,7 @@ Guia completo: [azure.md](azure.md)
 | 3 | `az aks get-credentials` — configurar kubectl |
 | 4 | Build e push da imagem para ACR |
 | 5 | Configurar GitHub Secret `RCON_PASSWORD` (CD cria `mc-rcon` no cluster) |
-| 6 | Workflow **CD Infra** com `APPLY_INFRA` (primeira vez) |
+| 6 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
 | 7 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
 | 8 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
 | 9 | `bash app/scripts/bash/test-aks.sh` |
