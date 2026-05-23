@@ -58,6 +58,10 @@ runs:
         docker build -f infra/docker/Dockerfile -t "${IMAGE}" .
         docker push "${IMAGE}"
 
+    - name: Namespace
+      shell: bash
+      run: kubectl apply -f infra/kubernetes/base/namespace.yaml
+
     - name: Secret RCON
       shell: bash
       run: |
