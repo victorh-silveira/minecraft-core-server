@@ -55,7 +55,7 @@ jobs:
     name: CD - Deploy App
     if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-app')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     environment: production
 
     steps:
