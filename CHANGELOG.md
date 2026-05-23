@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.0.0...v1.1.0) (2026-05-23)
+
+### Funcionalidades
+
+* **devops:** reorganizar scripts e adicionar testes Docker no WSL ([ba12e27](https://github.com/victorh-silveira/minecraft-server/commit/ba12e27a7d568ddd8aabf92b55de2a8a0bb79ba1))
+
 ## 1.0.0 (2026-05-23)
 
 ### Funcionalidades
