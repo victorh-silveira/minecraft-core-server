@@ -109,11 +109,14 @@ kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/wo
 bash app/scripts/bash/test-aks.sh
 ```
 
-IP do jogo:
+IP do jogo (hostname Azure gratuito apos deploy-infra):
 
 ```bash
+terraform -chdir=infra/terraform/live/prod output -raw game_fqdn
 kubectl -n minecraft-server-prod get svc mc-server-game
 ```
+
+Conecte no cliente Minecraft usando o FQDN (porta padrao 25565). Detalhes: [docs/access-and-hostname.md](../docs/access-and-hostname.md).
 
 ## Custos estimados (prod minimo)
 
@@ -129,9 +132,12 @@ Use creditos Azure iniciais para homologacao. Spot nodes apenas em ambientes nao
 
 ## Seguranca
 
-- RCON restrito por `loadBalancerSourceRanges` e NSG (`admin_cidr_list`)
-- Preferivel: RCON via `kubectl port-forward svc/mc-server-rcon 25575:25575` sem LB publico
-- Rotacione `mc-rcon` e use Azure Key Vault + External Secrets em evolucao futura
+Guia completo: [access-and-hostname.md](access-and-hostname.md)
+
+- Whitelist + `online-mode=true` (conta Mojang obrigatoria)
+- RCON via `kubectl port-forward svc/mc-server-rcon 25575:25575` (ClusterIP)
+- NSG opcional: `game_cidr_list` e `admin_cidr_list` no Terraform
+- Hostname gratuito: `minecraftserverprod.brazilsouth.cloudapp.azure.com`
 
 ## Qualidade (Terraform)
 

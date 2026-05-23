@@ -1,12 +1,11 @@
 import json
 
-import pytest
-import requests
-
 import infrastructure.mods.http_client as http_mod
 import infrastructure.mods.modrinth as modrinth_mod
 import infrastructure.mods.paths as paths_mod
 import infrastructure.mods.sync as sync_mods
+import pytest
+import requests
 
 
 @pytest.fixture

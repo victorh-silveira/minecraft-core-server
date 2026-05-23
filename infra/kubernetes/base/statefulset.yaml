@@ -57,7 +57,16 @@ spec:
             - name: MEMORY
               value: "2G"
             - name: ONLINE_MODE
-              value: "false"
+              value: "TRUE"
+            - name: WHITE_LIST
+              value: "TRUE"
+            - name: ENFORCE_WHITELIST
+              value: "TRUE"
+            - name: WHITELIST
+              valueFrom:
+                secretKeyRef:
+                  name: mc-access
+                  key: WHITELIST
             - name: DIFFICULTY
               value: "hard"
             - name: MAX_PLAYERS

@@ -33,7 +33,7 @@ permissions:
 jobs:
   deploy-infra:
     name: CD - Deploy Infra
-    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-infra'
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-infra')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production-infra
@@ -49,11 +49,15 @@ jobs:
           azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
           azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          confirm_token: ${{ inputs.confirm_infra }}
+          confirm_token: ${{ github.event_name == 'release' && 'APPLY_INFRA' || inputs.confirm_infra }}
 
   deploy-app:
     name: CD - Deploy App
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-app')
+    needs: [deploy-infra]
+    if: |
+      always() &&
+      (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') &&
+      (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-app'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production
@@ -92,6 +96,7 @@ jobs:
           azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           rcon_password: ${{ secrets.RCON_PASSWORD }}
+          minecraft_whitelist: ${{ secrets.MINECRAFT_WHITELIST }}
 
   post-deploy:
     name: CD - Post Deploy

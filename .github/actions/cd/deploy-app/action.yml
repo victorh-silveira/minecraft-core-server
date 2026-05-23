@@ -18,6 +18,9 @@ inputs:
   rcon_password:
     description: Senha RCON (GitHub Secret RCON_PASSWORD)
     required: true
+  minecraft_whitelist:
+    description: Nicks permitidos separados por virgula (GitHub Secret MINECRAFT_WHITELIST)
+    required: true
   resource_group:
     required: false
     default: rg-minecraft-server-prod
@@ -67,6 +70,13 @@ runs:
       run: |
         kubectl -n minecraft-server-prod create secret generic mc-rcon \
           --from-literal=RCON_PASSWORD="${{ inputs.rcon_password }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Secret acesso
+      shell: bash
+      run: |
+        kubectl -n minecraft-server-prod create secret generic mc-access \
+          --from-literal=WHITELIST="${{ inputs.minecraft_whitelist }}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Apply Kubernetes

@@ -14,6 +14,16 @@ module "network" {
   vnet_address_space  = ["10.10.0.0/16"]
   aks_subnet_prefix   = ["10.10.0.0/22"]
   admin_cidr_list     = var.admin_cidr_list
+  game_cidr_list      = var.game_cidr_list
+  tags                = local.tags
+}
+
+module "game_public_ip" {
+  source              = "../../modules/public-ip"
+  name                = local.game_pip_name
+  resource_group_name = module.resource_group.name
+  location            = local.region
+  domain_name_label   = var.game_dns_label != "" ? var.game_dns_label : local.game_dns_label
   tags                = local.tags
 }
 

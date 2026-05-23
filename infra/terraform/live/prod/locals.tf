@@ -17,4 +17,6 @@ locals {
   acr_name            = "acr${replace(local.project, "-", "")}${local.environment}"
   dns_prefix           = "minecraftserver${local.environment}"
   storage_account_name = "st${replace(local.project, "-", "")}${local.environment}001"
+  game_pip_name        = "pip-${local.project}-${local.environment}-game"
+  game_dns_label       = replace("${local.project}${local.environment}", "-", "")
 }

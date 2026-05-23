@@ -167,11 +167,15 @@ Documentacao completa: [`.github/README.md`](../.github/README.md)
 
 | Job | Actions | Gatilho |
 |-----|---------|---------|
-| `deploy-app` | `cd/deploy-app` | release ou manual (`mode=deploy-app`) |
-| `post-deploy` | `cd/post-deploy` | apos `deploy-app` |
-| `deploy-infra` | `cd/deploy-infra` | manual (`mode=deploy-infra`, confirm `APPLY_INFRA`) |
+| `deploy-infra` | `cd/deploy-infra` | release (automático) ou manual (`mode=deploy-infra`) |
+| `deploy-app` | `cd/deploy-app` | release (automático, após infra) ou manual (`mode=deploy-app`) |
+| `post-deploy` | `cd/post-deploy` | após `deploy-app` |
 
-Release publicado dispara `deploy-app`. Manual: escolha `deploy-app` (informe `image_tag`) ou `deploy-infra` (informe `APPLY_INFRA`). Tag `latest` proibida.
+O fluxo é 100% automatizado no modelo GitOps. Pushes na branch `main` que resultam em uma nova versão gerada pelo semantic-release disparam automaticamente o deploy da infraestrutura (`deploy-infra`) e em seguida o deploy da aplicação (`deploy-app`). 
+
+Na automação de infraestrutura, a confirmação `APPLY_INFRA` é injetada de forma silenciosa e segura. O deploy da aplicação depende de o deploy de infraestrutura ter finalizado com sucesso ou ter sido ignorado (caso acionado individualmente de forma manual).
+
+Manual: escolha `deploy-app` (informe `image_tag`) ou `deploy-infra` (informe `APPLY_INFRA`). Tag `latest` é proibida para garantir estabilidade e rollback seguro.
 
 ### Destroy ([`destroy.yml`](../.github/workflows/destroy.yml))
 

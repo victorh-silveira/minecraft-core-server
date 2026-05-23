@@ -11,4 +11,4 @@ images:
 
 patches:
   - path: patches/resources.yaml
-  - path: patches/networkpolicy-cidrs.yaml
+  - path: patches/service-game-lb.yaml

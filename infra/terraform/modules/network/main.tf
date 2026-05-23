@@ -28,7 +28,8 @@ resource "azurerm_network_security_rule" "minecraft" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "25565"
-  source_address_prefix       = "*"
+  source_address_prefix       = length(var.game_cidr_list) > 0 ? null : "*"
+  source_address_prefixes     = length(var.game_cidr_list) > 0 ? var.game_cidr_list : null
   destination_address_prefix  = "*"
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.aks.name

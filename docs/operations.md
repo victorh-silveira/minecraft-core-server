@@ -77,9 +77,10 @@ Para VPN de gerenciamento, substitua `127.0.0.1` pelo CIDR da rede privada.
 ### Boas praticas
 
 - `RCON_PASSWORD` forte e unico no `.env`
+- `MINECRAFT_WHITELIST` com nicks Mojang permitidos
+- `ONLINE_MODE=true` em producao
 - Nunca commitar `.env`
-- Preferir whitelist em servidores publicos
-- Considerar mod de autenticacao com `online-mode=false`
+- Guia completo: [access-and-hostname.md](access-and-hostname.md)
 
 ---
 
@@ -173,12 +174,12 @@ Guia completo: [azure.md](azure.md)
 | 1 | `infra/terraform/live/prod` — aplicar RG, VNet, ACR, AKS e storage |
 | 2 | `az aks get-credentials` — configurar kubectl |
 | 3 | Build e push da imagem para ACR |
-| 4 | Configurar GitHub Secret `RCON_PASSWORD` (CD cria `mc-rcon` no cluster) |
+| 4 | GitHub Secrets `RCON_PASSWORD` e `MINECRAFT_WHITELIST` |
 | 5 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
 | 6 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
 | 7 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
 | 8 | `bash app/scripts/bash/test-aks.sh` |
-| 9 | Obter IP: `kubectl -n minecraft-server-prod get svc mc-server-game` |
+| 9 | Obter hostname: `terraform output game_fqdn` ou `kubectl get svc mc-server-game` |
 
 ### Backup do mundo (PVC)
 

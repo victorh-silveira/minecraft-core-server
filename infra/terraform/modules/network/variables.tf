@@ -25,7 +25,13 @@ variable "aks_subnet_prefix" {
 variable "admin_cidr_list" {
   type        = list(string)
   description = "CIDR blocks allowed to reach RCON on nodes"
-  default     = ["203.0.113.10/32"]
+  default     = []
+}
+
+variable "game_cidr_list" {
+  type        = list(string)
+  description = "CIDR blocks allowed for Minecraft TCP 25565 (empty = any)"
+  default     = []
 }
 
 variable "tags" {

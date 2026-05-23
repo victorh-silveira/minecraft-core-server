@@ -76,15 +76,18 @@ else
 fi
 
 step "Verificando Services LoadBalancer"
-GAME_IP=""
-RCON_IP=""
+GAME_HOST=""
 if kubectl -n "$NAMESPACE" get svc mc-server-game >/dev/null 2>&1; then
-  GAME_IP="$(kubectl -n "$NAMESPACE" get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)"
-  if [[ -z "$GAME_IP" ]]; then
-    GAME_IP="$(kubectl -n "$NAMESPACE" get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+  GAME_HOST="$(kubectl -n "$NAMESPACE" get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+  if [[ -z "$GAME_HOST" ]]; then
+    GAME_HOST="$(kubectl -n "$NAMESPACE" get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)"
   fi
-  if [[ -n "$GAME_IP" ]]; then
-    pass "mc-server-game LB: ${GAME_IP}:25565"
+  if [[ -n "$GAME_HOST" ]]; then
+    if echo "$GAME_HOST" | grep -q '[a-zA-Z]'; then
+      pass "mc-server-game: conecte em ${GAME_HOST}"
+    else
+      pass "mc-server-game LB: ${GAME_HOST}:25565"
+    fi
   else
     warn "mc-server-game sem IP externo ainda (provisioning)"
   fi
@@ -99,10 +102,10 @@ else
 fi
 
 step "Testando porta TCP 25565"
-TARGET_HOST="${GAME_IP:-127.0.0.1}"
-if [[ -n "$GAME_IP" ]] && timeout 3 bash -c "echo > /dev/tcp/${TARGET_HOST}/25565" 2>/dev/null; then
+TARGET_HOST="${GAME_HOST:-127.0.0.1}"
+if [[ -n "$GAME_HOST" ]] && timeout 3 bash -c "echo > /dev/tcp/${TARGET_HOST}/25565" 2>/dev/null; then
   pass "porta 25565 acessivel em ${TARGET_HOST}"
-elif [[ -z "$GAME_IP" ]]; then
+elif [[ -z "$GAME_HOST" ]]; then
   warn "LB IP ausente; pulando teste TCP externo"
 else
   warn "porta 25565 nao respondeu em ${TARGET_HOST}"

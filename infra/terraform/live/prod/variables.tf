@@ -19,3 +19,15 @@ variable "admin_cidr_list" {
   description = "CIDR blocks allowed for RCON at NSG level (defina em terraform.tfvars)"
   default     = []
 }
+
+variable "game_cidr_list" {
+  type        = list(string)
+  description = "CIDR blocks allowed for Minecraft 25565 at NSG level (vazio = internet, use whitelist no servidor)"
+  default     = []
+}
+
+variable "game_dns_label" {
+  type        = string
+  description = "Label DNS gratuito Azure (unico na regiao). Vazio usa minecraftserverprod."
+  default     = ""
+}

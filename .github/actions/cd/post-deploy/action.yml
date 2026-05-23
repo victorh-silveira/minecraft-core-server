@@ -24,15 +24,19 @@ runs:
     - name: Verificar endpoint externo
       shell: bash
       run: |
-        GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+        GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
         if [ -z "$GAME_IP" ]; then
-          GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+          GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
         fi
         if [ -z "$GAME_IP" ]; then
           echo "LoadBalancer ainda sem IP externo"
           exit 1
         fi
-        echo "Endpoint: ${GAME_IP}:${{ inputs.game_port }}"
+        if echo "$GAME_IP" | grep -q '[a-zA-Z]'; then
+          echo "Conecte no Minecraft: ${GAME_IP}"
+        else
+          echo "Conecte no Minecraft: ${GAME_IP}:${{ inputs.game_port }}"
+        fi
         for attempt in $(seq 1 30); do
           if timeout 3 bash -c "echo > /dev/tcp/${GAME_IP}/${{ inputs.game_port }}" 2>/dev/null; then
             echo "Porta ${{ inputs.game_port }} acessivel em ${GAME_IP}"

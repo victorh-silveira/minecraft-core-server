@@ -48,14 +48,17 @@ services:
 
     ports:
       - "${GAME_PORT:-25565}:25565/tcp"
-      - "${RCON_PORT:-25575}:25575/tcp"
+      - "127.0.0.1:${RCON_PORT:-25575}:25575/tcp"
 
     environment:
       EULA: "${EULA_ACCEPTED}"
       VERSION: "${MINECRAFT_VERSION}"
       TYPE: "${SERVER_TYPE}"
       MEMORY: "${MEMORY_LIMIT}"
-      ONLINE_MODE: "${ONLINE_MODE}"
+      ONLINE_MODE: "${ONLINE_MODE:-TRUE}"
+      WHITE_LIST: "${WHITE_LIST:-TRUE}"
+      ENFORCE_WHITELIST: "${ENFORCE_WHITELIST:-TRUE}"
+      WHITELIST: "${MINECRAFT_WHITELIST}"
       DIFFICULTY: "${DIFFICULTY}"
       MAX_PLAYERS: "${MAX_PLAYERS}"
       ENABLE_RCON: "true"
