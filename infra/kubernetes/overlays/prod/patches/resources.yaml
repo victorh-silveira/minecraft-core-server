@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mc-server
+  namespace: mc-prod
+spec:
+  template:
+    spec:
+      containers:
+        - name: mc-server
+          env:
+            - name: MEMORY
+              value: "2G"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi

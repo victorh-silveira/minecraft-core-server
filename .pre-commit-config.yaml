@@ -1,52 +1,67 @@
-# ---- VERSAO MINIMA E RUNTIME PYTHON ----
 minimum_pre_commit_version: "3.5.0"
 
 default_language_version:
   python: python3.13
 
-# ---- REPOSITORIO LOCAL: HOOKS DE QUALIDADE ----
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.13
+    hooks:
+      - id: ruff
+        name: "Codigo | Lint Python (Ruff)"
+        args: [--fix, --config, app/pyproject.toml]
+        files: ^app/(src/infrastructure/mods|tests)/
+
+      - id: ruff-format
+        name: "Codigo | Formatar Python (Ruff)"
+        args: [--config, app/pyproject.toml]
+        files: ^app/(src/infrastructure/mods|tests)/
+
   - repo: local
     hooks:
-      # ---- LINT: RUFF, VULTURE, PYLINT E LIMITE DE LINHAS ----
-      - id: lint
-        name: Qualidade (Ruff, Vulture, limite de linhas)
-        entry: python scripts/python/clean_workspace.py --stage lint
+      - id: terraform-fmt
+        name: "Infra | Formatar Terraform"
+        entry: bash -c "terraform fmt -check -recursive -diff infra/terraform"
         language: system
         pass_filenames: false
         always_run: true
-        stages: [pre-commit]
 
-      # ---- TESTES: PYTEST + COBERTURA EM scripts/ ----
-      - id: test
-        name: Testes (pytest + cobertura em scripts)
-        entry: python scripts/python/clean_workspace.py --stage test
+      - id: terraform-validate
+        name: "Infra | Validar Terraform"
+        entry: bash -c "set -euo pipefail; for d in infra/terraform/bootstrap infra/terraform/live/prod; do echo \">>> Validando ${d}\"; (cd \"${d}\" && terraform init -backend=false -input=false && terraform validate); done"
         language: system
         pass_filenames: false
         always_run: true
-        stages: [pre-commit]
 
-      # ---- SEGURANCA: BANDIT + PIP-AUDIT ----
-      - id: security
-        name: Seguranca (Bandit + pip-audit)
-        entry: python scripts/python/clean_workspace.py --stage security
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
-
-      # ---- COMMIT MSG: CONVENTIONAL COMMITS (COMMITLINT) ----
       - id: commitlint
-        name: Commitlint (Conventional Commits)
-        entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config tools/commitlint.config.mjs --edit
+        name: "Commit | Validar Conventional Commits"
+        entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config app/tools/commitlint.config.mjs --edit
         language: system
         stages: [commit-msg]
 
-      # ---- LIMPEZA: CACHES E ARTEFATOS LOCAIS ----
-      - id: cleanup
-        name: Limpeza (caches e artefatos locais)
-        entry: python scripts/python/clean_workspace.py --stage clean
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: "Docker | Lint Dockerfile"
+        files: ^infra/docker/Dockerfile$
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+        name: "Infra | Validar sintaxe YAML"
+        files: ^(infra/kubernetes/|\.github/workflows/)
+        exclude: ^\.github/workflows/templates/
+
+      - id: check-json
+        name: "Codigo | Validar JSON (manifesto de mods)"
+        files: ^app/src/interface/mods/mods-manifest\.json$
+
+      - id: end-of-file-fixer
+        name: "Arquivo | Garantir newline no fim"
+        exclude: ^app/src/domain/world-data/
+
+      - id: trailing-whitespace
+        name: "Arquivo | Remover espacos no fim da linha"
+        exclude: ^app/src/domain/world-data/

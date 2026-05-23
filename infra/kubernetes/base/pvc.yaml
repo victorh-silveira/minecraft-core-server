@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mc-data
+  namespace: mc-prod
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: mc-standard-ssd
+  resources:
+    requests:
+      storage: 32Gi

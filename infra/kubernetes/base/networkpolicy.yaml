@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mc-server-netpol
+  namespace: mc-prod
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mc-server
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 25565
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 25575
+  egress:
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - ports:
+        - protocol: TCP
+          port: 443

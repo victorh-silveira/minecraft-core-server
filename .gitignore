@@ -1,5 +1,7 @@
 # ---- AMBIENTES VIRTUAIS E SEGREDOS ----
 .env
+**/.env
+!**/.env.example
 .venv/
 env/
 venv/
@@ -49,17 +51,31 @@ yarn-error.log*
 desktop.ini
 Thumbs.db
 
+# ---- TERRAFORM ----
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.*
+infra/terraform/**/terraform.tfvars
+!infra/terraform/**/terraform.tfvars.example
+
 # ---- SERVIDOR MINECRAFT: DADOS PERSISTENTES E BINARIOS ----
-src/domain/world-data/*
-!src/domain/world-data/.gitkeep
+app/src/domain/world-data/*
+!app/src/domain/world-data/.gitkeep
+app/src/domain/world-data/**/session.lock
+app/src/domain/world-data/**/level.dat
+app/src/domain/world-data/**/level.dat_old
+app/src/domain/world-data/**/*.mca
+app/src/domain/world-data/**/*.dat
 
-src/interface/mods/*.jar
-!src/interface/mods/mods-manifest.json
+app/src/interface/mods/*.jar
+!app/src/interface/mods/mods-manifest.json
 
-src/interface/plugins/*.jar
+app/src/interface/plugins/*.jar
 
-src/infrastructure/logging/*
-!src/infrastructure/logging/.gitkeep
+app/src/infrastructure/logging/*
+!app/src/infrastructure/logging/.gitkeep
 
-src/infrastructure/database/*
-!src/infrastructure/database/.gitkeep
+app/src/infrastructure/database/*
+!app/src/infrastructure/database/.gitkeep
+
+.azure-setup-tmp/

@@ -2,7 +2,7 @@
 
 ## Dockerfile
 
-Local: [`Dockerfile`](../Dockerfile)
+Local: [`Dockerfile`](../infra/docker/Dockerfile)
 
 | Pratica | Implementacao |
 |---------|---------------|
@@ -14,13 +14,13 @@ Local: [`Dockerfile`](../Dockerfile)
 | Volumes declarados | world, mods, plugins, logs |
 | EXPOSE | 25565/tcp, 25575/tcp |
 
-Templates em `/templates/` servem como fallback na imagem; em runtime os **bind mounts** de `src/` prevalecem.
+Templates em `/templates/` servem como fallback na imagem; em runtime os **bind mounts** de `app/src/` prevalecem.
 
 ---
 
 ## Docker Compose
 
-Local: [`docker-compose.yml`](../docker-compose.yml)
+Local: [`docker-compose.yml`](../infra/docker/docker-compose.yml)
 
 | Recurso | Detalhe |
 |---------|---------|
@@ -62,10 +62,49 @@ Prefixo obrigatorio: **`docker-*`**
 | `docker-up` | Sobe com build e recreate |
 | `docker-down` | Para e remove containers/rede |
 | `docker-restart` | Reinicia o servico |
-| `docker-sync-mods` | Roda `sync_mods.py` |
+| `docker-sync-mods` | Roda `python -m infrastructure.mods` |
+| `ci-lint` | Pre-commit leve (Ruff + TF fmt/validate) |
+| `ci-test` | Pytest + cobertura 100% |
+| `ci-validate` | Testes + security + test-docker |
+| `terraform-plan` | Plan em `live/prod` (requer tfvars + Azure) |
 | `docker-logs` | Logs em tempo real |
 | `docker-sh` | Shell no container |
 | `docker-clean` | Remove containers e imagens locais |
+| `docker-test` | Valida Docker local (`test-docker.sh`) |
+| `docker-nuke` | Limpeza total do Docker no WSL (com confirmacao) |
+
+---
+
+## Terraform e Azure AKS
+
+Guia completo: [azure.md](azure.md)
+
+| Caminho | Proposito |
+|---------|-----------|
+| `infra/terraform/bootstrap/` | Storage Account do remote state |
+| `infra/terraform/modules/` | RG, VNet, ACR, AKS, backup |
+| `infra/terraform/live/prod/` | Stack de producao (`brazilsouth`) |
+| `infra/kubernetes/base/` | Manifestos K8s base |
+| `infra/kubernetes/overlays/prod/` | Overlay de producao (kustomize) |
+
+Ferramentas de qualidade:
+
+```bash
+terraform fmt -recursive infra/terraform/
+tflint --init && tflint --recursive --config linters/.tflint.hcl
+tfsec --config-file linters/.tfsec.yml .
+```
+
+Configuracao: [`linters/.tflint.hcl`](../linters/.tflint.hcl), [`linters/.tfsec.yml`](../linters/.tfsec.yml)
+
+Pre-commit inclui hooks `terraform_fmt`, `terraform_validate`, `terraform_tflint`, `terraform_tfsec`.
+
+Deploy Kubernetes:
+
+```bash
+kubectl apply -k infra/kubernetes/overlays/prod
+bash app/scripts/bash/test-aks.sh
+```
 
 ---
 
@@ -74,9 +113,8 @@ Prefixo obrigatorio: **`docker-*`**
 Instalacao:
 
 ```powershell
-pip install -r requirements-dev.txt
-pre-commit install
-pre-commit install --hook-type commit-msg
+pip install -r app/requirements-dev.txt
+make pre-commit-install
 ```
 
 Execucao manual:
@@ -85,7 +123,7 @@ Execucao manual:
 pre-commit run --all-files
 ```
 
-Hooks usam `always_run: true` em lint/test/security para nao serem skipped sem arquivos Python rastreados no Git.
+Hooks locais seguem o padrao `Area | Acao` (ver `.pre-commit-config.yaml`). Testes, seguranca e kubeconform rodam no CI.
 
 ---
 
@@ -94,8 +132,8 @@ Hooks usam `always_run: true` em lint/test/security para nao serem skipped sem a
 | Stage | Ferramentas |
 |-------|-------------|
 | lint | Ruff check/format, Vulture, Pylint duplicate-code, limite 300 linhas |
-| test | pytest + coverage 100% em `scripts/python/sync_mods.py` |
-| security | Bandit (scripts/python/), pip-audit (requirements.txt) |
+| test | pytest + coverage 100% em `app/src/infrastructure/mods/` |
+| security | Bandit (app/scripts/python/), pip-audit (app/requirements.txt) |
 | clean | Remove `__pycache__`, `.pytest_cache`, `.ruff_cache`, etc. |
 
 ---
@@ -114,20 +152,42 @@ Branches elegiveis: `main`.
 
 ---
 
-## CI/CD (nao implementado)
+## CI/CD
 
-Pipeline minimo sugerido (GitHub Actions):
+Documentacao completa: [`.github/README.md`](../.github/README.md)
 
-```yaml
-- pip install -r requirements-dev.txt
-- python scripts/python/sync_mods.py
-- python scripts/python/clean_workspace.py --stage lint
-- python scripts/python/clean_workspace.py --stage test
-- python scripts/python/clean_workspace.py --stage security
-- docker compose --env-file .env.example config
-```
+### CI ([`ci.yml`](../.github/workflows/ci.yml))
 
-Ver [roadmap.md](roadmap.md).
+| Job | Actions |
+|-----|---------|
+| `linter` | `ci/lint-code`, `ci/lint-infra` (+ actionlint) |
+| `validate` | `ci/test`, `ci/security`, `ci/validate-docker`, `ci/validate-kubernetes`, `ci/validate-terraform` |
+| `release` | `ci/sync-tags`, `ci/release` (apenas push em `main`) |
+
+### CD App ([`cd.yml`](../.github/workflows/cd.yml))
+
+| Job | Actions |
+|-----|---------|
+| `deploy` | `cd/deploy-app` (build/push ACR, secret RCON, kubectl rollout) |
+| `post-deploy` | `cd/post-deploy` (`test-aks.sh` + TCP na porta do jogo) |
+
+Gatilhos: release publicado ou `workflow_dispatch` (tag semantica; `latest` proibido).
+
+### CD Infra ([`cd-infra.yml`](../.github/workflows/cd-infra.yml))
+
+| Job | Actions |
+|-----|---------|
+| `deploy-infra` | `cd/deploy-infra` (apply com confirm `APPLY_INFRA`) |
+
+**Somente manual.** Use na primeira provisionagem ou mudancas de rede/AKS.
+
+### Destroy ([`destroy.yml`](../.github/workflows/destroy.yml))
+
+| Job | Action |
+|-----|--------|
+| `destroy` | `destroy/azure` (plan destroy + destroy) |
+
+**Somente manual.** Confirmar digitando `DESTROY`.
 
 ---
 
@@ -140,6 +200,9 @@ Ver [roadmap.md](roadmap.md).
 | Makefile | OK |
 | Pre-commit | OK |
 | Testes automatizados | OK |
-| CI/CD | Pendente |
-| Pin de versao base (nao `latest`) | Pendente |
-| Docker Secrets | Pendente |
+| CI/CD | OK |
+| Terraform + AKS (IaC) | OK |
+| Pin de versao base (nao `latest` no CD) | OK |
+| Secret RCON via GitHub Secret no CD | OK |
+| OIDC Azure | OK (com fallback SP JSON) |
+| Docker Secrets / Key Vault nativo | Pendente |

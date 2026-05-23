@@ -3,41 +3,29 @@ name: CI
 on:
   push:
     branches: [main]
-
     paths:
-      - ".github/**"
       - ".dockerignore"
-      - ".env.example"
       - ".gitattributes"
       - ".gitignore"
-      - ".python-version"
-      - ".pre-commit-config.yaml"
-      - "Dockerfile"
-      - "docker-compose.yml"
+      - ".github/**"
+      - "app/**"
+      - "docs/**"
+      - "infra/**"
+      - "linters/**"
       - "Makefile"
       - "README.md"
-      - "docs/**"
-      - "pyproject.toml"
-      - "requirements*.txt"
-      - "src/**"
-      - "scripts/**"
-      - "tests/**"
-      - "tools/**"
-
-  pull_request:
-    branches: [main]
 
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Qualidade - Lint
+  linter:
+    name: CI - Linter
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -46,75 +34,46 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Lint
-        uses: ./.github/actions/lint
+      - name: Lint codigo
+        uses: ./.github/actions/ci/lint-code
 
-  tests:
-    name: Testes - Pytest
+      - name: Lint infra
+        uses: ./.github/actions/ci/lint-infra
+
+  validate:
+    name: CI - Validate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Testes
-        uses: ./.github/actions/test
-
-  security:
-    name: Seguranca - Auditoria
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        uses: ./.github/actions/ci/test
 
       - name: Seguranca
-        uses: ./.github/actions/security
+        uses: ./.github/actions/ci/security
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  docker:
-    name: Docker - Compose Config
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+      - name: Validar Docker
+        uses: ./.github/actions/ci/validate-docker
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Validar Kubernetes
+        uses: ./.github/actions/ci/validate-kubernetes
 
-      - name: Validar docker-compose.yml
-        shell: bash
-        run: |
-          cat > .env << 'EOF'
-          MINECRAFT_VERSION=1.20.6
-          SERVER_TYPE=FABRIC
-          MEMORY_LIMIT=2G
-          EULA_ACCEPTED=TRUE
-          GAME_PORT=25565
-          RCON_PORT=25575
-          ONLINE_MODE=false
-          DIFFICULTY=hard
-          MAX_PLAYERS=20
-          RCON_PASSWORD=ci-test-password
-          UID=1000
-          GID=1000
-          SKIP_CHOWN=false
-          DOCKER_BASE_IMAGE=itzg/minecraft-server:latest
-          IMAGE_VERSION=0.1.0
-          DOCKER_PIDS_LIMIT=512
-          EOF
-          docker compose --env-file .env config --quiet
+      - name: Validar Terraform
+        uses: ./.github/actions/ci/validate-terraform
 
   release:
-    name: Release - Versao
-    needs: [quality, tests, security, docker]
-
+    name: CI - Release
+    needs: [linter, validate]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     permissions:
       contents: write
@@ -127,12 +86,12 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Tags
-        uses: ./.github/actions/sync-tags
+      - name: Sync tags
+        uses: ./.github/actions/ci/sync-tags
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release
-        uses: ./.github/actions/release
+      - name: Release semantico
+        uses: ./.github/actions/ci/release
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

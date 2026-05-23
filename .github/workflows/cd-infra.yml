@@ -1,0 +1,37 @@
+name: CD Infra
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Digite APPLY_INFRA para aplicar Terraform live/prod
+        required: true
+        type: string
+
+concurrency:
+  group: cd-infra-${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-infra:
+    name: CD - Deploy Infra
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production-infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy infraestrutura
+        uses: ./.github/actions/cd/deploy-infra
+        with:
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          confirm_token: ${{ inputs.confirm }}

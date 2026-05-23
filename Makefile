@@ -1,30 +1,73 @@
-COMPOSE := docker compose
+REPO_ROOT := $(CURDIR)
+COMPOSE_FILE := infra/docker/docker-compose.yml
+ENV_FILE := infra/docker/.env
+COMPOSE := docker compose -f $(COMPOSE_FILE)
+COMPOSE_FLAGS := --env-file $(ENV_FILE)
 SERVICE := mc-server
 CONTAINER := minecraft_core_server
-ENV_FILE := .env
-COMPOSE_FLAGS := --env-file $(ENV_FILE)
+TF_LIVE := infra/terraform/live/prod
 
-.PHONY: docker-help docker-env-check docker-sync-mods docker-build docker-pull docker-up docker-build-up docker-down docker-restart docker-logs docker-sh docker-clean docker-test docker-nuke
+.PHONY: help docker-help ci-lint ci-test ci-validate terraform-fmt terraform-validate terraform-plan docker-env-check docker-sync-mods docker-build docker-pull docker-up docker-build-up docker-down docker-restart docker-logs docker-sh docker-clean docker-test docker-nuke k8s-apply k8s-test pre-commit-install
 
-docker-help:
-	@echo "Comandos Minecraft Server (Docker Compose)"
+help:
+	@echo "Comandos Minecraft Server"
 	@echo ""
-	@echo "  make docker-build-up     Sync mods, build e sobe o servidor"
-	@echo "  make docker-up           Sobe o servidor (build + recreate)"
-	@echo "  make docker-down         Para e remove containers/rede"
-	@echo "  make docker-restart      Reinicia o servico"
-	@echo "  make docker-sync-mods    Baixa mods do mods-manifest.json"
-	@echo "  make docker-logs         Logs em tempo real"
-	@echo "  make docker-sh           Shell no container"
-	@echo "  make docker-clean        Remove containers e imagens locais"
-	@echo "  make docker-test         Roda scripts/bash/test-docker.sh no ambiente atual"
-	@echo "  make docker-nuke         Apaga TODO o Docker no WSL (com confirmacao s/N)"
+	@echo "  CI local:"
+	@echo "    make ci-lint              Lint codigo e infra (pre-commit leve)"
+	@echo "    make ci-test              Pytest + cobertura 100%%"
+	@echo "    make ci-validate          Testes + validacoes (espelho CI)"
+	@echo ""
+	@echo "  Terraform:"
+	@echo "    make terraform-fmt        Formata infra/terraform/"
+	@echo "    make terraform-validate   validate bootstrap + live/prod"
+	@echo "    make terraform-plan       plan live/prod (requer Azure login)"
+	@echo ""
+	@echo "  Docker:"
+	@echo "    make docker-build-up      Sync mods, build e sobe o servidor"
+	@echo "    make docker-up            Sobe o servidor (build + recreate)"
+	@echo "    make docker-down          Para e remove containers/rede"
+	@echo "    make docker-restart       Reinicia o servico"
+	@echo "    make docker-sync-mods     Baixa mods do mods-manifest.json"
+	@echo "    make docker-logs          Logs em tempo real"
+	@echo "    make docker-sh            Shell no container"
+	@echo "    make docker-clean         Remove containers e imagens locais"
+	@echo "    make docker-test          Valida Docker local"
+	@echo "    make docker-nuke          Limpa todo Docker no WSL (confirmacao s/N)"
+	@echo ""
+	@echo "  Kubernetes:"
+	@echo "    make k8s-apply            Aplica overlay prod no AKS"
+	@echo "    make k8s-test             Valida deploy AKS"
+	@echo ""
+	@echo "    make pre-commit-install   Instala hooks (.pre-commit-config.yaml)"
+
+docker-help: help
+
+ci-lint:
+	pre-commit run --all-files
+
+ci-test:
+	cd app && python scripts/python/clean_workspace.py --stage test --coverage-fail-under 100
+
+ci-validate: ci-test
+	cd app && python scripts/python/clean_workspace.py --stage security
+	bash app/scripts/bash/test-docker.sh
+
+terraform-fmt:
+	terraform fmt -recursive infra/terraform/
+
+terraform-validate:
+	cd infra/terraform/bootstrap && terraform init -backend=false && terraform validate
+	cd infra/terraform/live/prod && terraform init -backend=false && terraform validate
+
+terraform-plan:
+	@test -f $(TF_LIVE)/terraform.tfvars || (echo "Crie $(TF_LIVE)/terraform.tfvars a partir do .example" && exit 1)
+	cd $(TF_LIVE) && terraform init -input=false && terraform plan -input=false
 
 docker-env-check:
-	@test -f $(ENV_FILE) || (echo "Arquivo $(ENV_FILE) nao encontrado. Copie .env.example para .env" && exit 1)
+	@test -f $(ENV_FILE) || (echo "Arquivo $(ENV_FILE) nao encontrado. Copie infra/docker/.env.example para $(ENV_FILE)" && exit 1)
 
 docker-sync-mods:
-	python scripts/python/sync_mods.py
+	cd app && python -m infrastructure.mods
 
 docker-pull: docker-env-check
 	$(COMPOSE) $(COMPOSE_FLAGS) pull --ignore-pull-failures $(SERVICE)
@@ -56,9 +99,19 @@ docker-clean: docker-env-check
 	docker rmi -f minecraft-core-server:latest 2>/dev/null || true
 
 docker-test: docker-env-check
-	bash scripts/bash/test-docker.sh
+	bash app/scripts/bash/test-docker.sh
 
 docker-nuke:
-	bash scripts/bash/docker-nuke.sh
+	bash app/scripts/bash/docker-nuke.sh
 
-.DEFAULT_GOAL := docker-help
+k8s-apply:
+	kubectl apply -k infra/kubernetes/overlays/prod
+
+k8s-test:
+	bash app/scripts/bash/test-aks.sh
+
+pre-commit-install:
+	pre-commit install
+	pre-commit install --hook-type commit-msg
+
+.DEFAULT_GOAL := help

@@ -1,0 +1,47 @@
+name: CI Validate Terraform
+description: tflint, tfsec e terraform validate
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
+
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@v4
+      with:
+        tflint_version: v0.54.0
+
+    - name: TFLint init
+      shell: bash
+      run: tflint --init
+
+    - name: TFLint
+      shell: bash
+      run: tflint --recursive --config=$(pwd)/linters/.tflint.hcl
+
+    - name: Setup tfsec
+      uses: aquasecurity/setup-tfsec@v1
+      with:
+        version: v1.28.11
+
+    - name: tfsec
+      shell: bash
+      run: tfsec --config-file linters/.tfsec.yml .
+
+    - name: Terraform validate bootstrap
+      shell: bash
+      run: |
+        cd infra/terraform/bootstrap
+        terraform init -backend=false
+        terraform validate
+
+    - name: Terraform validate live prod
+      shell: bash
+      run: |
+        cd infra/terraform/live/prod
+        terraform init -backend=false
+        terraform validate

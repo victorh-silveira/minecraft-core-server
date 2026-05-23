@@ -26,7 +26,7 @@ Mantenha `.env` **sincronizado** com `.env.example` (mesmas chaves; valores reai
 
 ## `server.properties`
 
-Arquivo: `src/application/configs/server.properties`
+Arquivo: `app/src/application/configs/server.properties`
 
 Montado em `/data/server.properties` (gravavel). A imagem itzg mescla variaveis de ambiente no arquivo na inicializacao; por isso **nao** use `read_only: true` nesse volume.
 
@@ -96,7 +96,7 @@ Passados no build via Compose:
 
 ## Manifesto de mods
 
-`src/interface/mods/mods-manifest.json`
+`app/src/interface/mods/mods-manifest.json`
 
 Campos por mod:
 
@@ -112,6 +112,6 @@ Campos por mod:
 Sync:
 
 ```powershell
-python scripts/python/sync_mods.py
+cd app && python -m infrastructure.mods
 make docker-sync-mods
 ```

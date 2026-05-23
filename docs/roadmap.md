@@ -6,7 +6,7 @@ Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao
 
 | Pilar | Nota | Resumo |
 |-------|------|--------|
-| Clean Architecture | 7/10 | Pastas corretas; codigo em `scripts/python/` |
+| Clean Architecture | 7/10 | Pastas corretas; codigo em `app/scripts/python/` |
 | DRY | 6/10 | `.env` bom; config duplicada properties/env |
 | SOLID | 6/10 | Script testado; sem abstracoes |
 | DDD | 6/10 | Estrutural sim; tatico nao |
@@ -42,8 +42,8 @@ Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao
 
 **Acao:** GitHub Actions com:
 
-- `pip install -r requirements-dev.txt`
-- `python scripts/python/sync_mods.py`
+- `pip install -r app/requirements-dev.txt`
+- `cd app && python -m infrastructure.mods`
 - `clean_workspace.py --stage lint|test|security`
 - `docker compose config`
 
@@ -63,20 +63,9 @@ Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao
 
 ## Prioridade 5 — Reorganizar `sync_mods` (Clean Architecture)
 
-**Problema:** Logica de infra em `scripts/python/` fora de `src/`.
+**Status:** Concluido.
 
-**Acao:**
-
-```text
-src/infrastructure/mods/
-├── providers/modrinth.py
-├── providers/curseforge.py
-├── manifest.py
-└── sync_service.py
-scripts/python/sync_mods.py  → entrypoint fino
-```
-
-**Criterio de done:** Testes mantem 100% coverage; imports atualizados.
+Modulos em `app/src/infrastructure/mods/` com `ModResolver`, entrypoints `python -m infrastructure.mods` e `app/scripts/python/sync_mods.py`.
 
 ---
 
@@ -142,7 +131,7 @@ scripts/python/sync_mods.py  → entrypoint fino
 - [x] Dockerfile + `.dockerignore` categorizado
 - [x] Makefile `docker-*`
 - [x] Pre-commit (lint, test, security)
-- [x] Testes 100% em `sync_mods.py`
+- [x] Testes 100% em `infrastructure.mods`
 - [x] Documentacao `README.md` e `docs/`
 - [x] Lockfile de mods + sync idempotente
 

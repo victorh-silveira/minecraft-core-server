@@ -1,9 +1,7 @@
-# ---- CONTROLE DE VERSAO E METADADOS ----
 .git
 .gitattributes
 .gitignore
 
-# ---- AMBIENTES VIRTUAIS E SEGREDOS ----
 .env
 .env.*
 !.env.example
@@ -11,16 +9,13 @@
 env
 venv
 
-# ---- FERRAMENTAS DE DESENVOLVIMENTO ----
 .cache
 .pre-commit
-.pre-commit-config.yaml
 .pytest_cache
 .ruff_cache
 .coverage
 htmlcov
 
-# ---- PYTHON: CACHES E ARTEFATOS DE BUILD ----
 __pycache__
 *$py.class
 *.egg-info
@@ -28,11 +23,9 @@ __pycache__
 build
 dist
 
-# ---- LOGS ----
 *.log
 logs
 
-# ---- NODE / NPM / HUSKY (ARTEFATOS LOCAIS) ----
 .husky
 node_modules
 npm-debug.log*
@@ -41,14 +34,12 @@ package.json
 yarn-debug.log*
 yarn-error.log*
 
-# ---- IA E FERRAMENTAS DE AGENTES (CURSOR/MCP) ----
 .agent
 .agents
 .antigravity
 .cursor
 .gemini
 
-# ---- IDEs E SISTEMA OPERACIONAL ----
 *.swp
 *.swo
 .DS_Store
@@ -57,26 +48,24 @@ yarn-error.log*
 desktop.ini
 Thumbs.db
 
-# ---- DOCUMENTACAO E AUTOMACAO LOCAL ----
-*.md
+docs
+.github
+infra/kubernetes
+infra/terraform
+linters
 Makefile
-tools
-tests
-scripts
-requirements.txt
-requirements-dev.txt
-pyproject.toml
-.python-version
+README.md
 
-# ---- DOCKER: ARQUIVOS DE ORQUESTRACAO (NAO ENVIAR AO BUILD CONTEXT) ----
-docker-compose.yml
-docker-compose.*.yml
-Dockerfile
-.dockerignore
+app/tests
+app/scripts
+app/tools
+app/requirements.txt
+app/requirements-dev.txt
+app/pyproject.toml
+app/.python-version
 
-# ---- SERVIDOR MINECRAFT: DADOS PERSISTENTES E BINARIOS ----
-src/domain/world-data
-src/infrastructure/logging
-src/infrastructure/database
-src/interface/mods/*.jar
-src/interface/plugins/*.jar
+app/src/domain/world-data
+app/src/infrastructure/logging
+app/src/infrastructure/database
+app/src/interface/mods/*.jar
+app/src/interface/plugins/*.jar

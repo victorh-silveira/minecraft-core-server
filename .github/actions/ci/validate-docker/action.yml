@@ -1,0 +1,29 @@
+name: CI Validate Docker
+description: Valida docker-compose.yml com env de CI
+
+runs:
+  using: composite
+
+  steps:
+    - name: Validar docker compose config
+      shell: bash
+      run: |
+        cat > infra/docker/.env << 'EOF'
+        MINECRAFT_VERSION=1.20.6
+        SERVER_TYPE=FABRIC
+        MEMORY_LIMIT=2G
+        EULA_ACCEPTED=TRUE
+        GAME_PORT=25565
+        RCON_PORT=25575
+        ONLINE_MODE=false
+        DIFFICULTY=hard
+        MAX_PLAYERS=20
+        RCON_PASSWORD=ci-test-password
+        UID=1000
+        GID=1000
+        SKIP_CHOWN=false
+        DOCKER_BASE_IMAGE=itzg/minecraft-server:latest
+        IMAGE_VERSION=0.1.0
+        DOCKER_PIDS_LIMIT=512
+        EOF
+        docker compose -f infra/docker/docker-compose.yml --env-file infra/docker/.env config --quiet

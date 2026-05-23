@@ -1,0 +1,82 @@
+# ---- CONTROLE DE VERSAO E METADADOS ----
+.git
+.gitattributes
+.gitignore
+
+# ---- AMBIENTES VIRTUAIS E SEGREDOS ----
+.env
+.env.*
+!.env.example
+.venv
+env
+venv
+
+# ---- FERRAMENTAS DE DESENVOLVIMENTO ----
+.cache
+.pre-commit
+.pre-commit-config.yaml
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# ---- PYTHON: CACHES E ARTEFATOS DE BUILD ----
+__pycache__
+*$py.class
+*.egg-info
+*.py[cod]
+build
+dist
+
+# ---- LOGS ----
+*.log
+logs
+
+# ---- NODE / NPM / HUSKY (ARTEFATOS LOCAIS) ----
+.husky
+node_modules
+npm-debug.log*
+package-lock.json
+package.json
+yarn-debug.log*
+yarn-error.log*
+
+# ---- IA E FERRAMENTAS DE AGENTES (CURSOR/MCP) ----
+.agent
+.agents
+.antigravity
+.cursor
+.gemini
+
+# ---- IDEs E SISTEMA OPERACIONAL ----
+*.swp
+*.swo
+.DS_Store
+.idea
+.vscode
+desktop.ini
+Thumbs.db
+
+# ---- DOCUMENTACAO E AUTOMACAO LOCAL ----
+*.md
+Makefile
+tools
+tests
+scripts
+requirements.txt
+requirements-dev.txt
+pyproject.toml
+.python-version
+
+# ---- DOCKER: ARQUIVOS DE ORQUESTRACAO (NAO ENVIAR AO BUILD CONTEXT) ----
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.dockerignore
+
+# ---- SERVIDOR MINECRAFT: DADOS PERSISTENTES E BINARIOS ----
+src/domain/world-data
+src/infrastructure/logging
+src/infrastructure/database
+src/interface/mods/*.jar
+src/interface/plugins/*.jar

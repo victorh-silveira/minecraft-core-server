@@ -1,0 +1,8 @@
+minimum_severity: MEDIUM
+
+exclude:
+  - AZU-0001
+
+terraform:
+  directories:
+    - infra/terraform

@@ -1,0 +1,60 @@
+name: CD Deploy Infra
+description: Terraform apply na stack live/prod
+
+inputs:
+  azure_client_id:
+    required: false
+    default: ""
+  azure_tenant_id:
+    required: true
+  azure_subscription_id:
+    required: true
+  azure_credentials:
+    required: false
+    default: ""
+  confirm_token:
+    description: Deve ser APPLY_INFRA para apply
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Validar confirmacao
+      shell: bash
+      run: |
+        if [ "${{ inputs.confirm_token }}" != "APPLY_INFRA" ]; then
+          echo "Confirmacao invalida. Informe APPLY_INFRA."
+          exit 1
+        fi
+
+    - name: Login Azure
+      uses: ./.github/actions/shared/azure-login
+      with:
+        azure_client_id: ${{ inputs.azure_client_id }}
+        azure_tenant_id: ${{ inputs.azure_tenant_id }}
+        azure_subscription_id: ${{ inputs.azure_subscription_id }}
+        azure_credentials: ${{ inputs.azure_credentials }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
+        terraform_wrapper: false
+
+    - name: Preparar terraform.tfvars
+      shell: bash
+      run: |
+        {
+          echo "subscription_id = \"${{ inputs.azure_subscription_id }}\""
+          echo "tenant_id = \"${{ inputs.azure_tenant_id }}\""
+        } > infra/terraform/live/prod/terraform.tfvars
+
+    - name: Terraform apply
+      shell: bash
+      env:
+        ARM_USE_AZUREAD: true
+      run: |
+        cd infra/terraform/live/prod
+        terraform init -input=false
+        terraform apply -auto-approve -input=false

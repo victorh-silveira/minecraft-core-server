@@ -1,0 +1,75 @@
+name: CD Deploy App
+description: Build imagem, push ACR, secret RCON e rollout Kubernetes
+
+inputs:
+  image_tag:
+    description: Tag da imagem no ACR
+    required: true
+  azure_client_id:
+    required: false
+    default: ""
+  azure_tenant_id:
+    required: true
+  azure_subscription_id:
+    required: true
+  azure_credentials:
+    required: false
+    default: ""
+  rcon_password:
+    description: Senha RCON (GitHub Secret RCON_PASSWORD)
+    required: true
+  resource_group:
+    required: false
+    default: rg-minecraft-prod-bs
+  aks_cluster_name:
+    required: false
+    default: aks-minecraft-prod
+  acr_name:
+    required: false
+    default: acrminecraftprod
+
+runs:
+  using: composite
+
+  steps:
+    - name: Login Azure
+      uses: ./.github/actions/shared/azure-login
+      with:
+        azure_client_id: ${{ inputs.azure_client_id }}
+        azure_tenant_id: ${{ inputs.azure_tenant_id }}
+        azure_subscription_id: ${{ inputs.azure_subscription_id }}
+        azure_credentials: ${{ inputs.azure_credentials }}
+
+    - name: Credenciais AKS
+      uses: azure/aks-set-context@v4
+      with:
+        resource-group: ${{ inputs.resource_group }}
+        cluster-name: ${{ inputs.aks_cluster_name }}
+
+    - name: Login ACR
+      shell: bash
+      run: az acr login --name ${{ inputs.acr_name }}
+
+    - name: Build e push imagem
+      shell: bash
+      run: |
+        ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
+        IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
+        docker build -f infra/docker/Dockerfile -t "${IMAGE}" .
+        docker push "${IMAGE}"
+
+    - name: Secret RCON
+      shell: bash
+      run: |
+        kubectl -n mc-prod create secret generic mc-rcon \
+          --from-literal=RCON_PASSWORD="${{ inputs.rcon_password }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Apply Kubernetes
+      shell: bash
+      run: |
+        ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
+        IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
+        kubectl apply -k infra/kubernetes/overlays/prod
+        kubectl -n mc-prod set image statefulset/mc-server mc-server="${IMAGE}"
+        kubectl -n mc-prod rollout status statefulset/mc-server --timeout=600s

@@ -42,7 +42,7 @@ Garantir que o `.env` local inclua todas as chaves de `.env.example` (incluindo 
 
 ---
 
-## SOLID (analise de `scripts/python/sync_mods.py`)
+## SOLID (analise de `app/src/infrastructure/mods/`)
 
 ### Single Responsibility (S)
 
@@ -95,23 +95,30 @@ Com injecao de paths e HTTP client nos testes, sem monkeypatch global.
 
 ## Testes e cobertura
 
-- `tests/unit/scripts/test_sync_mods.py` — 22 testes
-- Cobertura minima **100%** em `scripts/python/sync_mods.py` (via `pyproject.toml`)
-- `scripts/python/clean_workspace.py` omitido da cobertura (ferramenta de dev)
+- `tests/unit/infrastructure/mods/test_sync.py` — 22 testes
+- Cobertura minima **100%** em `app/src/infrastructure/mods/` (via `pyproject.toml`)
+- `app/scripts/python/clean_workspace.py` omitido da cobertura (ferramenta de dev)
 
 ---
 
 ## Pre-commit e commits
 
-Hooks (`.pre-commit-config.yaml`):
+Hooks locais (`.pre-commit-config.yaml`, padrao `Area | Acao`):
 
-| Hook | Funcao |
+| Nome | Funcao |
 |------|--------|
-| lint | Ruff, Vulture, limite de linhas |
-| test | pytest + coverage |
-| security | Bandit + pip-audit |
-| commitlint | Conventional Commits |
-| cleanup | Remove caches locais |
+| Codigo \| Lint Python (Ruff) | Lint com correcao automatica |
+| Codigo \| Formatar Python (Ruff) | Formatacao |
+| Codigo \| Validar JSON (manifesto de mods) | Sintaxe do `mods-manifest.json` |
+| Infra \| Formatar Terraform | `terraform fmt -check -recursive` em `infra/terraform/` |
+| Infra \| Validar Terraform | `terraform validate` em bootstrap e live/prod |
+| Infra \| Validar sintaxe YAML | Kubernetes e workflows GitHub |
+| Docker \| Lint Dockerfile | Hadolint |
+| Arquivo \| Garantir newline no fim | EOF |
+| Arquivo \| Remover espacos no fim da linha | Trailing whitespace |
+| Commit \| Validar Conventional Commits | Hook `commit-msg` |
+
+No CI (`clean_workspace.py`): Vulture, Pylint, pytest, Bandit, pip-audit, tflint, tfsec, kubeconform.
 
 Formato de commit: `tipo(escopo): assunto` com corpo obrigatorio.
 

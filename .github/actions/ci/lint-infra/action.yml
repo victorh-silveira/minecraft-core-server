@@ -1,0 +1,59 @@
+name: CI Lint Infra
+description: Terraform fmt, Hadolint e validacao YAML de infra/
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
+
+    - name: Terraform fmt
+      shell: bash
+      run: terraform fmt -check -recursive infra/terraform/
+
+    - name: Hadolint Dockerfile
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: infra/docker/Dockerfile
+        failure-threshold: warning
+
+    - name: Instalar actionlint
+      shell: bash
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
+        sudo mv actionlint /usr/local/bin/actionlint
+
+    - name: Actionlint workflows
+      shell: bash
+      run: actionlint
+
+    - name: Validar YAML
+      shell: bash
+      run: |
+        python -m pip install --quiet pyyaml
+        python - <<'PY'
+        import sys
+        from pathlib import Path
+        import yaml
+        errors = []
+        for path in Path(".").rglob("*"):
+            if not path.is_file():
+                continue
+            if path.suffix not in {".yml", ".yaml"}:
+                continue
+            parts = set(path.parts)
+            if ".github" not in parts and "infra" not in parts:
+                continue
+            if ".github" in parts and "templates" in parts:
+                continue
+            try:
+                list(yaml.safe_load_all(path.read_text(encoding="utf-8")))
+            except yaml.YAMLError as exc:
+                errors.append(f"{path}: {exc}")
+        if errors:
+            print("\n".join(errors))
+            sys.exit(1)
+        PY

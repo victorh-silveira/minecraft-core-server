@@ -1,0 +1,37 @@
+name: Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Digite DESTROY para confirmar a remocao completa
+        required: true
+        type: string
+
+concurrency:
+  group: destroy-${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  destroy:
+    name: Destroy - Azure
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production-destroy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Destroy stack Azure
+        uses: ./.github/actions/destroy/azure
+        with:
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          confirm_token: ${{ inputs.confirm }}

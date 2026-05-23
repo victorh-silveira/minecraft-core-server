@@ -2,7 +2,7 @@
 
 ## Visao geral
 
-O projeto separa **dados e configuracao do jogo** (`src/`) da **orquestracao de entrega** (Docker, Makefile, scripts na raiz). Isso aproxima o layout de Clean Architecture e DDD estrutural, mesmo sem camada de aplicacao em Python dentro de `src/`.
+O projeto separa **dados e configuracao do jogo** (`app/src/`) da **orquestracao de entrega** (`infra/`, Makefile, `app/scripts/`). Isso aproxima o layout de Clean Architecture e DDD estrutural, mesmo sem camada de aplicacao em Python dentro de `src/`.
 
 ## Clean Architecture
 
@@ -10,39 +10,51 @@ O projeto separa **dados e configuracao do jogo** (`src/`) da **orquestracao de 
 flowchart TB
   subgraph root [Raiz - Orquestracao]
     env[".env"]
-    compose["docker-compose.yml"]
+    compose["infra/docker/"]
     makefile["Makefile"]
-    scripts["scripts/python/"]
+    scripts["app/scripts/python/"]
+    tf["infra/terraform/live/prod"]
+    k8s["infra/kubernetes/overlays/prod"]
   end
-  subgraph srcLayer [src/]
+  subgraph azure [Azure]
+    aks["AKS"]
+    acr["ACR"]
+  end
+  subgraph srcLayer [app/src/]
     domain["domain/world-data"]
     app["application/configs"]
     iface["interface/mods+plugins"]
     infra["infrastructure/logging+database"]
   end
-  subgraph container [Container mc-server]
+  subgraph container [Pod mc-server]
     data["/data/*"]
   end
   env --> compose
   makefile --> scripts
   scripts --> iface
   compose --> container
+  tf --> aks
+  acr --> aks
+  k8s --> aks
+  aks --> container
   domain --> data
   app --> data
   iface --> data
   infra --> data
 ```
 
+Entrega local: Docker Compose. Entrega cloud: Terraform provisiona AKS/ACR; Kubernetes monta os mesmos caminhos `/data/*` via PVC subPaths e ConfigMap.
+
 ### Mapeamento de volumes
 
 | Host | Container | Modo | Camada |
 |------|-----------|------|--------|
-| `./src/domain/world-data` | `/data/world` | rw | Dominio |
-| `./src/application/configs/server.properties` | `/data/server.properties` | ro | Aplicacao |
-| `./src/interface/mods` | `/data/mods` | rw | Interface |
-| `./src/interface/plugins` | `/data/plugins` | rw | Interface |
-| `./src/infrastructure/logging` | `/data/logs` | rw | Infraestrutura |
-| `./src/infrastructure/database` | `/data/database` | rw | Infraestrutura (auth/SQLite) |
+| `app/src/domain/world-data` | `/data/world` | rw | Dominio |
+| `app/src/application/configs/server.properties` | `/data/server.properties` | ro | Aplicacao |
+| `app/src/interface/mods` | `/data/mods` | rw | Interface |
+| `app/src/interface/plugins` | `/data/plugins` | rw | Interface |
+| `app/src/infrastructure/logging` | `/data/logs` | rw | Infraestrutura |
+| `app/src/infrastructure/database` | `/data/database` | rw | Infraestrutura (auth/SQLite) |
 
 ### Regra de dependencia
 
@@ -56,11 +68,10 @@ flowchart TB
 
 | Aspecto | Situacao |
 |---------|----------|
-| Codigo Python em `src/` | Ausente — logica em `scripts/python/` |
+| Codigo Python em `src/` | `src/infrastructure/mods/` (sync, providers Modrinth/CurseForge) |
+| Entrypoint fino | `app/scripts/python/sync_mods.py` e `python -m infrastructure.mods` |
 | Templates no Dockerfile (`/templates/`) | Sobrescritos por bind mounts em runtime |
 | Camada Presentation | Nao aplicavel (sem UI/API HTTP) |
-
-Evolucao recomendada: mover `sync_mods.py` para `src/infrastructure/mods/` e expor ports (interfaces) para providers Modrinth/CurseForge.
 
 ## DDD (Domain-Driven Design)
 
@@ -74,7 +85,7 @@ Evolucao recomendada: mover `sync_mods.py` para `src/infrastructure/mods/` e exp
 |-------|------------------------|
 | Mundo | Dados em `src/domain/world-data` |
 | Manifesto | `mods-manifest.json` (lockfile de dependencias) |
-| Sync | Download idempotente de JARs via `sync_mods.py` |
+| Sync | Download idempotente de JARs via `infrastructure.mods` |
 | Modo hibrido | `online-mode=false` (original + offline) |
 
 ### Bounded contexts (pastas)
@@ -109,7 +120,7 @@ Nao ha entidades, value objects ou repositorios implementados em codigo. O DDD a
 ```
 
 - JARs **nao** entram no Git principal
-- CI/local roda `sync_mods.py` antes do `up`
+- CI/local roda `python -m infrastructure.mods` antes do `up`
 - Atualizacoes de mods em **branch separada**, testadas antes do merge
 
 ## Scorecard arquitetural

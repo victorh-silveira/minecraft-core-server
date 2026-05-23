@@ -1,0 +1,17 @@
+name: CI Validate Kubernetes
+description: kubeconform no overlay prod
+
+runs:
+  using: composite
+
+  steps:
+    - name: Instalar kubeconform
+      shell: bash
+      run: |
+        curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz kubeconform
+        sudo mv kubeconform /usr/local/bin/kubeconform
+
+    - name: Validar manifests
+      shell: bash
+      run: |
+        kubectl kustomize infra/kubernetes/overlays/prod | kubeconform -kubernetes-version 1.29.0 -summary -ignore-missing-schemas

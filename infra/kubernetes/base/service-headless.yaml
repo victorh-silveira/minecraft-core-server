@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mc-server-headless
+  namespace: mc-prod
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mc-server
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: 25565
+      protocol: TCP

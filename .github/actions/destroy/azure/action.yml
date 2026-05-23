@@ -1,0 +1,76 @@
+name: Destroy Azure
+description: Terraform plan destroy e destroy da stack live/prod
+
+inputs:
+  azure_client_id:
+    required: false
+    default: ""
+  azure_tenant_id:
+    required: true
+  azure_subscription_id:
+    required: true
+  azure_credentials:
+    required: false
+    default: ""
+  confirm_token:
+    description: Token de confirmacao (deve ser DESTROY)
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Validar confirmacao
+      shell: bash
+      run: |
+        if [ "${{ inputs.confirm_token }}" != "DESTROY" ]; then
+          echo "Confirmacao invalida. Informe DESTROY no campo confirm."
+          exit 1
+        fi
+
+    - name: Login Azure
+      uses: ./.github/actions/shared/azure-login
+      with:
+        azure_client_id: ${{ inputs.azure_client_id }}
+        azure_tenant_id: ${{ inputs.azure_tenant_id }}
+        azure_subscription_id: ${{ inputs.azure_subscription_id }}
+        azure_credentials: ${{ inputs.azure_credentials }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
+        terraform_wrapper: false
+
+    - name: Preparar terraform.tfvars
+      shell: bash
+      run: |
+        {
+          echo "subscription_id = \"${{ inputs.azure_subscription_id }}\""
+          echo "tenant_id = \"${{ inputs.azure_tenant_id }}\""
+        } > infra/terraform/live/prod/terraform.tfvars
+
+    - name: Terraform plan destroy
+      shell: bash
+      env:
+        ARM_USE_AZUREAD: true
+      run: |
+        cd infra/terraform/live/prod
+        terraform init -input=false
+        terraform plan -destroy -input=false -no-color -out=destroy.tfplan
+        terraform show -no-color destroy.tfplan > destroy-plan.txt
+
+    - name: Publicar plano destroy
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-destroy-plan-${{ github.run_id }}
+        path: infra/terraform/live/prod/destroy-plan.txt
+        retention-days: 14
+
+    - name: Terraform destroy
+      shell: bash
+      env:
+        ARM_USE_AZUREAD: true
+      run: |
+        cd infra/terraform/live/prod
+        terraform apply -input=false -auto-approve destroy.tfplan

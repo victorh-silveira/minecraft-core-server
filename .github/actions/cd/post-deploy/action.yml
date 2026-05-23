@@ -1,0 +1,44 @@
+name: CD Post Deploy
+description: Testes pos-deploy no AKS (health, PVC, LB, logs)
+
+inputs:
+  namespace:
+    description: Namespace Kubernetes
+    required: false
+    default: mc-prod
+  game_port:
+    description: Porta do jogo
+    required: false
+    default: "25565"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Testes pos-deploy
+      shell: bash
+      env:
+        NAMESPACE: ${{ inputs.namespace }}
+      run: bash app/scripts/bash/test-aks.sh
+
+    - name: Verificar endpoint externo
+      shell: bash
+      run: |
+        GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+        if [ -z "$GAME_IP" ]; then
+          GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+        fi
+        if [ -z "$GAME_IP" ]; then
+          echo "LoadBalancer ainda sem IP externo"
+          exit 1
+        fi
+        echo "Endpoint: ${GAME_IP}:${{ inputs.game_port }}"
+        for attempt in $(seq 1 30); do
+          if timeout 3 bash -c "echo > /dev/tcp/${GAME_IP}/${{ inputs.game_port }}" 2>/dev/null; then
+            echo "Porta ${{ inputs.game_port }} acessivel em ${GAME_IP}"
+            exit 0
+          fi
+          sleep 10
+        done
+        echo "Porta ${{ inputs.game_port }} nao respondeu em ${GAME_IP}"
+        exit 1
