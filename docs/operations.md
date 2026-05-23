@@ -170,16 +170,15 @@ Guia completo: [azure.md](azure.md)
 
 | # | Acao |
 |---|------|
-| 1 | `infra/terraform/bootstrap` — criar remote state |
-| 2 | `infra/terraform/live/prod` — aplicar RG, VNet, ACR, AKS |
-| 3 | `az aks get-credentials` — configurar kubectl |
-| 4 | Build e push da imagem para ACR |
-| 5 | Configurar GitHub Secret `RCON_PASSWORD` (CD cria `mc-rcon` no cluster) |
-| 6 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
-| 7 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
-| 8 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
-| 9 | `bash app/scripts/bash/test-aks.sh` |
-| 10 | Obter IP: `kubectl -n minecraft-server-prod get svc mc-server-game` |
+| 1 | `infra/terraform/live/prod` — aplicar RG, VNet, ACR, AKS e storage |
+| 2 | `az aks get-credentials` — configurar kubectl |
+| 3 | Build e push da imagem para ACR |
+| 4 | Configurar GitHub Secret `RCON_PASSWORD` (CD cria `mc-rcon` no cluster) |
+| 5 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
+| 6 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
+| 7 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
+| 8 | `bash app/scripts/bash/test-aks.sh` |
+| 9 | Obter IP: `kubectl -n minecraft-server-prod get svc mc-server-game` |
 
 ### Backup do mundo (PVC)
 
@@ -191,7 +190,7 @@ kubectl -n minecraft-server-prod exec "$POD" -- tar czf /tmp/world-backup.tgz -C
 kubectl -n minecraft-server-prod cp "${POD}:/tmp/world-backup.tgz" "./backup-world-$(date +%Y%m%d).tgz"
 ```
 
-Storage de backup opcional: output `backup_storage_account_name` do Terraform (`stminecraftserverprod001`).
+Storage de backup e tfstate: `stminecraftserverprod001` (containers `world-backups` e `tfstate`).
 
 ### RCON no AKS
 
@@ -208,4 +207,4 @@ Senha: GitHub Secret `RCON_PASSWORD` (aplicada pelo CD) ou `kubectl create secre
 1. Actions > **Destroy** > confirmar `DESTROY` e aprovar environment.
 2. Baixar artifact `terraform-destroy-plan-*` e revisar o plano.
 3. Apos destroy, listar discos orfaos no portal Azure (PVC `Retain` pode manter discos).
-4. Bootstrap (`stminecraftservertf001`) permanece ate remocao manual.
+4. O remote state em `stminecraftserverprod001` nao e destruido pelo workflow de destroy da stack prod.

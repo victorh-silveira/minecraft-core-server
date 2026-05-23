@@ -4,6 +4,3 @@ tenant_id       = "00000000-0000-0000-0000-000000000000"
 kubernetes_version = null
 
 admin_cidr_list = ["203.0.113.10/32"]
-
-backup_storage_account_name = "stminecraftserverprod001"
-enable_backup_storage       = true

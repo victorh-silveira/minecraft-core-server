@@ -11,8 +11,7 @@ flowchart TB
     vnet[vnet-minecraft-server-prod-bs]
     aks[aks-minecraft-server-prod]
     acr[acrminecraftserverprod]
-    st_tf[stminecraftservertf001]
-    st_bk[stminecraftserverprod001]
+    st[stminecraftserverprod001]
   end
   subgraph k8s [Namespace minecraft-server-prod]
     sts[StatefulSet mc-server]
@@ -30,7 +29,6 @@ flowchart TB
 
 ```text
 infra/terraform/
-  bootstrap/
   modules/
   live/prod/
 
@@ -47,23 +45,9 @@ infra/kubernetes/
 - kustomize (incluso no kubectl)
 - Permissoes: Contributor na subscription + Storage Blob Data Contributor no state
 
-## 1. Bootstrap do state
+## 1. Deploy da infraestrutura
 
-```bash
-cd infra/terraform/bootstrap
-cp terraform.tfvars.example terraform.tfvars
-```
-
-Edite `subscription_id` e `tenant_id`, depois:
-
-```bash
-terraform init
-terraform apply
-```
-
-Detalhes: [infra/terraform/bootstrap/README.md](../infra/terraform/bootstrap/README.md)
-
-## 2. Deploy da infraestrutura
+O remote state Terraform fica no mesmo resource group e storage account da producao (`rg-minecraft-server-prod` / `stminecraftserverprod001`, container `tfstate`).
 
 ```bash
 cd infra/terraform/live/prod
@@ -84,7 +68,7 @@ Obtenha credenciais do cluster:
 az aks get-credentials --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod
 ```
 
-## 3. Imagem no ACR
+## 2. Imagem no ACR
 
 ```bash
 ACR=$(terraform -chdir=infra/terraform/live/prod output -raw acr_login_server)
@@ -93,7 +77,7 @@ docker build -t "${ACR}/minecraft-core-server:v1.0.0" .
 docker push "${ACR}/minecraft-core-server:v1.0.0"
 ```
 
-## 4. Deploy Kubernetes
+## 3. Deploy Kubernetes
 
 Altere a senha RCON antes do apply:
 
@@ -110,7 +94,7 @@ Consulte `infra/kubernetes/base/secret-rcon.yaml.example` (nao commitar senha re
 kubectl apply -k infra/kubernetes/overlays/prod
 ```
 
-## 5. Migracao do mundo
+## 4. Migracao do mundo
 
 Copie dados locais para o pod:
 
@@ -119,7 +103,7 @@ POD=$(kubectl -n minecraft-server-prod get pod -l app.kubernetes.io/name=mc-serv
 kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/world/"
 ```
 
-## 6. Validacao
+## 5. Validacao
 
 ```bash
 bash app/scripts/bash/test-aks.sh

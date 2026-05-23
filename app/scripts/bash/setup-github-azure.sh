@@ -7,8 +7,8 @@ SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-28c9f836-6ad3-45a3-8c33-36531a68fe51}"
 TENANT_ID="${TENANT_ID:-8d4a2319-f160-4911-aa05-1875d2772226}"
 APP_NAME="${APP_NAME:-github-minecraft-server-actions}"
 APP_ID="${APP_ID:-}"
-TFSTATE_RG="${TFSTATE_RG:-rg-minecraft-server-tfstate-bs}"
-TFSTATE_SA="${TFSTATE_SA:-stminecraftservertf001}"
+TFSTATE_RG="${TFSTATE_RG:-rg-minecraft-server-prod}"
+TFSTATE_SA="${TFSTATE_SA:-stminecraftserverprod001}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 WORKDIR="${WORKDIR:-$(cd "${SCRIPT_DIR}/../../.." && pwd)}"
 TMPDIR="${TMPDIR:-${WORKDIR}/.azure-setup-tmp}"
@@ -121,7 +121,7 @@ assign_roles() {
       --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${TFSTATE_RG}/providers/Microsoft.Storage/storageAccounts/${TFSTATE_SA}" \
       >/dev/null 2>&1 || echo "Role Storage Blob Data Contributor (SA) ja atribuida"
   else
-    echo "Storage account ${TFSTATE_SA} ainda nao existe. Rode bootstrap e depois atribua Storage Blob Data Contributor no SA."
+    echo "Storage account ${TFSTATE_SA} ainda nao existe. Rode deploy-infra ou terraform apply em live/prod."
   fi
 }
 

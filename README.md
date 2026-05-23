@@ -14,7 +14,7 @@ minecraft-server/
 ├── infra/
 │   ├── docker/          # Dockerfile, Compose, .env.example
 │   ├── kubernetes/      # Manifestos K8s (base + overlays)
-│   └── terraform/       # IaC Azure (bootstrap, modules, live/prod)
+│   └── terraform/       # IaC Azure (modules, live/prod)
 ├── app/
 │   ├── src/             # Clean Architecture (mundo, configs, mods)
 │   ├── scripts/         # python, bash, powershell

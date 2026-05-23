@@ -28,7 +28,7 @@ repos:
 
       - id: terraform-validate
         name: "Infra | Validar Terraform"
-        entry: bash -c "set -euo pipefail; for d in infra/terraform/bootstrap infra/terraform/live/prod; do echo \">>> Validando ${d}\"; (cd \"${d}\" && terraform init -backend=false -input=false && terraform validate); done"
+        entry: bash -c "set -euo pipefail; for d in infra/terraform/live/prod; do echo \">>> Validando ${d}\"; (cd \"${d}\" && terraform init -backend=false -input=false && terraform validate); done"
         language: system
         pass_filenames: false
         always_run: true

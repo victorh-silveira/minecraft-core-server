@@ -44,12 +44,10 @@ module "aks" {
   tags                = local.tags
 }
 
-module "storage_backup" {
-  count                = var.enable_backup_storage ? 1 : 0
-  source               = "../../modules/storage-backup"
-  storage_account_name = var.backup_storage_account_name
+module "storage" {
+  source               = "../../modules/storage"
+  storage_account_name = local.storage_account_name
   resource_group_name  = module.resource_group.name
   location             = local.region
-  container_name       = "world-backups"
   tags                 = local.tags
 }

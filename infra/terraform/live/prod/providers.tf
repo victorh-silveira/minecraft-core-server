@@ -13,8 +13,8 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "rg-minecraft-server-tfstate-bs"
-    storage_account_name = "stminecraftservertf001"
+    resource_group_name  = "rg-minecraft-server-prod"
+    storage_account_name = "stminecraftserverprod001"
     container_name       = "tfstate"
     key                  = "minecraft/prod.terraform.tfstate"
     use_azuread_auth     = true

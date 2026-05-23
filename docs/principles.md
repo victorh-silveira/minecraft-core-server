@@ -111,7 +111,7 @@ Hooks locais (`.pre-commit-config.yaml`, padrao `Area | Acao`):
 | Codigo \| Formatar Python (Ruff) | Formatacao |
 | Codigo \| Validar JSON (manifesto de mods) | Sintaxe do `mods-manifest.json` |
 | Infra \| Formatar Terraform | `terraform fmt -check -recursive` em `infra/terraform/` |
-| Infra \| Validar Terraform | `terraform validate` em bootstrap e live/prod |
+| Infra \| Validar Terraform | `terraform validate` em live/prod |
 | Infra \| Validar sintaxe YAML | Kubernetes e workflows GitHub |
 | Docker \| Lint Dockerfile | Hadolint |
 | Arquivo \| Garantir newline no fim | EOF |

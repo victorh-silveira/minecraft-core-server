@@ -15,5 +15,6 @@ locals {
   aks_subnet_name     = "snet-aks-${local.project}-${local.environment}-${local.region_suffix}"
   aks_cluster_name    = "aks-${local.project}-${local.environment}"
   acr_name            = "acr${replace(local.project, "-", "")}${local.environment}"
-  dns_prefix          = "minecraftserver${local.environment}"
+  dns_prefix           = "minecraftserver${local.environment}"
+  storage_account_name = "st${replace(local.project, "-", "")}${local.environment}001"
 }

@@ -10,7 +10,12 @@ variable "location" {
   type = string
 }
 
-variable "container_name" {
+variable "tfstate_container_name" {
+  type    = string
+  default = "tfstate"
+}
+
+variable "backups_container_name" {
   type    = string
   default = "world-backups"
 }

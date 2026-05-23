@@ -81,8 +81,7 @@ Guia completo: [azure.md](azure.md)
 
 | Caminho | Proposito |
 |---------|-----------|
-| `infra/terraform/bootstrap/` | Storage Account do remote state |
-| `infra/terraform/modules/` | RG, VNet, ACR, AKS, backup |
+| `infra/terraform/modules/` | RG, VNet, ACR, AKS, storage |
 | `infra/terraform/live/prod/` | Stack de producao (`brazilsouth`) |
 | `infra/kubernetes/base/` | Manifestos K8s base |
 | `infra/kubernetes/overlays/prod/` | Overlay de producao (kustomize) |

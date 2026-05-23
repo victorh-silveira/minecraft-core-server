@@ -23,7 +23,7 @@ runs:
       shell: bash
       run: |
         CONFIG="$(pwd)/linters/.tflint.hcl"
-        for dir in infra/terraform/bootstrap infra/terraform/live/prod; do
+        for dir in infra/terraform/live/prod; do
           echo ">>> tflint ${dir}"
           (cd "${dir}" && tflint --config="${CONFIG}" --minimum-failure-severity=error)
         done
@@ -39,13 +39,6 @@ runs:
     - name: tfsec
       shell: bash
       run: tfsec --config-file linters/.tfsec.yml .
-
-    - name: Terraform validate bootstrap
-      shell: bash
-      run: |
-        cd infra/terraform/bootstrap
-        terraform init -backend=false
-        terraform validate
 
     - name: Terraform validate live prod
       shell: bash

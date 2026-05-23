@@ -19,7 +19,7 @@ help:
 	@echo ""
 	@echo "  Terraform:"
 	@echo "    make terraform-fmt        Formata infra/terraform/"
-	@echo "    make terraform-validate   validate bootstrap + live/prod"
+	@echo "    make terraform-validate   validate live/prod"
 	@echo "    make terraform-plan       plan live/prod (requer Azure login)"
 	@echo ""
 	@echo "  Docker:"
@@ -56,7 +56,6 @@ terraform-fmt:
 	terraform fmt -recursive infra/terraform/
 
 terraform-validate:
-	cd infra/terraform/bootstrap && terraform init -backend=false && terraform validate
 	cd infra/terraform/live/prod && terraform init -backend=false && terraform validate
 
 terraform-plan:

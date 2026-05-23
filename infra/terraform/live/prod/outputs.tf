@@ -22,10 +22,23 @@ output "aks_subnet_id" {
   value = module.network.aks_subnet_id
 }
 
-output "backup_storage_account_name" {
-  value = var.enable_backup_storage ? module.storage_backup[0].storage_account_name : null
+output "storage_account_name" {
+  value = module.storage.storage_account_name
 }
 
-output "backup_container_name" {
-  value = var.enable_backup_storage ? module.storage_backup[0].container_name : null
+output "tfstate_container_name" {
+  value = module.storage.tfstate_container_name
+}
+
+output "backups_container_name" {
+  value = module.storage.backups_container_name
+}
+
+output "backend_config" {
+  value = {
+    resource_group_name  = module.resource_group.name
+    storage_account_name = module.storage.storage_account_name
+    container_name       = module.storage.tfstate_container_name
+    key                  = "minecraft/prod.terraform.tfstate"
+  }
 }
