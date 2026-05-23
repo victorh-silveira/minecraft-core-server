@@ -56,5 +56,5 @@ runs:
         ARM_USE_AZUREAD: true
       run: |
         cd infra/terraform/live/prod
-        terraform init -reconfigure -input=false
+        terraform init -input=false
         terraform apply -auto-approve -input=false
