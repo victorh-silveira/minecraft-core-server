@@ -1,9 +1,4 @@
 moved {
-  from = module.storage_backup[0]
-  to   = module.storage
-}
-
-moved {
   from = module.storage_backup[0].azurerm_storage_account.backup
   to   = module.storage.azurerm_storage_account.this
 }
