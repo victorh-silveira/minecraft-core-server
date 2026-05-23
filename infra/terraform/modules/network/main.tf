@@ -35,6 +35,7 @@ resource "azurerm_network_security_rule" "minecraft" {
 }
 
 resource "azurerm_network_security_rule" "rcon" {
+  count                       = length(var.admin_cidr_list) > 0 ? 1 : 0
   name                        = "allow-rcon-tcp-admin"
   priority                    = 110
   direction                   = "Inbound"

@@ -49,7 +49,7 @@ module "aks" {
   kubernetes_version  = var.kubernetes_version
   sku_tier            = "Free"
   node_count          = 1
-  vm_size             = "Standard_B2s"
+  vm_size             = "Standard_D2s_v6"
   os_disk_size_gb     = 64
   enable_auto_scaling = false
   acr_id              = module.acr.id
