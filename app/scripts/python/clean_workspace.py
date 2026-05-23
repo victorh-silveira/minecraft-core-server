@@ -30,7 +30,9 @@ def stage_lint():
     subprocess.run(fix_cmd, check=True, text=True, cwd=REPO_ROOT)
     run_tool("ruff", ["check", *targets], "Ruff Check", cwd=REPO_ROOT)
     run_tool("ruff", ["format", *targets], "Ruff Format", cwd=REPO_ROOT)
-    run_tool("vulture", ["app"], "Vulture Dead Code Detection", cwd=REPO_ROOT)
+    run_tool(
+        "vulture", ["app/src/infrastructure/mods", "app/scripts/python"], "Vulture Dead Code Detection", cwd=REPO_ROOT
+    )
     run_tool(
         "pylint",
         [

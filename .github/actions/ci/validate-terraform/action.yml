@@ -23,10 +23,13 @@ runs:
       shell: bash
       run: tflint --recursive --config=$(pwd)/linters/.tflint.hcl
 
-    - name: Setup tfsec
-      uses: aquasecurity/setup-tfsec@v1
-      with:
-        version: v1.28.11
+    - name: Instalar tfsec
+      shell: bash
+      run: |
+        curl -fsSL -o /tmp/tfsec https://github.com/aquasecurity/tfsec/releases/download/v1.28.11/tfsec-linux-amd64
+        chmod +x /tmp/tfsec
+        sudo mv /tmp/tfsec /usr/local/bin/tfsec
+        tfsec --version
 
     - name: tfsec
       shell: bash
