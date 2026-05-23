@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.0...v1.2.1) (2026-05-23)
+
+### Correcoes de Bug
+
+* **cd:** exportar ARM_USE_OIDC para Terraform com login OIDC ([a7a7af4](https://github.com/victorh-silveira/minecraft-server/commit/a7a7af47ca9fef092bc4285b605b6f851e589720))
+
 ## [1.2.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.1.0...v1.2.0) (2026-05-23)
 
 ### Funcionalidades
