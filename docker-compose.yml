@@ -111,13 +111,6 @@ services:
     mem_limit: ${MEMORY_LIMIT}
     pids_limit: ${DOCKER_PIDS_LIMIT:-512}
 
-    deploy:
-      resources:
-        limits:
-          memory: ${MEMORY_LIMIT}
-        reservations:
-          memory: ${MEMORY_RESERVATION:-1G}
-
     networks:
       - mc-backend
 

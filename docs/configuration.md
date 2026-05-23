@@ -16,7 +16,7 @@ Copy-Item .env.example .env
 | Portas | `GAME_PORT`, `RCON_PORT` |
 | Jogo | `ONLINE_MODE`, `DIFFICULTY`, `MAX_PLAYERS` |
 | Segredos | `RCON_PASSWORD` |
-| Docker | `DOCKER_BASE_IMAGE`, `IMAGE_VERSION`, `DOCKER_PIDS_LIMIT`, `MEMORY_RESERVATION` |
+| Docker | `DOCKER_BASE_IMAGE`, `IMAGE_VERSION`, `DOCKER_PIDS_LIMIT`, `UID`, `GID`, `SKIP_CHOWN` |
 
 **Nunca** versione `.env` — esta no `.gitignore`.
 

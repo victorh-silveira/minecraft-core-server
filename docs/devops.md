@@ -28,7 +28,7 @@ Local: [`docker-compose.yml`](../docker-compose.yml)
 | Rede | `minecraft-core-network` (bridge) |
 | Logging | json-file, 10m x 5 arquivos, compress |
 | Seguranca | `no-new-privileges:true` |
-| Recursos | `mem_limit`, `pids_limit`, reserva de memoria |
+| Recursos | `mem_limit`, `pids_limit` |
 | Graceful stop | `stop_grace_period: 60s` |
 | Init | `init: true` (reaping de processos zombie) |
 | Healthcheck | Compose + Dockerfile |

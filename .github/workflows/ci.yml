@@ -104,7 +104,6 @@ jobs:
           DOCKER_BASE_IMAGE=itzg/minecraft-server:latest
           IMAGE_VERSION=0.1.0
           DOCKER_PIDS_LIMIT=512
-          MEMORY_RESERVATION=1G
           EOF
           docker compose --env-file .env config --quiet
 
