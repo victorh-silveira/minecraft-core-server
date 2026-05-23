@@ -87,9 +87,9 @@ spec:
           startupProbe:
             tcpSocket:
               port: 25565
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 30
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 40
           livenessProbe:
             tcpSocket:
               port: 25565
@@ -123,13 +123,7 @@ spec:
             - name: mc-data
               mountPath: /data/database
               subPath: database
-            - name: server-properties
-              mountPath: /data/server.properties
-              subPath: server.properties
       volumes:
         - name: mc-data
           persistentVolumeClaim:
             claimName: mc-data
-        - name: server-properties
-          configMap:
-            name: mc-server-properties

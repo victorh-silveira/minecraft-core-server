@@ -74,6 +74,8 @@ runs:
       run: |
         ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
         IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
-        kubectl apply -k infra/kubernetes/overlays/prod
-        kubectl -n mc-prod set image statefulset/mc-server mc-server="${IMAGE}"
-        kubectl -n mc-prod rollout status statefulset/mc-server --timeout=600s
+        kubectl kustomize infra/kubernetes/overlays/prod \
+          | sed "s|acrminecraftprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g" \
+          | kubectl apply -f -
+        kubectl -n mc-prod delete pod mc-server-0 --ignore-not-found --wait=false
+        kubectl -n mc-prod rollout status statefulset/mc-server --timeout=1200s
