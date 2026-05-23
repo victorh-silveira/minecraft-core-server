@@ -106,6 +106,13 @@ assign_roles() {
     --scope "/subscriptions/${SUBSCRIPTION_ID}" \
     >/dev/null 2>&1 || echo "Role Contributor ja atribuida ou sem permissao para criar"
 
+  az role assignment create \
+    --assignee-object-id "$SP_OBJECT_ID" \
+    --assignee-principal-type ServicePrincipal \
+    --role "User Access Administrator" \
+    --scope "/subscriptions/${SUBSCRIPTION_ID}" \
+    >/dev/null 2>&1 || echo "Role User Access Administrator ja atribuida ou sem permissao para criar"
+
   if az storage account show --name "$TFSTATE_SA" --resource-group "$TFSTATE_RG" >/dev/null 2>&1; then
     az role assignment create \
       --assignee-object-id "$SP_OBJECT_ID" \
