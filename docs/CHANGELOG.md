@@ -1,3 +1,9 @@
+## [1.2.3](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.2...v1.2.3) (2026-05-23)
+
+### Correcoes de Bug
+
+* **azure:** incluir User Access Administrator no setup do SP ([d878cb0](https://github.com/victorh-silveira/minecraft-server/commit/d878cb0f6b4a8c922e8694ad20d03b6a552c0637))
+
 ## [1.2.2](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.1...v1.2.2) (2026-05-23)
 
 ### Correcoes de Bug
