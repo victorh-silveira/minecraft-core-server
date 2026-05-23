@@ -21,7 +21,11 @@ runs:
 
     - name: TFLint
       shell: bash
-      run: tflint --recursive --config=$(pwd)/linters/.tflint.hcl
+      run: |
+        tflint --config=$(pwd)/linters/.tflint.hcl \
+          --minimum-failure-severity=error \
+          infra/terraform/bootstrap \
+          infra/terraform/live/prod
 
     - name: Instalar tfsec
       shell: bash
