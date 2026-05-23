@@ -17,13 +17,13 @@ variable "location" {
 variable "resource_group_name" {
   type        = string
   description = "Resource group for Terraform remote state"
-  default     = "rg-minecraft-tfstate-bs"
+  default     = "rg-minecraft-server-tfstate-bs"
 }
 
 variable "storage_account_name" {
   type        = string
   description = "Storage account name for Terraform state (globally unique)"
-  default     = "stminecraftprodtf001"
+  default     = "stminecraftservertf001"
 }
 
 variable "container_name" {

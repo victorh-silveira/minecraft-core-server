@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: mc-server-netpol
-  namespace: mc-prod
+  namespace: minecraft-server-prod
 spec:
   podSelector:
     matchLabels:

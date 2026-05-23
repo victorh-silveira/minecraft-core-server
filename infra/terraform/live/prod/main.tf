@@ -1,18 +1,6 @@
-locals {
-  project       = "minecraft"
-  environment   = "prod"
-  region        = "brazilsouth"
-  region_suffix = "bs"
-  tags = {
-    project     = local.project
-    environment = local.environment
-    managed_by  = "terraform"
-  }
-}
-
 module "resource_group" {
   source   = "../../modules/resource-group"
-  name     = "rg-${local.project}-${local.environment}-${local.region_suffix}"
+  name     = local.resource_group_name
   location = local.region
   tags     = local.tags
 }
@@ -21,8 +9,8 @@ module "network" {
   source              = "../../modules/network"
   resource_group_name = module.resource_group.name
   location            = local.region
-  vnet_name           = "vnet-${local.project}-${local.environment}"
-  aks_subnet_name     = "snet-aks-${local.environment}"
+  vnet_name           = local.vnet_name
+  aks_subnet_name     = local.aks_subnet_name
   vnet_address_space  = ["10.10.0.0/16"]
   aks_subnet_prefix   = ["10.10.0.0/22"]
   admin_cidr_list     = var.admin_cidr_list
@@ -31,7 +19,7 @@ module "network" {
 
 module "acr" {
   source              = "../../modules/acr"
-  name                = "acrminecraft${local.environment}"
+  name                = local.acr_name
   resource_group_name = module.resource_group.name
   location            = local.region
   sku                 = "Basic"
@@ -41,10 +29,10 @@ module "acr" {
 
 module "aks" {
   source              = "../../modules/aks"
-  cluster_name        = "aks-${local.project}-${local.environment}"
+  cluster_name        = local.aks_cluster_name
   resource_group_name = module.resource_group.name
   location            = local.region
-  dns_prefix          = "mc-${local.environment}"
+  dns_prefix          = local.dns_prefix
   subnet_id           = module.network.aks_subnet_id
   kubernetes_version  = var.kubernetes_version
   sku_tier            = "Free"

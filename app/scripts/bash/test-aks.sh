@@ -4,7 +4,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT"
 
-NAMESPACE="${NAMESPACE:-mc-prod}"
+NAMESPACE="${NAMESPACE:-minecraft-server-prod}"
 APP_LABEL="app.kubernetes.io/name=mc-server"
 FAILED=0
 

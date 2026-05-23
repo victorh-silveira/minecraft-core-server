@@ -7,14 +7,14 @@ Guia de infraestrutura como codigo (Terraform) e manifestos Kubernetes para exec
 ```mermaid
 flowchart TB
   subgraph azure [Azure Brazil South]
-    rg[rg-minecraft-prod-bs]
-    vnet[vnet-minecraft-prod]
-    aks[aks-minecraft-prod]
-    acr[acrminecraftprod]
-    st_tf[stminecraftprodtf001]
-    st_bk[stminecraftprod001]
+    rg[rg-minecraft-server-prod]
+    vnet[vnet-minecraft-server-prod-bs]
+    aks[aks-minecraft-server-prod]
+    acr[acrminecraftserverprod]
+    st_tf[stminecraftservertf001]
+    st_bk[stminecraftserverprod001]
   end
-  subgraph k8s [Namespace mc-prod]
+  subgraph k8s [Namespace minecraft-server-prod]
     sts[StatefulSet mc-server]
     pvc[PVC mc-data 32Gi]
     svcG[Service LB :25565]
@@ -81,14 +81,14 @@ terraform apply
 Obtenha credenciais do cluster:
 
 ```bash
-az aks get-credentials --resource-group rg-minecraft-prod-bs --name aks-minecraft-prod
+az aks get-credentials --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod
 ```
 
 ## 3. Imagem no ACR
 
 ```bash
 ACR=$(terraform -chdir=infra/terraform/live/prod output -raw acr_login_server)
-az acr login --name acrminecraftprod
+az acr login --name acrminecraftserverprod
 docker build -t "${ACR}/minecraft-core-server:v1.0.0" .
 docker push "${ACR}/minecraft-core-server:v1.0.0"
 ```
@@ -98,8 +98,8 @@ docker push "${ACR}/minecraft-core-server:v1.0.0"
 Altere a senha RCON antes do apply:
 
 ```bash
-kubectl create namespace mc-prod --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n mc-prod create secret generic mc-rcon \
+kubectl create namespace minecraft-server-prod --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n minecraft-server-prod create secret generic mc-rcon \
   --from-literal=RCON_PASSWORD='sua-senha-forte' \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -115,8 +115,8 @@ kubectl apply -k infra/kubernetes/overlays/prod
 Copie dados locais para o pod:
 
 ```bash
-POD=$(kubectl -n mc-prod get pod -l app.kubernetes.io/name=mc-server -o jsonpath='{.items[0].metadata.name}')
-kubectl -n mc-prod cp app/src/domain/world-data/. "${POD}:/data/world/"
+POD=$(kubectl -n minecraft-server-prod get pod -l app.kubernetes.io/name=mc-server -o jsonpath='{.items[0].metadata.name}')
+kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/world/"
 ```
 
 ## 6. Validacao
@@ -128,7 +128,7 @@ bash app/scripts/bash/test-aks.sh
 IP do jogo:
 
 ```bash
-kubectl -n mc-prod get svc mc-server-game
+kubectl -n minecraft-server-prod get svc mc-server-game
 ```
 
 ## Custos estimados (prod minimo)

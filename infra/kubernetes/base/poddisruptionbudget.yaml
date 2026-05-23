@@ -2,7 +2,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: mc-server-pdb
-  namespace: mc-prod
+  namespace: minecraft-server-prod
 spec:
   minAvailable: 0
   selector:

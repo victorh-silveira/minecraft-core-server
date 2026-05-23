@@ -120,8 +120,8 @@ jobs:
       - name: Credenciais AKS
         uses: azure/aks-set-context@v4
         with:
-          resource-group: rg-minecraft-prod-bs
-          cluster-name: aks-minecraft-prod
+          resource-group: rg-minecraft-server-prod
+          cluster-name: aks-minecraft-server-prod
 
       - name: Testes pos-deploy
         uses: ./.github/actions/cd/post-deploy

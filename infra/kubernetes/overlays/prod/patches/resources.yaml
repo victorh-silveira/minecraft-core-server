@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mc-server
-  namespace: mc-prod
+  namespace: minecraft-server-prod
 spec:
   template:
     spec:

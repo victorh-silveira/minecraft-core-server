@@ -5,7 +5,7 @@ inputs:
   namespace:
     description: Namespace Kubernetes
     required: false
-    default: mc-prod
+    default: minecraft-server-prod
   game_port:
     description: Porta do jogo
     required: false

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mc-server-headless
-  namespace: mc-prod
+  namespace: minecraft-server-prod
 spec:
   clusterIP: None
   selector:

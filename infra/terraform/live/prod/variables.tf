@@ -23,7 +23,7 @@ variable "admin_cidr_list" {
 variable "backup_storage_account_name" {
   type        = string
   description = "Globally unique storage account for world backups"
-  default     = "stminecraftprod001"
+  default     = "stminecraftserverprod001"
 }
 
 variable "enable_backup_storage" {

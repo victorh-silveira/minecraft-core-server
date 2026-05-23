@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: mc-prod
+  name: minecraft-server-prod
   labels:
     app.kubernetes.io/name: minecraft-server
     app.kubernetes.io/part-of: minecraft-server

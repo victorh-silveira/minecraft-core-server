@@ -179,26 +179,26 @@ Guia completo: [azure.md](azure.md)
 | 7 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
 | 8 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
 | 9 | `bash app/scripts/bash/test-aks.sh` |
-| 10 | Obter IP: `kubectl -n mc-prod get svc mc-server-game` |
+| 10 | Obter IP: `kubectl -n minecraft-server-prod get svc mc-server-game` |
 
 ### Backup do mundo (PVC)
 
 Com pod em execucao:
 
 ```bash
-POD=$(kubectl -n mc-prod get pod -l app.kubernetes.io/name=mc-server -o jsonpath='{.items[0].metadata.name}')
-kubectl -n mc-prod exec "$POD" -- tar czf /tmp/world-backup.tgz -C /data world
-kubectl -n mc-prod cp "${POD}:/tmp/world-backup.tgz" "./backup-world-$(date +%Y%m%d).tgz"
+POD=$(kubectl -n minecraft-server-prod get pod -l app.kubernetes.io/name=mc-server -o jsonpath='{.items[0].metadata.name}')
+kubectl -n minecraft-server-prod exec "$POD" -- tar czf /tmp/world-backup.tgz -C /data world
+kubectl -n minecraft-server-prod cp "${POD}:/tmp/world-backup.tgz" "./backup-world-$(date +%Y%m%d).tgz"
 ```
 
-Storage de backup opcional: output `backup_storage_account_name` do Terraform (`stminecraftprod001`).
+Storage de backup opcional: output `backup_storage_account_name` do Terraform (`stminecraftserverprod001`).
 
 ### RCON no AKS
 
 O servico `mc-server-rcon` e **ClusterIP** (sem Load Balancer extra). Acesso administrativo:
 
 ```bash
-kubectl port-forward -n mc-prod svc/mc-server-rcon 25575:25575
+kubectl port-forward -n minecraft-server-prod svc/mc-server-rcon 25575:25575
 ```
 
 Senha: GitHub Secret `RCON_PASSWORD` (aplicada pelo CD) ou `kubectl create secret` local conforme `infra/kubernetes/base/secret-rcon.yaml.example`.
@@ -208,4 +208,4 @@ Senha: GitHub Secret `RCON_PASSWORD` (aplicada pelo CD) ou `kubectl create secre
 1. Actions > **Destroy** > confirmar `DESTROY` e aprovar environment.
 2. Baixar artifact `terraform-destroy-plan-*` e revisar o plano.
 3. Apos destroy, listar discos orfaos no portal Azure (PVC `Retain` pode manter discos).
-4. Bootstrap (`stminecraftprodtf001`) permanece ate remocao manual.
+4. Bootstrap (`stminecraftservertf001`) permanece ate remocao manual.

@@ -62,7 +62,7 @@
 
 1. **Primeira vez:** `CD` manual, modo `deploy-infra`, confirmar `APPLY_INFRA` (AKS, ACR, rede).
 2. **Cada release:** CI gera tag; `CD` publica imagem e faz rollout no AKS.
-3. **RCON:** `kubectl port-forward -n mc-prod svc/mc-server-rcon 25575:25575` (ClusterIP, sem LB extra).
+3. **RCON:** `kubectl port-forward -n minecraft-server-prod svc/mc-server-rcon 25575:25575` (ClusterIP, sem LB extra).
 4. **Destroy:** Actions > Destroy > `DESTROY`; revise artifact `terraform-destroy-plan-*` antes de aprovar o environment.
 
-O state remoto em `stminecraftprodtf001` (bootstrap) nao e destruido pelo workflow. PVC com `Retain` pode deixar discos orfaos; consulte [docs/operations.md](../docs/operations.md).
+O state remoto em `stminecraftservertf001` (bootstrap) nao e destruido pelo workflow. PVC com `Retain` pode deixar discos orfaos; consulte [docs/operations.md](../docs/operations.md).

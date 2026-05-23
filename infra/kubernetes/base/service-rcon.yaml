@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mc-server-rcon
-  namespace: mc-prod
+  namespace: minecraft-server-prod
   labels:
     app.kubernetes.io/name: mc-server
 spec:

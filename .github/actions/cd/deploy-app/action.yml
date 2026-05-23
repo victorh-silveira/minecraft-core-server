@@ -20,13 +20,13 @@ inputs:
     required: true
   resource_group:
     required: false
-    default: rg-minecraft-prod-bs
+    default: rg-minecraft-server-prod
   aks_cluster_name:
     required: false
-    default: aks-minecraft-prod
+    default: aks-minecraft-server-prod
   acr_name:
     required: false
-    default: acrminecraftprod
+    default: acrminecraftserverprod
 
 runs:
   using: composite
@@ -65,7 +65,7 @@ runs:
     - name: Secret RCON
       shell: bash
       run: |
-        kubectl -n mc-prod create secret generic mc-rcon \
+        kubectl -n minecraft-server-prod create secret generic mc-rcon \
           --from-literal=RCON_PASSWORD="${{ inputs.rcon_password }}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
@@ -75,7 +75,7 @@ runs:
         ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
         IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
         kubectl kustomize infra/kubernetes/overlays/prod \
-          | sed "s|acrminecraftprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g" \
+          | sed "s|acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g" \
           | kubectl apply -f -
-        kubectl -n mc-prod delete pod mc-server-0 --ignore-not-found --wait=false
-        kubectl -n mc-prod rollout status statefulset/mc-server --timeout=1200s
+        kubectl -n minecraft-server-prod delete pod mc-server-0 --ignore-not-found --wait=false
+        kubectl -n minecraft-server-prod rollout status statefulset/mc-server --timeout=1200s

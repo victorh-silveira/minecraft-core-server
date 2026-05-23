@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mc-server
-  namespace: mc-prod
+  namespace: minecraft-server-prod
   labels:
     app.kubernetes.io/name: mc-server
 spec:
@@ -38,7 +38,7 @@ spec:
             allowPrivilegeEscalation: false
       containers:
         - name: mc-server
-          image: acrminecraftprod.azurecr.io/minecraft-core-server:placeholder
+          image: acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder
           imagePullPolicy: Always
           ports:
             - name: minecraft
