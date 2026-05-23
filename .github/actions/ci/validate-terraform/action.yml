@@ -17,7 +17,7 @@ runs:
 
     - name: TFLint init
       shell: bash
-      run: tflint --init
+      run: tflint --init --config=$(pwd)/linters/.tflint.hcl
 
     - name: TFLint
       shell: bash
