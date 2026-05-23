@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.1...v1.2.2) (2026-05-23)
+
+### Correcoes de Bug
+
+* **terraform:** VM D2s_v6 em brazilsouth e regra RCON condicional ([4972af7](https://github.com/victorh-silveira/minecraft-server/commit/4972af7b96d4a71855ba3c21d72c5e56d17f1a7d))
+
 ## [1.2.1](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.0...v1.2.1) (2026-05-23)
 
 ### Correcoes de Bug
