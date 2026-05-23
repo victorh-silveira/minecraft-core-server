@@ -1,3 +1,9 @@
+## [1.2.4](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.3...v1.2.4) (2026-05-23)
+
+### Correcoes de Bug
+
+* **cd:** criar namespace antes do secret RCON no deploy-app ([c1c88cc](https://github.com/victorh-silveira/minecraft-server/commit/c1c88cca2c745fca3fc7298a694c2e707a8d1ade))
+
 ## [1.2.3](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.2...v1.2.3) (2026-05-23)
 
 ### Correcoes de Bug
