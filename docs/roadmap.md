@@ -6,7 +6,7 @@ Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao
 
 | Pilar | Nota | Resumo |
 |-------|------|--------|
-| Clean Architecture | 7/10 | Pastas corretas; codigo em `scripts/` |
+| Clean Architecture | 7/10 | Pastas corretas; codigo em `scripts/python/` |
 | DRY | 6/10 | `.env` bom; config duplicada properties/env |
 | SOLID | 6/10 | Script testado; sem abstracoes |
 | DDD | 6/10 | Estrutural sim; tatico nao |
@@ -43,7 +43,7 @@ Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao
 **Acao:** GitHub Actions com:
 
 - `pip install -r requirements-dev.txt`
-- `python scripts/sync_mods.py`
+- `python scripts/python/sync_mods.py`
 - `clean_workspace.py --stage lint|test|security`
 - `docker compose config`
 
@@ -63,7 +63,7 @@ Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao
 
 ## Prioridade 5 — Reorganizar `sync_mods` (Clean Architecture)
 
-**Problema:** Logica de infra em `scripts/` fora de `src/`.
+**Problema:** Logica de infra em `scripts/python/` fora de `src/`.
 
 **Acao:**
 
@@ -73,7 +73,7 @@ src/infrastructure/mods/
 ├── providers/curseforge.py
 ├── manifest.py
 └── sync_service.py
-scripts/sync_mods.py  → entrypoint fino
+scripts/python/sync_mods.py  → entrypoint fino
 ```
 
 **Criterio de done:** Testes mantem 100% coverage; imports atualizados.
@@ -130,7 +130,7 @@ scripts/sync_mods.py  → entrypoint fino
 
 **Acao:**
 
-- Script `scripts/backup_world.ps1` ou job agendado
+- Script `scripts/powershell/backup_world.ps1` ou job agendado
 - Retencao N dias documentada
 
 ---

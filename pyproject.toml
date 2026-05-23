@@ -83,7 +83,7 @@ lines-after-imports = 2
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/**/*.py" = ["T201", "S603", "S607", "S101"]
+"scripts/python/**/*.py" = ["T201", "S603", "S607", "S101"]
 "tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004"]
 
 [tool.ruff.format]
@@ -95,7 +95,7 @@ line-ending = "auto"
 # ---- PYTEST: TESTES UNITARIOS ----
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = [".", "scripts"]
+pythonpath = [".", "scripts/python"]
 addopts = "-q --strict-markers"
 
 # ---- INTERROGATE: COBERTURA DE DOCSTRINGS ----
@@ -121,8 +121,8 @@ exclude = ["*/clean_workspace.py"]
 
 # ---- COVERAGE: COBERTURA DE TESTES ----
 [tool.coverage.run]
-source = ["scripts"]
-omit = ["scripts/clean_workspace.py"]
+source = ["scripts/python"]
+omit = ["scripts/python/clean_workspace.py"]
 
 [tool.coverage.report]
 show_missing = true
@@ -137,5 +137,5 @@ exclude_lines = [
 # ---- VULTURE: DEAD CODE ----
 [tool.vulture]
 min_confidence = 70
-paths = ["scripts"]
-exclude = ["scripts/clean_workspace.py"]
+paths = ["scripts/python"]
+exclude = ["scripts/python/clean_workspace.py"]

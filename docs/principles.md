@@ -42,7 +42,7 @@ Garantir que o `.env` local inclua todas as chaves de `.env.example` (incluindo 
 
 ---
 
-## SOLID (analise de `scripts/sync_mods.py`)
+## SOLID (analise de `scripts/python/sync_mods.py`)
 
 ### Single Responsibility (S)
 
@@ -96,8 +96,8 @@ Com injecao de paths e HTTP client nos testes, sem monkeypatch global.
 ## Testes e cobertura
 
 - `tests/unit/scripts/test_sync_mods.py` — 22 testes
-- Cobertura minima **100%** em `scripts/sync_mods.py` (via `pyproject.toml`)
-- `scripts/clean_workspace.py` omitido da cobertura (ferramenta de dev)
+- Cobertura minima **100%** em `scripts/python/sync_mods.py` (via `pyproject.toml`)
+- `scripts/python/clean_workspace.py` omitido da cobertura (ferramenta de dev)
 
 ---
 

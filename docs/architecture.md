@@ -12,7 +12,7 @@ flowchart TB
     env[".env"]
     compose["docker-compose.yml"]
     makefile["Makefile"]
-    scripts["scripts/"]
+    scripts["scripts/python/"]
   end
   subgraph srcLayer [src/]
     domain["domain/world-data"]
@@ -56,7 +56,7 @@ flowchart TB
 
 | Aspecto | Situacao |
 |---------|----------|
-| Codigo Python em `src/` | Ausente — logica em `scripts/` |
+| Codigo Python em `src/` | Ausente — logica em `scripts/python/` |
 | Templates no Dockerfile (`/templates/`) | Sobrescritos por bind mounts em runtime |
 | Camada Presentation | Nao aplicavel (sem UI/API HTTP) |
 
@@ -116,7 +116,7 @@ Nao ha entidades, value objects ou repositorios implementados em codigo. O DDD a
 
 | Pilar | Nota | Observacao |
 |-------|------|------------|
-| Clean Architecture | 7/10 | Pastas corretas; codigo concentrado em `scripts/` |
+| Clean Architecture | 7/10 | Pastas corretas; codigo concentrado em `scripts/python/` |
 | DDD estrutural | 7/10 | Contexto claro; sem DDD tatico em codigo |
 | Isolamento de dados | 9/10 | Bind mounts + `.gitignore` adequados |
 

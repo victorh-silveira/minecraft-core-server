@@ -24,7 +24,7 @@ runs:
 
     - name: Clean workspace — seguranca
       shell: bash
-      run: python scripts/clean_workspace.py --stage security
+      run: python scripts/python/clean_workspace.py --stage security
 
     - name: Gitleaks — vazamento de segredos no repositorio
       shell: bash

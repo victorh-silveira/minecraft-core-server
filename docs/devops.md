@@ -58,19 +58,14 @@ Prefixo obrigatorio: **`docker-*`**
 | Comando | Descricao |
 |---------|-----------|
 | `docker-help` | Lista comandos (padrao) |
-| `docker-env-check` | Valida `.env` |
+| `docker-build-up` | Sync mods, build e sobe o servidor |
+| `docker-up` | Sobe com build e recreate |
+| `docker-down` | Para e remove containers/rede |
+| `docker-restart` | Reinicia o servico |
 | `docker-sync-mods` | Roda `sync_mods.py` |
-| `docker-config` | `docker compose config` |
-| `docker-pull` | Pull da imagem |
-| `docker-build` | Build `--no-cache --pull` + BUILD_DATE/VCS_REF |
-| `docker-up` | sync + up `--build --force-recreate` |
-| `docker-build-up` | build + up |
-| `docker-down` | Para e remove containers |
-| `docker-clean` | Remove containers, imagens locais |
-| `docker-nuke` | clean + `docker system prune -af --volumes` |
-| `docker-logs` | Logs follow |
+| `docker-logs` | Logs em tempo real |
 | `docker-sh` | Shell no container |
-| `docker-health` | Status rapido |
+| `docker-clean` | Remove containers e imagens locais |
 
 ---
 
@@ -99,8 +94,8 @@ Hooks usam `always_run: true` em lint/test/security para nao serem skipped sem a
 | Stage | Ferramentas |
 |-------|-------------|
 | lint | Ruff check/format, Vulture, Pylint duplicate-code, limite 300 linhas |
-| test | pytest + coverage 100% em `scripts/sync_mods.py` |
-| security | Bandit (scripts/), pip-audit (requirements.txt) |
+| test | pytest + coverage 100% em `scripts/python/sync_mods.py` |
+| security | Bandit (scripts/python/), pip-audit (requirements.txt) |
 | clean | Remove `__pycache__`, `.pytest_cache`, `.ruff_cache`, etc. |
 
 ---
@@ -125,10 +120,10 @@ Pipeline minimo sugerido (GitHub Actions):
 
 ```yaml
 - pip install -r requirements-dev.txt
-- python scripts/sync_mods.py
-- python scripts/clean_workspace.py --stage lint
-- python scripts/clean_workspace.py --stage test
-- python scripts/clean_workspace.py --stage security
+- python scripts/python/sync_mods.py
+- python scripts/python/clean_workspace.py --stage lint
+- python scripts/python/clean_workspace.py --stage test
+- python scripts/python/clean_workspace.py --stage security
 - docker compose --env-file .env.example config
 ```
 

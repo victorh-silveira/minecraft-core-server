@@ -11,7 +11,7 @@ repos:
       # ---- LINT: RUFF, VULTURE, PYLINT E LIMITE DE LINHAS ----
       - id: lint
         name: Qualidade (Ruff, Vulture, limite de linhas)
-        entry: python scripts/clean_workspace.py --stage lint
+        entry: python scripts/python/clean_workspace.py --stage lint
         language: system
         pass_filenames: false
         always_run: true
@@ -20,7 +20,7 @@ repos:
       # ---- TESTES: PYTEST + COBERTURA EM scripts/ ----
       - id: test
         name: Testes (pytest + cobertura em scripts)
-        entry: python scripts/clean_workspace.py --stage test
+        entry: python scripts/python/clean_workspace.py --stage test
         language: system
         pass_filenames: false
         always_run: true
@@ -29,7 +29,7 @@ repos:
       # ---- SEGURANCA: BANDIT + PIP-AUDIT ----
       - id: security
         name: Seguranca (Bandit + pip-audit)
-        entry: python scripts/clean_workspace.py --stage security
+        entry: python scripts/python/clean_workspace.py --stage security
         language: system
         pass_filenames: false
         always_run: true
@@ -45,7 +45,7 @@ repos:
       # ---- LIMPEZA: CACHES E ARTEFATOS LOCAIS ----
       - id: cleanup
         name: Limpeza (caches e artefatos locais)
-        entry: python scripts/clean_workspace.py --stage clean
+        entry: python scripts/python/clean_workspace.py --stage clean
         language: system
         pass_filenames: false
         always_run: true

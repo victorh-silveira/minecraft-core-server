@@ -4,44 +4,27 @@ CONTAINER := minecraft_core_server
 ENV_FILE := .env
 COMPOSE_FLAGS := --env-file $(ENV_FILE)
 
-.PHONY: docker-help docker-env-check docker-sync-mods docker-config docker-pull docker-build docker-up docker-build-up docker-start docker-stop docker-restart docker-down docker-remove docker-clean docker-nuke docker-logs docker-logs-tail docker-ps docker-sh docker-exec docker-stats docker-attach docker-top docker-inspect docker-health
+.PHONY: docker-help docker-env-check docker-sync-mods docker-build docker-pull docker-up docker-build-up docker-down docker-restart docker-logs docker-sh docker-clean docker-test docker-nuke
 
 docker-help:
 	@echo "Comandos Minecraft Server (Docker Compose)"
 	@echo ""
-	@echo "  make docker-env-check    Verifica se $(ENV_FILE) existe"
-	@echo "  make docker-sync-mods    Baixa mods do mods-manifest.json"
-	@echo "  make docker-config       Valida docker-compose.yml + .env"
-	@echo "  make docker-pull         Baixa imagem mais recente (sem cache local)"
-	@echo "  make docker-build        Pull + build --no-cache (se houver Dockerfile)"
-	@echo "  make docker-up           Sobe o servidor (pull always, force-recreate)"
-	@echo "  make docker-build-up     sync-mods + build + up"
-	@echo "  make docker-start        Inicia containers parados"
-	@echo "  make docker-stop         Para containers sem remover"
-	@echo "  make docker-restart      Reinicia o servico $(SERVICE)"
+	@echo "  make docker-build-up     Sync mods, build e sobe o servidor"
+	@echo "  make docker-up           Sobe o servidor (build + recreate)"
 	@echo "  make docker-down         Para e remove containers/rede"
-	@echo "  make docker-remove       down + remove imagens do projeto"
-	@echo "  make docker-clean        Remove containers, rede e imagens locais"
-	@echo "  make docker-nuke         clean + prune do Docker (cuidado)"
-	@echo "  make docker-logs         Logs em tempo real (-f)"
-	@echo "  make docker-logs-tail    Ultimas 200 linhas dos logs"
-	@echo "  make docker-ps           Lista containers do compose"
-	@echo "  make docker-sh           Shell interativo no container"
-	@echo "  make docker-exec CMD=... Executa comando no container"
-	@echo "  make docker-stats        Uso de CPU/RAM em tempo real"
-	@echo "  make docker-attach       Anexa stdin/stdout ao container"
-	@echo "  make docker-top          Processos dentro do container"
-	@echo "  make docker-inspect      JSON de inspecao do container"
-	@echo "  make docker-health       Status rapido do servidor"
+	@echo "  make docker-restart      Reinicia o servico"
+	@echo "  make docker-sync-mods    Baixa mods do mods-manifest.json"
+	@echo "  make docker-logs         Logs em tempo real"
+	@echo "  make docker-sh           Shell no container"
+	@echo "  make docker-clean        Remove containers e imagens locais"
+	@echo "  make docker-test         Roda scripts/bash/test-docker.sh no ambiente atual"
+	@echo "  make docker-nuke         Apaga TODO o Docker no WSL (com confirmacao s/N)"
 
 docker-env-check:
 	@test -f $(ENV_FILE) || (echo "Arquivo $(ENV_FILE) nao encontrado. Copie .env.example para .env" && exit 1)
 
 docker-sync-mods:
-	python scripts/sync_mods.py
-
-docker-config: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) config
+	python scripts/python/sync_mods.py
 
 docker-pull: docker-env-check
 	$(COMPOSE) $(COMPOSE_FLAGS) pull --ignore-pull-failures $(SERVICE)
@@ -55,59 +38,27 @@ docker-up: docker-env-check docker-sync-mods
 
 docker-build-up: docker-build docker-up
 
-docker-start: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) start $(SERVICE)
-
-docker-stop: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) stop $(SERVICE)
+docker-down: docker-env-check
+	$(COMPOSE) $(COMPOSE_FLAGS) down --remove-orphans
 
 docker-restart: docker-env-check
 	$(COMPOSE) $(COMPOSE_FLAGS) restart $(SERVICE)
 
-docker-down: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) down --remove-orphans
+docker-logs: docker-env-check
+	$(COMPOSE) $(COMPOSE_FLAGS) logs -f $(SERVICE)
 
-docker-remove: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) down --remove-orphans --rmi local
+docker-sh: docker-env-check
+	docker exec -it $(CONTAINER) /bin/bash || docker exec -it $(CONTAINER) /bin/sh
 
 docker-clean: docker-env-check
 	$(COMPOSE) $(COMPOSE_FLAGS) down --remove-orphans --rmi local -v
 	docker rm -f $(CONTAINER) 2>/dev/null || true
 	docker rmi -f minecraft-core-server:latest 2>/dev/null || true
 
-docker-nuke: docker-clean
-	docker system prune -af --volumes
+docker-test: docker-env-check
+	bash scripts/bash/test-docker.sh
 
-docker-logs: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) logs -f $(SERVICE)
-
-docker-logs-tail: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) logs --tail=200 $(SERVICE)
-
-docker-ps: docker-env-check
-	$(COMPOSE) $(COMPOSE_FLAGS) ps -a
-
-docker-sh: docker-env-check
-	docker exec -it $(CONTAINER) /bin/bash || docker exec -it $(CONTAINER) /bin/sh
-
-docker-exec: docker-env-check
-	@test -n "$(CMD)" || (echo "Use: make docker-exec CMD='comando'" && exit 1)
-	docker exec -it $(CONTAINER) $(CMD)
-
-docker-stats: docker-env-check
-	docker stats $(CONTAINER)
-
-docker-attach: docker-env-check
-	docker attach $(CONTAINER)
-
-docker-top: docker-env-check
-	docker top $(CONTAINER)
-
-docker-inspect: docker-env-check
-	docker inspect $(CONTAINER)
-
-docker-health: docker-env-check
-	@$(COMPOSE) $(COMPOSE_FLAGS) ps $(SERVICE)
-	@docker inspect -f 'Status={{.State.Status}} Health={{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' $(CONTAINER) 2>/dev/null || echo "Container $(CONTAINER) nao encontrado"
+docker-nuke:
+	bash scripts/bash/docker-nuke.sh
 
 .DEFAULT_GOAL := docker-help

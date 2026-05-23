@@ -19,4 +19,4 @@ runs:
 
     - name: Clean workspace — lint
       shell: bash
-      run: python scripts/clean_workspace.py --stage lint
+      run: python scripts/python/clean_workspace.py --stage lint

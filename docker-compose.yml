@@ -39,7 +39,7 @@ services:
       tags:
         - minecraft-core-server:latest
     image: minecraft-core-server:latest
-    container_name: minecraft_core_server
+    container_name: minecraft-core-server
     hostname: mc-server
 
     env_file:
@@ -78,7 +78,8 @@ services:
       - type: bind
         source: ./src/application/configs/server.properties
         target: /data/server.properties
-        read_only: true
+        bind:
+          create_host_path: true
       - type: bind
         source: ./src/interface/mods
         target: /data/mods

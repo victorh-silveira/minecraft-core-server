@@ -19,4 +19,4 @@ runs:
 
     - name: Executar suite de testes e cobertura (100%)
       shell: bash
-      run: python scripts/clean_workspace.py --stage test --coverage-fail-under 100
+      run: python scripts/python/clean_workspace.py --stage test --coverage-fail-under 100

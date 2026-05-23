@@ -28,7 +28,7 @@ Mantenha `.env` **sincronizado** com `.env.example` (mesmas chaves; valores reai
 
 Arquivo: `src/application/configs/server.properties`
 
-Montado somente leitura em `/data/server.properties`.
+Montado em `/data/server.properties` (gravavel). A imagem itzg mescla variaveis de ambiente no arquivo na inicializacao; por isso **nao** use `read_only: true` nesse volume.
 
 | Propriedade | Valor padrao | Efeito |
 |-------------|--------------|--------|
@@ -112,6 +112,6 @@ Campos por mod:
 Sync:
 
 ```powershell
-python scripts/sync_mods.py
+python scripts/python/sync_mods.py
 make docker-sync-mods
 ```

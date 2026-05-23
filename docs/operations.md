@@ -19,8 +19,7 @@
 ## Operacao diaria
 
 ```powershell
-make docker-health
-make docker-logs-tail
+make docker-logs
 make docker-restart
 ```
 
@@ -28,7 +27,6 @@ Shell administrativo:
 
 ```powershell
 make docker-sh
-make docker-exec CMD='ls -la /data/mods'
 ```
 
 ---
@@ -146,9 +144,10 @@ Se aparecer `Permission denied` nos logs:
 | Container reinicia em loop | `make docker-logs` — verificar EULA, VERSION, TYPE |
 | Mods nao carregam | `make docker-sync-mods`; conferir JARs em `src/interface/mods/` |
 | Porta em uso | Alterar `GAME_PORT` no `.env` |
-| `.env` nao encontrado | `make docker-env-check` |
+| `.env` nao encontrado | Copie `.env.example` para `.env` |
 | Healthcheck failing | Aguardar start-period (180s); Fabric + mods demoram |
-| Permission denied em /data | Ver [operations.md](docs/operations.md#permissoes-de-volume-uidgid); ajustar UID/GID no `.env` |
+| Read-only file system em server.properties | Remover `read_only` do volume; itzg precisa gravar propriedades do `.env` no arquivo |
+| Permission denied em /data | Ajustar UID/GID no `.env`; preferir repo em filesystem Linux no WSL |
 
 ---
 
@@ -156,9 +155,7 @@ Se aparecer `Permission denied` nos logs:
 
 | Comando | Efeito |
 |---------|--------|
-| `make docker-stop` | Para sem remover |
 | `make docker-down` | Para e remove containers/rede |
 | `make docker-clean` | + remove imagens locais e volumes anonimos |
-| `make docker-nuke` | + prune global Docker (**destrutivo**) |
 
 `docker-clean` **nao** apaga `src/domain/world-data` (bind mount, nao volume nomeado).

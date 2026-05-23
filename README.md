@@ -29,8 +29,13 @@ minecraft-server/
 ├── docker-compose.yml
 ├── Makefile
 ├── scripts/
-│   ├── sync_mods.py
-│   └── clean_workspace.py
+│   ├── python/
+│   │   ├── sync_mods.py
+│   │   └── clean_workspace.py
+│   ├── bash/
+│   │   └── test-docker.sh
+│   └── powershell/
+│       └── test-docker.ps1
 ├── src/
 │   ├── domain/world-data/
 │   ├── application/configs/
@@ -52,18 +57,15 @@ minecraft-server/
 | Interface | `src/interface/mods`, `plugins` | Extensoes (mods Fabric, plugins futuros) |
 | Infraestrutura | `src/infrastructure/logging` | Logs operacionais |
 
-Scripts de automacao (`scripts/`) e orquestracao (Compose, Makefile) ficam na raiz, fora de `src/`.
+Scripts de automacao (`scripts/python`, `scripts/bash`, `scripts/powershell`) e orquestracao (Compose, Makefile) ficam na raiz, fora de `src/`.
 
 ## Comandos Make (prefixo docker-*)
 
 ```bash
-make docker-help
-make docker-config
-make docker-sync-mods
 make docker-build-up
 make docker-logs
 make docker-down
-make docker-health
+make docker-sh
 ```
 
 ## Modo hibrido (online-mode=false)

@@ -18,15 +18,15 @@ def run_tool(module, args, description):
 
 
 def stage_lint():
-    fix_cmd = [sys.executable, "-m", "ruff", "check", "--fix", "scripts", "tests"]
+    fix_cmd = [sys.executable, "-m", "ruff", "check", "--fix", "scripts/python", "tests"]
     print(f"\n>>> Executando: Ruff Check (auto-fix)\nCommand: {' '.join(fix_cmd)}")
     subprocess.run(fix_cmd, check=True, text=True)
-    run_tool("ruff", ["check", "scripts", "tests"], "Ruff Check")
-    run_tool("ruff", ["format", "scripts", "tests"], "Ruff Format")
+    run_tool("ruff", ["check", "scripts/python", "tests"], "Ruff Check")
+    run_tool("ruff", ["format", "scripts/python", "tests"], "Ruff Format")
     run_tool("vulture", [], "Vulture Dead Code Detection")
     run_tool(
         "pylint",
-        ["--disable=all", "--enable=duplicate-code", "--min-similarity-lines=15", "scripts/"],
+        ["--disable=all", "--enable=duplicate-code", "--min-similarity-lines=15", "scripts/python/"],
         "Pylint Duplicate Code Detection",
     )
     stage_structure()
@@ -65,7 +65,7 @@ def stage_security():
     for vuln in ignored_vulns:
         ignore_args.extend(["--ignore-vuln", vuln])
 
-    run_tool("bandit", ["-r", "scripts", "-c", "pyproject.toml"], "Bandit Security Scan")
+    run_tool("bandit", ["-r", "scripts/python", "-c", "pyproject.toml"], "Bandit Security Scan")
     run_tool("pip_audit", ["-r", "requirements.txt", *ignore_args], "Pip-audit Vulnerability Scan")
 
 

@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 MANIFEST_PATH = ROOT / "src" / "interface" / "mods" / "mods-manifest.json"
 MODS_DIR = ROOT / "src" / "interface" / "mods"
 MODRINTH_API = "https://api.modrinth.com/v2"
