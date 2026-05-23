@@ -1,3 +1,9 @@
+## [1.2.6](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.5...v1.2.6) (2026-05-23)
+
+### Correcoes de Bug
+
+* **cd:** aumentar timeout do deploy-app para 45 minutos ([a0fe2f9](https://github.com/victorh-silveira/minecraft-server/commit/a0fe2f931ab6c45063cc652b9b5af0e5913ce6ab))
+
 ## [1.2.5](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.4...v1.2.5) (2026-05-23)
 
 ### Correcoes de Bug
