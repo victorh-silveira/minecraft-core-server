@@ -22,7 +22,7 @@ runs:
         UID=1000
         GID=1000
         SKIP_CHOWN=false
-        DOCKER_BASE_IMAGE=itzg/minecraft-server:latest
+        DOCKER_BASE_IMAGE=itzg/minecraft-server:java21
         IMAGE_VERSION=0.1.0
         DOCKER_PIDS_LIMIT=512
         EOF

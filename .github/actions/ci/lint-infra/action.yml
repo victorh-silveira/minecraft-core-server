@@ -19,6 +19,7 @@ runs:
       with:
         dockerfile: infra/docker/Dockerfile
         failure-threshold: warning
+        ignore: DL3006
 
     - name: Instalar actionlint
       shell: bash

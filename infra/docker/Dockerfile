@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG BASE_IMAGE=itzg/minecraft-server:latest
+ARG BASE_IMAGE=itzg/minecraft-server:java21
 
 FROM ${BASE_IMAGE}
 

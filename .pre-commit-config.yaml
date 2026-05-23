@@ -45,6 +45,7 @@ repos:
       - id: hadolint-docker
         name: "Docker | Lint Dockerfile"
         files: ^infra/docker/Dockerfile$
+        args: [--ignore=DL3006]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

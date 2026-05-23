@@ -120,7 +120,7 @@ def test_download_jar(monkeypatch, tmp_path):
         def raise_for_status(self):
             return None
 
-        def iter_content(self, _chunk_size=8192):
+        def iter_content(self, chunk_size=8192):
             return iter(chunks)
 
     monkeypatch.setattr(http_mod.requests, "get", lambda *_args, **_kwargs: FakeResponse())
