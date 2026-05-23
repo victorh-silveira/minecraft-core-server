@@ -1,0 +1,52 @@
+# ---- VERSAO MINIMA E RUNTIME PYTHON ----
+minimum_pre_commit_version: "3.5.0"
+
+default_language_version:
+  python: python3.13
+
+# ---- REPOSITORIO LOCAL: HOOKS DE QUALIDADE ----
+repos:
+  - repo: local
+    hooks:
+      # ---- LINT: RUFF, VULTURE, PYLINT E LIMITE DE LINHAS ----
+      - id: lint
+        name: Qualidade (Ruff, Vulture, limite de linhas)
+        entry: python scripts/clean_workspace.py --stage lint
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      # ---- TESTES: PYTEST + COBERTURA EM scripts/ ----
+      - id: test
+        name: Testes (pytest + cobertura em scripts)
+        entry: python scripts/clean_workspace.py --stage test
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      # ---- SEGURANCA: BANDIT + PIP-AUDIT ----
+      - id: security
+        name: Seguranca (Bandit + pip-audit)
+        entry: python scripts/clean_workspace.py --stage security
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      # ---- COMMIT MSG: CONVENTIONAL COMMITS (COMMITLINT) ----
+      - id: commitlint
+        name: Commitlint (Conventional Commits)
+        entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config tools/commitlint.config.mjs --edit
+        language: system
+        stages: [commit-msg]
+
+      # ---- LIMPEZA: CACHES E ARTEFATOS LOCAIS ----
+      - id: cleanup
+        name: Limpeza (caches e artefatos locais)
+        entry: python scripts/clean_workspace.py --stage clean
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]

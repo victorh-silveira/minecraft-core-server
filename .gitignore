@@ -1,0 +1,65 @@
+# ---- AMBIENTES VIRTUAIS E SEGREDOS ----
+.env
+.venv/
+env/
+venv/
+
+# ---- FERRAMENTAS DE DESENVOLVIMENTO ----
+.cache/
+.pre-commit/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- PYTHON: CACHES E ARTEFATOS DE BUILD ----
+*$py.class
+*.egg-info/
+*.py[cod]
+__pycache__/
+build/
+dist/
+
+# ---- LOGS ----
+*.log
+
+# ---- NODE / NPM / HUSKY (ARTEFATOS LOCAIS) ----
+.husky/
+node_modules/
+npm-debug.log*
+package-lock.json
+package.json
+yarn-debug.log*
+yarn-error.log*
+
+# ---- IA E FERRAMENTAS DE AGENTES (CURSOR/MCP) ----
+.agent/
+.agents/
+.antigravity/
+.cursor/
+.gemini/
+
+# ---- IDEs E SISTEMA OPERACIONAL ----
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+desktop.ini
+Thumbs.db
+
+# ---- SERVIDOR MINECRAFT: DADOS PERSISTENTES E BINARIOS ----
+src/domain/world-data/*
+!src/domain/world-data/.gitkeep
+
+src/interface/mods/*.jar
+!src/interface/mods/mods-manifest.json
+
+src/interface/plugins/*.jar
+
+src/infrastructure/logging/*
+!src/infrastructure/logging/.gitkeep
+
+src/infrastructure/database/*
+!src/infrastructure/database/.gitkeep
