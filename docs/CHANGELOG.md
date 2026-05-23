@@ -1,3 +1,9 @@
+## [1.2.5](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.4...v1.2.5) (2026-05-23)
+
+### Correcoes de Bug
+
+* **cd:** imagem correta no apply e server.properties gravavel ([d5a06e7](https://github.com/victorh-silveira/minecraft-server/commit/d5a06e7fd79df3c86ddbde72682cf1fd84842942))
+
 ## [1.2.4](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.3...v1.2.4) (2026-05-23)
 
 ### Correcoes de Bug
