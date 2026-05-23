@@ -1,5 +1,5 @@
 name: Release semantico
-description: semantic-release (tools/releaserc.mjs) — versao, CHANGELOG.md, GitHub Release
+description: semantic-release (tools/releaserc.mjs) — versao, docs/CHANGELOG.md, GitHub Release
 
 inputs:
   github_token:

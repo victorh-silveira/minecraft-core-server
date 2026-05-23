@@ -108,7 +108,7 @@ Config: [`tools/releaserc.mjs`](../tools/releaserc.mjs)
 npx semantic-release --extends ./tools/releaserc.mjs
 ```
 
-Gera `CHANGELOG.md` e tagueia versoes a partir de Conventional Commits.
+Gera `docs/CHANGELOG.md` e tagueia versoes a partir de Conventional Commits.
 
 Branches elegiveis: `main`.
 

@@ -10,5 +10,6 @@ Indice dos guias do projeto Minecraft Server.
 | [devops.md](devops.md) | Dockerfile, Compose, Makefile, CI sugerido |
 | [operations.md](operations.md) | Checklist, backup, RCON, troubleshooting |
 | [roadmap.md](roadmap.md) | Gaps e prioridades de evolucao |
+| [CHANGELOG.md](CHANGELOG.md) | Historico de versoes (semantic-release) |
 
 Entrada principal do repositorio: [README.md](../README.md).

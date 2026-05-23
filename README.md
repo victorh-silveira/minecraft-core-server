@@ -84,5 +84,6 @@ make docker-sh
 | [docs/devops.md](docs/devops.md) | Docker, Compose, Makefile, pre-commit |
 | [docs/operations.md](docs/operations.md) | Checklist operacional, backup, seguranca |
 | [docs/roadmap.md](docs/roadmap.md) | Gaps conhecidos e prioridades |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Historico de versoes |
 
 Indice completo: [docs/README.md](docs/README.md)
