@@ -1,3 +1,13 @@
+## [1.10.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.9.0...v1.10.0) (2026-05-25)
+
+### Funcionalidades
+
+* **server:** desativar online-mode e autenticacao Mojang ([f5656c0](https://github.com/victorh-silveira/minecraft-server/commit/f5656c0cbe16d7b58185f2abbb2b54273fd423aa))
+
+### Refatoracoes Tecnicas
+
+* **infra:** reduzir annotations a 14 informacoes essenciais ([a174d79](https://github.com/victorh-silveira/minecraft-server/commit/a174d7905c874a11624bd161b47df4ef1a23574e))
+
 ## [1.9.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.8.0...v1.9.0) (2026-05-25)
 
 ### Funcionalidades
