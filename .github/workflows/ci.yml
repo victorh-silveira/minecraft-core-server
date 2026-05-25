@@ -84,7 +84,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Detectar alterações na infraestrutura
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            infra:
+              - 'infra/terraform/**'
+              - 'infra/modules/**'
+
       - name: Deploy infraestrutura
+        if: steps.filter.outputs.infra == 'true'
         uses: ./.github/actions/cd/deploy-infra
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
