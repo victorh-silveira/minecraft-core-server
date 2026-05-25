@@ -94,7 +94,7 @@ jobs:
               - 'infra/modules/**'
 
       - name: Deploy infraestrutura
-        if: steps.filter.outputs.infra == 'true'
+        if: steps.filter.outputs.infra == 'true' || contains(github.event.head_commit.message, '[force-infra]')
         uses: ./.github/actions/cd/deploy-infra
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
