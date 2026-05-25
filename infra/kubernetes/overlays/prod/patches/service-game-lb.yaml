@@ -4,6 +4,4 @@ metadata:
   name: mc-server-game
   namespace: minecraft-server-prod
   annotations:
-    service.beta.kubernetes.io/azure-load-balancer-resource-group: rg-minecraft-server-prod
-    service.beta.kubernetes.io/azure-pip-name: pip-minecraft-server-prod-game
     service.beta.kubernetes.io/azure-dns-label-name: minecraftserverprod

@@ -68,9 +68,34 @@ jobs:
       - name: Validar Terraform
         uses: ./.github/actions/ci/validate-terraform
 
+  deploy-infra:
+    name: CD - Deploy Infra (GitOps)
+    needs: [linter, validate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production-infra
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy infraestrutura
+        uses: ./.github/actions/cd/deploy-infra
+        with:
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          confirm_token: "APPLY_INFRA"
+
   release:
     name: CI - Release
-    needs: [linter, validate]
+    needs: [deploy-infra]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15

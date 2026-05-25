@@ -157,31 +157,32 @@ Documentacao completa: [`.github/README.md`](../.github/README.md)
 
 ### CI ([`ci.yml`](../.github/workflows/ci.yml))
 
-| Job | Actions |
-|-----|---------|
-| `linter` | `ci/lint-code`, `ci/lint-infra` (+ actionlint) |
-| `validate` | `ci/test`, `ci/security`, `ci/validate-docker`, `ci/validate-kubernetes`, `ci/validate-terraform` |
-| `release` | `ci/sync-tags`, `ci/release` (apenas push em `main`) |
+| Job | Actions | Descrição |
+|-----|---------|-----------|
+| `linter` | `ci/lint-code`, `ci/lint-infra` (+ actionlint) | Lint de código e infra |
+| `validate` | `ci/test`, `ci/security`, `ci/validate-docker`, `ci/validate-kubernetes`, `ci/validate-terraform` | Testes, análise de segurança e validações |
+| `deploy-infra` | `cd/deploy-infra` | Deploy automático de Terraform no push da `main` (GitOps de infra) |
+| `release` | `ci/sync-tags`, `ci/release` | Semantic release gerando nova versão/tag Git |
 
 ### CD ([`cd.yml`](../.github/workflows/cd.yml))
 
 | Job | Actions | Gatilho |
 |-----|---------|---------|
-| `deploy-infra` | `cd/deploy-infra` | release (automático) ou manual (`mode=deploy-infra`) |
-| `deploy-app` | `cd/deploy-app` | release (automático, após infra) ou manual (`mode=deploy-app`) |
+| `deploy-infra` | `cd/deploy-infra` | Apenas manual (`mode=deploy-infra`) |
+| `deploy-app` | `cd/deploy-app` | Automático na release publicada ou manual (`mode=deploy-app`) |
 | `post-deploy` | `cd/post-deploy` | após `deploy-app` |
 
-O fluxo é 100% automatizado no modelo GitOps. Pushes na branch `main` que resultam em uma nova versão gerada pelo semantic-release disparam automaticamente o deploy da infraestrutura (`deploy-infra`) e em seguida o deploy da aplicação (`deploy-app`). 
+O fluxo é 100% automatizado no modelo GitOps. Pushes na branch `main` passam por validação, aplicam a infraestrutura atualizada via Terraform no job `deploy-infra` (com injeção automática de `APPLY_INFRA`) e disparam a release. O evento de release publicada por sua vez aciona automaticamente o deploy da aplicação (`deploy-app`), que instala a imagem com a tag da versão semântica correspondente no AKS nativo.
 
-Na automação de infraestrutura, a confirmação `APPLY_INFRA` é injetada de forma silenciosa e segura. O deploy da aplicação depende de o deploy de infraestrutura ter finalizado com sucesso ou ter sido ignorado (caso acionado individualmente de forma manual).
-
-Manual: escolha `deploy-app` (informe `image_tag`) ou `deploy-infra` (informe `APPLY_INFRA`). Tag `latest` é proibida para garantir estabilidade e rollback seguro.
+Manual: escolha `deploy-app` (informe `image_tag`) ou `deploy-infra` (informe `APPLY_INFRA`). Tag `latest` é proibida para garantir rollback seguro.
 
 ### Destroy ([`destroy.yml`](../.github/workflows/destroy.yml))
 
 | Job | Action |
 |-----|--------|
-| `destroy` | `destroy/azure` (plan destroy + destroy) |
+| `destroy` | `destroy/azure` (Kubernetes cleanup + plan destroy + destroy) |
+
+O fluxo de destroy é robusto e limpa **toda** a infraestrutura de forma 100% nativa. Antes de invocar o `terraform destroy`, ele conecta no AKS e executa `kubectl delete namespace minecraft-server-prod` para deletar graciosamente os LoadBalancers (liberando IPs públicos da Azure) e PVCs (que, configurados com `reclaimPolicy: Delete`, eliminam automaticamente os Discos Gerenciados associados). A trava de deleção do Resource Group no Terraform está desativada (`prevent_deletion_if_contains_resources = false`).
 
 **Somente manual.** Confirmar digitando `DESTROY`.
 

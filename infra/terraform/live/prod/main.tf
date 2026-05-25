@@ -18,15 +18,6 @@ module "network" {
   tags                = local.tags
 }
 
-module "game_public_ip" {
-  source              = "../../modules/public-ip"
-  name                = local.game_pip_name
-  resource_group_name = module.resource_group.name
-  location            = local.region
-  domain_name_label   = var.game_dns_label != "" ? var.game_dns_label : local.game_dns_label
-  tags                = local.tags
-}
-
 module "acr" {
   source              = "../../modules/acr"
   name                = local.acr_name

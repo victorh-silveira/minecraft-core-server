@@ -109,14 +109,13 @@ kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/wo
 bash app/scripts/bash/test-aks.sh
 ```
 
-IP do jogo (hostname Azure gratuito apos deploy-infra):
+IP do jogo (hostname Azure gratuito alocado dinamicamente pelo AKS):
 
 ```bash
-terraform -chdir=infra/terraform/live/prod output -raw game_fqdn
 kubectl -n minecraft-server-prod get svc mc-server-game
 ```
 
-Conecte no cliente Minecraft usando o FQDN (porta padrao 25565). Detalhes: [docs/access-and-hostname.md](../docs/access-and-hostname.md).
+Conecte no cliente Minecraft usando o FQDN exibido nas anotações/status do Service (porta padrão 25565). Detalhes: [docs/access-and-hostname.md](../docs/access-and-hostname.md).
 
 ## Custos estimados (prod minimo)
 

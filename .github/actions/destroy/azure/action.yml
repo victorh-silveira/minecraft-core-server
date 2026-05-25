@@ -50,6 +50,17 @@ runs:
           echo "tenant_id = \"${{ inputs.azure_tenant_id }}\""
         } > infra/terraform/live/prod/terraform.tfvars
 
+    - name: Limpar recursos do Kubernetes (AKS Nativo)
+      shell: bash
+      run: |
+        echo "Obtendo credenciais do AKS para limpeza de recursos..."
+        if az aks get-credentials --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod --overwrite-existing 2>/dev/null; then
+          echo "Conectado com sucesso ao AKS. Removendo a namespace minecraft-server-prod para liberar LoadBalancers e PVCs..."
+          kubectl delete namespace minecraft-server-prod --ignore-not-found=true --timeout=180s || true
+        else
+          echo "AKS nao encontrado ou indisponivel. Continuando com o destroy direto..."
+        fi
+
     - name: Terraform plan destroy
       shell: bash
       env:

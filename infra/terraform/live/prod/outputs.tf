@@ -42,19 +42,6 @@ output "backend_config" {
     key                  = "minecraft/prod.terraform.tfstate"
   }
 }
-
-output "game_public_ip" {
-  value = module.game_public_ip.ip_address
-}
-
-output "game_fqdn" {
-  value = module.game_public_ip.fqdn
-}
-
-output "game_pip_name" {
-  value = module.game_public_ip.name
-}
-
 output "game_dns_label" {
   value = var.game_dns_label != "" ? var.game_dns_label : local.game_dns_label
 }

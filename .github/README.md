@@ -4,8 +4,8 @@
 
 | Workflow | Gatilho | Jobs |
 |----------|---------|------|
-| [ci.yml](workflows/ci.yml) | push `main`, manual | `linter`, `validate`, `release` |
-| [cd.yml](workflows/cd.yml) | release (automático) ou manual (`deploy-app` / `deploy-infra`) | `deploy-infra`, `deploy-app`, `post-deploy` |
+| [ci.yml](workflows/ci.yml) | push `main`, manual | `linter`, `validate`, `deploy-infra`, `release` |
+| [cd.yml](workflows/cd.yml) | release (automático) ou manual (`deploy-app` / `deploy-infra`) | `deploy-infra` (manual), `deploy-app`, `post-deploy` |
 | [destroy.yml](workflows/destroy.yml) | **somente manual** | `destroy` |
 
 ## Actions
@@ -62,8 +62,7 @@
 ## Fluxo recomendado
 
 1. **Primeira vez:** `CD` manual, modo `deploy-infra`, confirmar `APPLY_INFRA` para provisionar os recursos iniciais (AKS, ACR, rede, storage).
-2. **Ciclo de Desenvolvimento (GitOps):** Cada push na branch `main` passa pelo `CI` e, gerando uma nova versão/tag via semantic-release, inicia de forma 100% automatizada o `CD`. Ele aplica quaisquer atualizações de Terraform/infra e em seguida faz o build e rollout da aplicação no AKS.
+2. **Ciclo de Desenvolvimento (GitOps):** Cada push na branch `main` passa pelo `CI` que valida, aplica quaisquer atualizações de Terraform/infra e gera a release via semantic-release. A criação da release então dispara o `CD` para fazer o build e rollout da aplicação de forma 100% autônoma.
 3. **RCON:** `kubectl port-forward -n minecraft-server-prod svc/mc-server-rcon 25575:25575` (ClusterIP, sem LB extra).
 4. **Destroy:** Actions > Destroy > `DESTROY`; revise o artefato `terraform-destroy-plan-*` antes de aprovar o environment.
-
-O state remoto em `stminecraftserverprod001` (container `tfstate`) nao e destruido pelo workflow. PVC com `Retain` pode deixar discos orfaos; consulte [docs/operations.md](../docs/operations.md).
+5. **Observação do Storage:** O state remoto em `stminecraftserverprod001` (container `tfstate`) não é destruído pelo workflow. Os discos PVC configurados com `reclaimPolicy: Delete` são limpos automaticamente com a deleção do namespace durante o destroy.
