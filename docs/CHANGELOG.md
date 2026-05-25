@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.8.0...v1.9.0) (2026-05-25)
+
+### Funcionalidades
+
+* **ci:** publicar annotations minecraft-server.io no Summary do GitHub ([3d307c5](https://github.com/victorh-silveira/minecraft-server/commit/3d307c50277741415c37299279e97b997f2d65ce))
+
 ## [1.8.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.7.0...v1.8.0) (2026-05-25)
 
 ### Funcionalidades
