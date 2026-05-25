@@ -1,5 +1,5 @@
-name: CI Test
-description: Pytest com cobertura minima 100% em infrastructure.mods
+name: CI - Testes
+description: Testes pytest com cobertura minima de 100% no modulo infrastructure.mods
 
 runs:
   using: composite

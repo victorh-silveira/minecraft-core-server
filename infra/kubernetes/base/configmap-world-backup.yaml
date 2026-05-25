@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mc-world-backup
+  namespace: minecraft-server-prod
+  labels:
+    app.kubernetes.io/name: mc-world-backup
+    app.kubernetes.io/component: backup-mundo
+data:
+  AZURE_STORAGE_ACCOUNT: stminecraftserverprod001
+  AZURE_STORAGE_CONTAINER: world-backups
+  TARGET_NAMESPACE: minecraft-server-prod
+  TARGET_POD: mc-server-0
+  TARGET_CONTAINER: mc-server
+  KUBECTL_VERSION: v1.31.0

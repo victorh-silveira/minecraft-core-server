@@ -1,97 +1,119 @@
-# Acesso e hostname do servidor
+# Acesso e hostname
 
-Controle de quem entra no servidor e como conectar sem depender de IP:porta.
+Quem pode entrar no servidor e como conectar de forma estavel (hostname em vez de IP volatil).
 
 ## Camadas de seguranca
 
 | Camada | Docker local | AKS producao |
 |--------|--------------|--------------|
-| Conta Mojang | `ONLINE_MODE=true` | `ONLINE_MODE=TRUE` no StatefulSet |
+| Conta Mojang | `ONLINE_MODE=true` no `.env` | `ONLINE_MODE=TRUE` no StatefulSet |
 | Whitelist | `MINECRAFT_WHITELIST` no `.env` | Secret `mc-access` / GitHub `MINECRAFT_WHITELIST` |
-| RCON | Porta publicada so em `127.0.0.1` | Service `ClusterIP` + `kubectl port-forward` |
+| RCON | Porta `127.0.0.1:25575` apenas | Service `mc-server-rcon` ClusterIP + port-forward |
 | Rede (opcional) | Firewall do host | NSG `game_cidr_list` no Terraform |
 
-Somente jogadores com conta Minecraft legitima **e** nick na whitelist conseguem entrar.
+Jogadores precisam de conta Mojang legitima **e** nick na whitelist.
 
 ## Docker local
 
-1. Copie `infra/docker/.env.example` para `infra/docker/.env`.
-2. Preencha `MINECRAFT_WHITELIST=SeuNick,AmigoNick` (nicks exatos da conta Mojang).
-3. Mantenha `ONLINE_MODE=true`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`.
-4. Suba com `make docker-build-up`.
+1. `Copy-Item infra/docker/.env.example infra/docker/.env`
+2. `MINECRAFT_WHITELIST=SeuNick,OutroNick` (nicks exatos Mojang)
+3. `ONLINE_MODE=true`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
+4. `make docker-build-up`
 
-RCON fica acessivel apenas em `127.0.0.1:25575` no host.
+RCON: `127.0.0.1:25575` no host (Compose publica RCON só em localhost).
 
-## AKS / GitHub Actions
+## AKS e GitHub Actions
 
-### Secrets obrigatorios no environment `production`
+### Secrets (environment `production`)
 
-| Secret | Exemplo |
-|--------|---------|
-| `RCON_PASSWORD` | senha forte |
-| `MINECRAFT_WHITELIST` | `victorh,amigo1,amigo2` |
+| Secret | Uso |
+|--------|-----|
+| `RCON_PASSWORD` | Secret `mc-rcon` |
+| `MINECRAFT_WHITELIST` | Secret `mc-access` (virgula, sem espacos extras) |
 
-O CD cria o secret `mc-access` com a whitelist a cada deploy.
+O CD recria os secrets a cada `deploy-app`.
 
-### Atualizar quem pode jogar
+### Atualizar whitelist
 
-1. Edite o secret `MINECRAFT_WHITELIST` no GitHub (Settings > Secrets > Actions).
-2. Rode o workflow **CD** em modo `deploy-app` ou aguarde a proxima release.
+1. Altere `MINECRAFT_WHITELIST` em GitHub Secrets
+2. Dispare CD modo `deploy-app` ou aguarde proxima release
 
-## Hostname sem comprar dominio
+### RCON administrativo
 
-### Opcao 1 — Azure DNS gratuito (recomendado no AKS)
-
-O Terraform cria um IP publico estatico com label DNS:
-
+```bash
+kubectl port-forward -n minecraft-server-prod svc/mc-server-rcon 25575:25575
 ```
+
+Senha: valor de `RCON_PASSWORD` no GitHub.
+
+## Hostname para jogadores
+
+### Opcao 1 — DNS label do LoadBalancer Azure (recomendado)
+
+O overlay prod define no Service `mc-server-game`:
+
+```yaml
+service.beta.kubernetes.io/azure-dns-label-name: minecraftserverprod
+```
+
+FQDN tipico apos provisionamento:
+
+```text
 minecraftserverprod.brazilsouth.cloudapp.azure.com
 ```
 
-Apos `deploy-infra` e `deploy-app`, conecte no Minecraft usando **somente esse hostname** (porta padrao 25565, sem `:25565`).
+No cliente Minecraft use **Multiplayer > Adicionar servidor** com esse host (porta 25565 implicita).
 
-Consulte o FQDN:
+Consultar endereco real (IP ou hostname ja resolvido):
 
 ```bash
-terraform -chdir=infra/terraform/live/prod output -raw game_fqdn
+kubectl -n minecraft-server-prod get svc mc-server-game \
+  -o jsonpath='{.metadata.annotations.minecraft-server\.io/conectividade-endereco}{"\n"}'
 ```
 
-Se o label estiver em uso na regiao, altere `game_dns_label` em `terraform.tfvars`.
-
-### Opcao 2 — DuckDNS (subdominio personalizado)
-
-Servico gratuito: `https://www.duckdns.org`
-
-1. Crie um subdominio (ex: `meuminecraft.duckdns.org`).
-2. Exporte `DUCKDNS_TOKEN` e `DUCKDNS_DOMAIN`.
-3. Apos cada deploy ou mudanca de IP do LoadBalancer:
+Ou:
 
 ```bash
+make k8s-annotate
+kubectl -n minecraft-server-prod describe svc mc-server-game
+```
+
+Label alternativo: configure `game_dns_label` em `terraform.tfvars` e alinhe o patch `service-game-lb.yaml` se mudar o nome.
+
+### Opcao 2 — DuckDNS
+
+Para subdominio personalizado (`meuminecraft.duckdns.org`):
+
+```bash
+export DUCKDNS_TOKEN=<token>
+export DUCKDNS_DOMAIN=meuminecraft
 bash app/scripts/bash/update-duckdns.sh
 ```
 
-Agende no cron ou Task Scheduler para manter o DNS sincronizado.
+Execute apos cada mudanca de IP do LoadBalancer.
 
-### Opcao 3 — nip.io (emergencia, sem cadastro)
+### Opcao 3 — nip.io (teste rapido)
 
-Se o IP do LoadBalancer for `74.163.209.125`, use:
+Com IP `74.163.209.125`:
 
-```
+```text
 74-163-209-125.nip.io
 ```
 
-Nao e DDNS: se o IP mudar, o hostname muda. Util para testes rapidos.
+IP dinamico: hostname muda quando o LB mudar.
 
-## Restringir por IP (opcional)
+## Restringir por IP no NSG (opcional)
 
-Se todos os jogadores tiverem IP fixo conhecido, preencha em `terraform.tfvars`:
+Em `infra/terraform/live/prod/terraform.tfvars`:
 
 ```hcl
 game_cidr_list = ["203.0.113.10/32", "198.51.100.0/24"]
 ```
 
-Isso limita a porta 25565 no NSG. Amigos com IP dinamico devem usar apenas whitelist + online-mode.
+Limita TCP 25565 no NSG. Jogadores com IP dinamico dependem de whitelist, nao desta lista.
 
-## Migracao de modo offline para online
+`admin_cidr_list` restringe RCON (25575) na borda da rede Azure quando preenchido.
 
-Se o mundo foi jogado com `online-mode=false`, os UUIDs dos jogadores podem mudar na primeira entrada com conta Mojang. Faca backup do mundo antes do deploy com as novas configuracoes.
+## Migracao offline para online
+
+Mundos criados com `online-mode=false` podem ter UUIDs diferentes ao ativar conta Mojang. Faca backup antes (`make docker-down` + zip local ou backup AKS).

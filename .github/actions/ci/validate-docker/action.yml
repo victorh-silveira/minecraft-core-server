@@ -1,5 +1,5 @@
-name: CI Validate Docker
-description: Valida docker-compose.yml com env de CI
+name: CI - Validar Docker
+description: Valida docker-compose.yml com variaveis de ambiente de CI
 
 runs:
   using: composite

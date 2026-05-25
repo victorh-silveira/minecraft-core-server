@@ -1,16 +1,16 @@
-name: Azure Login
+name: Autenticacao Azure
 description: Autentica via OIDC (preferencial) ou service principal JSON (legado)
 
 inputs:
   azure_client_id:
-    description: Client ID do app registration (OIDC)
+    description: ID do cliente do app registration (OIDC)
     required: false
     default: ""
   azure_tenant_id:
-    description: Azure tenant ID
+    description: ID do locatario Azure
     required: true
   azure_subscription_id:
-    description: Azure subscription ID
+    description: ID da assinatura Azure
     required: true
   azure_credentials:
     description: JSON do service principal (fallback se OIDC nao configurado)
@@ -21,7 +21,7 @@ runs:
   using: composite
 
   steps:
-    - name: Login OIDC
+    - name: Autenticar via OIDC
       if: inputs.azure_client_id != ''
       uses: azure/login@v2
       with:
@@ -29,7 +29,7 @@ runs:
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
 
-    - name: Login service principal
+    - name: Autenticar via service principal
       if: inputs.azure_client_id == ''
       uses: azure/login@v2
       with:

@@ -1,4 +1,4 @@
-name: CD
+name: CD - Entrega Continua
 
 on:
   release:
@@ -39,7 +39,7 @@ jobs:
     environment: production-infra
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
 
       - name: Deploy infraestrutura
@@ -59,7 +59,7 @@ jobs:
     environment: production
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -95,7 +95,7 @@ jobs:
           minecraft_whitelist: ${{ secrets.MINECRAFT_WHITELIST }}
 
   post-deploy:
-    name: CD - Post Deploy
+    name: CD - Pos-deploy
     needs: [deploy-app]
     if: always() && needs.deploy-app.result == 'success'
     runs-on: ubuntu-latest
@@ -107,10 +107,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Login Azure
+      - name: Autenticar no Azure
         uses: ./.github/actions/shared/azure-login
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}

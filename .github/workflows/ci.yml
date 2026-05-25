@@ -1,4 +1,4 @@
-name: CI
+name: CI - Integracao Continua
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -41,12 +41,12 @@ jobs:
         uses: ./.github/actions/ci/lint-infra
 
   validate:
-    name: CI - Validate
+    name: CI - Validacao
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -81,10 +81,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Detectar alterações na infraestrutura
+      - name: Detectar alteracoes na infraestrutura
         id: filter
         uses: dorny/paths-filter@v3
         with:
@@ -93,7 +93,7 @@ jobs:
               - 'infra/terraform/**'
               - 'infra/modules/**'
 
-      - name: Login Azure para verificação
+      - name: Autenticar no Azure para verificacao
         uses: ./.github/actions/shared/azure-login
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -101,7 +101,7 @@ jobs:
           azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Verificar se a infraestrutura está ativa
+      - name: Verificar se a infraestrutura esta ativa
         id: check-infra
         shell: bash
         run: |
@@ -125,7 +125,7 @@ jobs:
           confirm_token: "APPLY_INFRA"
 
   release:
-    name: CI - Release
+    name: CI - Versao semantica
     needs: [deploy-infra]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -136,13 +136,13 @@ jobs:
       issues: write
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Sync tags
+      - name: Sincronizar tags
         uses: ./.github/actions/ci/sync-tags
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

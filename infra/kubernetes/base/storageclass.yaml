@@ -2,9 +2,12 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: mc-standard-ssd
+  labels:
+    app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: armazenamento
 provisioner: disk.csi.azure.com
 parameters:
   skuName: StandardSSD_LRS
-reclaimPolicy: Delete
+reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true

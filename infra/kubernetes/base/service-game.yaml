@@ -5,6 +5,7 @@ metadata:
   namespace: minecraft-server-prod
   labels:
     app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: servidor-jogo
 spec:
   type: LoadBalancer
   selector:

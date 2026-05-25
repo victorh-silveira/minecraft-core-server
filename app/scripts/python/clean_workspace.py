@@ -14,7 +14,7 @@ REQUIREMENTS = APP_ROOT / "requirements.txt"
 def run_tool(module, args, description, cwd=None):
     print(f"\n>>> Executando: {description}")
     command = [sys.executable, "-m", module] + args
-    print(f"Command: {' '.join(command)}")
+    print(f"Comando: {' '.join(command)}")
     try:
         subprocess.run(command, check=True, text=True, cwd=cwd or REPO_ROOT)
         return True
@@ -26,12 +26,12 @@ def run_tool(module, args, description, cwd=None):
 def stage_lint():
     targets = ["app/src/infrastructure/mods", "app/scripts/python", "app/tests"]
     fix_cmd = [sys.executable, "-m", "ruff", "check", "--fix", *targets]
-    print(f"\n>>> Executando: Ruff Check (auto-fix)\nCommand: {' '.join(fix_cmd)}")
+    print(f"\n>>> Executando: Ruff Check (correcao automatica)\nComando: {' '.join(fix_cmd)}")
     subprocess.run(fix_cmd, check=True, text=True, cwd=REPO_ROOT)
     run_tool("ruff", ["check", *targets], "Ruff Check", cwd=REPO_ROOT)
     run_tool("ruff", ["format", *targets], "Ruff Format", cwd=REPO_ROOT)
     run_tool(
-        "vulture", ["app/src/infrastructure/mods", "app/scripts/python"], "Vulture Dead Code Detection", cwd=REPO_ROOT
+        "vulture", ["app/src/infrastructure/mods", "app/scripts/python"], "Vulture - codigo morto", cwd=REPO_ROOT
     )
     run_tool(
         "pylint",
@@ -42,14 +42,14 @@ def stage_lint():
             "app/src/infrastructure/mods/",
             "app/scripts/python/",
         ],
-        "Pylint Duplicate Code Detection",
+        "Pylint - deteccao de codigo duplicado",
         cwd=REPO_ROOT,
     )
     stage_structure()
 
 
 def stage_structure(max_lines=300):
-    print(f"\n>>> Executando: Verificacao Estrutural (Max {max_lines} linhas)")
+    print(f"\n>>> Executando: Verificacao estrutural (maximo {max_lines} linhas)")
     violations = []
 
     for path in APP_ROOT.rglob("*.py"):
@@ -76,7 +76,7 @@ def stage_test(fail_under=100):
         text=True,
         cwd=APP_ROOT,
     )
-    run_tool("coverage", ["report", f"--fail-under={fail_under}"], f"Coverage report (min {fail_under}%)", cwd=APP_ROOT)
+    run_tool("coverage", ["report", f"--fail-under={fail_under}"], f"Relatorio de cobertura (minimo {fail_under}%)", cwd=APP_ROOT)
 
 
 def stage_security():
@@ -88,19 +88,19 @@ def stage_security():
     run_tool(
         "bandit",
         ["-r", "app/scripts/python", "-c", str(PYPROJECT)],
-        "Bandit Security Scan",
+        "Bandit - analise de seguranca",
         cwd=REPO_ROOT,
     )
     run_tool(
         "pip_audit",
         ["-r", str(REQUIREMENTS), *ignore_args],
-        "Pip-audit Vulnerability Scan",
+        "Pip-audit - vulnerabilidades em dependencias",
         cwd=REPO_ROOT,
     )
 
 
 def stage_clean():
-    print("\n>>> Running: Limpeza de lixo e caches")
+    print("\n>>> Executando: Limpeza de lixo e caches")
 
     def safe_remove(path: Path):
         try:
@@ -129,14 +129,14 @@ def stage_clean():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Minecraft Server Quality Gate")
+    parser = argparse.ArgumentParser(description="Portao de qualidade do servidor Minecraft")
     parser.add_argument(
         "--stage",
         required=True,
         choices=["lint", "pytest", "security", "test", "clean"],
-        help="Stage to execute",
+        help="Estagio a executar",
     )
-    parser.add_argument("--coverage-fail-under", type=int, default=100, help="Minimum coverage percentage")
+    parser.add_argument("--coverage-fail-under", type=int, default=100, help="Percentual minimo de cobertura de testes")
 
     args = parser.parse_args()
 

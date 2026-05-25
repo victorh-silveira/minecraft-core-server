@@ -1,10 +1,7 @@
-// ---- SEMANTIC RELEASE: CONFIGURACAO DE VERSIONAMENTO ----
 export default {
-  // ---- BRANCHES ELEGIVEIS PARA RELEASE ----
   branches: ["main"],
 
   plugins: [
-  // ---- ANALISE DE COMMITS (CONVENTIONAL COMMITS) ----
     [
       "@semantic-release/commit-analyzer",
       {
@@ -26,8 +23,6 @@ export default {
         ],
       },
     ],
-
-    // ---- GERACAO DE RELEASE NOTES ----
     [
       "@semantic-release/release-notes-generator",
       {
@@ -49,14 +44,7 @@ export default {
         },
       },
     ],
-
-    // ---- CHANGELOG ----
-    [
-      "@semantic-release/changelog",
-      { changelogFile: "docs/CHANGELOG.md" },
-    ],
-
-    // ---- COMMIT DE RELEASE NO GIT ----
+    ["@semantic-release/changelog", { changelogFile: "docs/CHANGELOG.md" }],
     [
       "@semantic-release/git",
       {
@@ -64,8 +52,6 @@ export default {
         message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
       },
     ],
-
-    // ---- PUBLICACAO NO GITHUB ----
     "@semantic-release/github",
   ],
 };

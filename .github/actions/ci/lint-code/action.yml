@@ -1,4 +1,4 @@
-name: CI Lint Code
+name: CI - Lint de codigo
 description: Ruff, Vulture, Pylint e limite de linhas (app/)
 
 runs:

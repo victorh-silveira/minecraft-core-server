@@ -1,4 +1,4 @@
-name: CI Sync Tags
+name: CI - Sincronizar tags
 description: Sincroniza e remove tags Git orfas
 
 inputs:

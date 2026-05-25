@@ -1,19 +1,23 @@
-name: CD Deploy Infra
-description: Terraform apply na stack live/prod
+name: CD - Deploy da infraestrutura
+description: Aplicacao Terraform (apply) na stack live/prod
 
 inputs:
   azure_client_id:
+    description: ID do cliente do app registration Azure (OIDC)
     required: false
     default: ""
   azure_tenant_id:
+    description: ID do locatario Azure
     required: true
   azure_subscription_id:
+    description: ID da assinatura Azure
     required: true
   azure_credentials:
+    description: JSON do service principal (fallback se OIDC nao configurado)
     required: false
     default: ""
   confirm_token:
-    description: Deve ser APPLY_INFRA para apply
+    description: Deve ser APPLY_INFRA para confirmar a aplicacao
     required: true
 
 runs:
@@ -28,7 +32,7 @@ runs:
           exit 1
         fi
 
-    - name: Login Azure
+    - name: Autenticar no Azure
       uses: ./.github/actions/shared/azure-login
       with:
         azure_client_id: ${{ inputs.azure_client_id }}
@@ -36,7 +40,7 @@ runs:
         azure_subscription_id: ${{ inputs.azure_subscription_id }}
         azure_credentials: ${{ inputs.azure_credentials }}
 
-    - name: Setup Terraform
+    - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: "1.9.8"
@@ -50,7 +54,7 @@ runs:
           echo "tenant_id = \"${{ inputs.azure_tenant_id }}\""
         } > infra/terraform/live/prod/terraform.tfvars
 
-    - name: Terraform apply
+    - name: Aplicar Terraform
       shell: bash
       env:
         ARM_USE_AZUREAD: true

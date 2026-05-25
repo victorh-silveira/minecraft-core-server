@@ -1,9 +1,9 @@
-name: CD Post Deploy
-description: Testes pos-deploy no AKS (health, PVC, LB, logs)
+name: CD - Pos-deploy
+description: Testes pos-deploy no AKS (saude, PVC, balanceador, logs)
 
 inputs:
   namespace:
-    description: Namespace Kubernetes
+    description: Namespace do Kubernetes
     required: false
     default: minecraft-server-prod
   game_port:
@@ -15,6 +15,12 @@ runs:
   using: composite
 
   steps:
+    - name: Atualizar annotations de conectividade e saude
+      shell: bash
+      env:
+        NAMESPACE: ${{ inputs.namespace }}
+      run: bash app/scripts/bash/atualizar-annotations-k8s.sh
+
     - name: Testes pos-deploy
       shell: bash
       env:

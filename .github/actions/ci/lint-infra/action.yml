@@ -1,20 +1,20 @@
-name: CI Lint Infra
-description: Terraform fmt, Hadolint e validacao YAML de infra/
+name: CI - Lint de infraestrutura
+description: Formatacao Terraform, Hadolint e validacao de YAML de infraestrutura
 
 runs:
   using: composite
 
   steps:
-    - name: Setup Terraform
+    - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: "1.9.8"
 
-    - name: Terraform fmt
+    - name: Formatar Terraform
       shell: bash
       run: terraform fmt -check -recursive infra/terraform/
 
-    - name: Hadolint Dockerfile
+    - name: Hadolint no Dockerfile
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: infra/docker/Dockerfile
@@ -27,7 +27,7 @@ runs:
         curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
         sudo mv actionlint /usr/local/bin/actionlint
 
-    - name: Actionlint workflows
+    - name: Actionlint nos workflows
       shell: bash
       run: actionlint
 

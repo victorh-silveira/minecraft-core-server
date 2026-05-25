@@ -3,6 +3,9 @@ kind: PodDisruptionBudget
 metadata:
   name: mc-server-pdb
   namespace: minecraft-server-prod
+  labels:
+    app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: servidor-jogo
 spec:
   minAvailable: 0
   selector:

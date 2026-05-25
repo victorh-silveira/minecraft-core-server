@@ -1,5 +1,5 @@
-name: CI Release
-description: semantic-release com CHANGELOG e GitHub Release
+name: CI - Versao semantica
+description: Release semantica com CHANGELOG e publicacao no GitHub
 
 inputs:
   github_token:
@@ -15,7 +15,7 @@ runs:
       with:
         node-version: "24"
 
-    - name: Instalar semantic-release
+    - name: Instalar release semantica
       shell: bash
       run: |
         npm install --no-save \
@@ -28,7 +28,7 @@ runs:
           @semantic-release/github \
           conventional-changelog-conventionalcommits
 
-    - name: Executar semantic-release
+    - name: Executar release semantica
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}

@@ -1,147 +1,70 @@
-# Roadmap e gaps conhecidos
+# Roadmap
 
-Documento derivado da revisao arquitetural do projeto. Prioridades para evolucao em direcao a Clean Architecture, DRY, SOLID, DDD e DevOps completos.
+Gaps e prioridades apos a stack Azure AKS + backup + annotations. O [CHANGELOG.md](CHANGELOG.md) registra entregas por release.
 
 ## Scorecard atual
 
 | Pilar | Nota | Resumo |
 |-------|------|--------|
-| Clean Architecture | 7/10 | Pastas corretas; codigo em `app/scripts/python/` |
-| DRY | 6/10 | `.env` bom; config duplicada properties/env |
-| SOLID | 6/10 | Script testado; sem abstracoes |
-| DDD | 6/10 | Estrutural sim; tatico nao |
-| DevOps | 8/10 | Docker/Makefile/pre-commit fortes; sem CI |
+| Clean Architecture | 8/10 | Pastas + `infrastructure.mods` em `src/` |
+| DRY | 6/10 | Config jogo duplicada local |
+| SOLID | 6/10 | Testado; DI limitada |
+| DDD | 7/10 | Estrutural; mundo como agregado de dados |
+| DevOps / IaC | 9/10 | CI/CD, TF, K8s, backup, annotations |
+| Observabilidade | 5/10 | Probes + logs; sem metricas |
 
----
+## Concluido
 
-## Prioridade 1 — Configuracao unica (DRY)
+- [x] Estrutura `app/src/` e sync de mods
+- [x] Docker Compose e Makefile
+- [x] Pre-commit e CI completo
+- [x] Terraform modules + live/prod (AKS, ACR, rede)
+- [x] Kubernetes base + overlay prod
+- [x] AKS Workload Identity + backup CronJob para blob
+- [x] StorageClass Retain e K8s 1.31 pinado
+- [x] CD GitOps (infra + app + pos-deploy)
+- [x] Annotations `minecraft-server.io/*` (Azure, K8s, Minecraft, saude)
+- [x] Documentacao alinhada a arquitetura atual
 
-**Problema:** `ONLINE_MODE`, `DIFFICULTY`, `MAX_PLAYERS` em `.env` **e** `server.properties`.
+## Prioridade 1 — Configuracao unica (DRY local)
 
-**Acao:** Adotar Opcao A ou B descrita em [configuration.md](configuration.md).
+Unificar `ONLINE_MODE`, `DIFFICULTY`, `MAX_PLAYERS` entre `.env` e `server.properties`.
 
-**Criterio de done:** Uma unica fonte de verdade documentada; teste manual de boot OK.
+Ver [configuration.md](configuration.md).
 
----
+## Prioridade 2 — Pin da imagem base Docker
 
-## Prioridade 2 — Sincronizar `.env` local
+Substituir tag flutuante de `itzg/minecraft-server` por tag ou digest fixo em `.env.example`.
 
-**Problema:** `.env` pode ficar desatualizado vs `.env.example`.
+## Prioridade 3 — SOLID / injecao de dependencias
 
-**Acao:**
+Expandir `providers.py` e reduzir monkeypatch nos testes.
 
-- Comparar chaves entre arquivos
-- Adicionar secao Docker Build no `.env` real
-- Script ou check no `docker-env-check` (futuro)
+## Prioridade 4 — Segredos em Key Vault
 
----
+Migrar `RCON_PASSWORD` e credenciais sensiveis para Azure Key Vault + CSI ou External Secrets.
 
-## Prioridade 3 — CI/CD minimo
+## Prioridade 5 — Ambientes Compose
 
-**Problema:** Quality gates so locais (pre-commit).
+Profiles `dev` / `staging` ou override gitignored.
 
-**Acao:** GitHub Actions com:
+## Prioridade 6 — Observabilidade (custo)
 
-- `pip install -r app/requirements-dev.txt`
-- `cd app && python -m infrastructure.mods`
-- `clean_workspace.py --stage lint|test|security`
-- `docker compose config`
+Sidecar `prometheus-minecraft-exporter` ou agente leve; avaliar RAM no node `Standard_D2s_v6` unico.
 
-**Arquivo sugerido:** `.github/workflows/ci.yml`
+## Prioridade 7 — Retencao de backups
 
----
+Lifecycle policy no container `world-backups` (ex.: manter 7/30 dias).
 
-## Prioridade 4 — Pin de versao da imagem base
+## Prioridade 8 — Multi-node / HA
 
-**Problema:** `DOCKER_BASE_IMAGE=itzg/minecraft-server:latest` e instavel.
+Segundo node ou pod disruption budget com minAvailable 1 quando escalar.
 
-**Acao:** Fixar tag testada (ex.: digest ou tag `java21-2024.x`).
-
-**Criterio de done:** `.env.example` documenta tag pinada; rebuild reproduzivel.
-
----
-
-## Prioridade 5 — Reorganizar `sync_mods` (Clean Architecture)
-
-**Status:** Concluido.
-
-Modulos em `app/src/infrastructure/mods/` com `ModResolver`, entrypoints `python -m infrastructure.mods` e `app/scripts/python/sync_mods.py`.
-
----
-
-## Prioridade 6 — SOLID (providers)
-
-**Problema:** Acoplamento direto a `requests` e paths globais.
-
-**Acao:**
-
-- Interface `ModProvider` com `resolve()` e `download()`
-- Injecao de `ManifestPath`, `ModsDir`, `HttpClient` nos testes
-
----
-
-## Prioridade 7 — Ambientes (Compose profiles)
-
-**Problema:** Um unico `docker-compose.yml` para dev/prod.
-
-**Acao:**
-
-- `docker-compose.override.yml` (local, gitignored) ou
-- Profiles `dev` / `prod` com limites de recurso distintos
-
----
-
-## Prioridade 8 — Segredos
-
-**Problema:** `RCON_PASSWORD` apenas em `.env` plano.
-
-**Acao (producao):**
-
-- Docker Secrets ou vault externo
-- Documentar rotacao de senha
-
----
-
-## Prioridade 9 — Observabilidade
-
-**Problema:** Sem metricas exportadas.
-
-**Acao futura:**
-
-- Plugin Prometheus para Minecraft ou sidecar
-- Alertas em healthcheck failing
-
----
-
-## Prioridade 10 — Backup automatizado
-
-**Problema:** Backup manual via PowerShell.
-
-**Acao:**
-
-- Script `scripts/powershell/backup_world.ps1` ou job agendado
-- Retencao N dias documentada
-
----
-
-## Itens concluidos neste ciclo
-
-- [x] Estrutura `src/` Clean Architecture
-- [x] Docker Compose parametrizado (DRY)
-- [x] Dockerfile + `.dockerignore` categorizado
-- [x] Makefile `docker-*`
-- [x] Pre-commit (lint, test, security)
-- [x] Testes 100% em `infrastructure.mods`
-- [x] Documentacao `README.md` e `docs/`
-- [x] Lockfile de mods + sync idempotente
-
----
-
-## Ramificacao de mods (processo)
+## Processo de mods
 
 1. Branch `feature/atualizar-mods`
-2. Alterar manifesto
-3. Testar container isolado
-4. Merge em `main` apos validacao
+2. Editar manifesto + `make docker-sync-mods`
+3. Testar local e AKS
+4. Merge apos validacao in-game
 
-Este fluxo e **governanca**, nao automacao — CI pode reforcar no futuro.
+CI pode exigir sync em branch futura.

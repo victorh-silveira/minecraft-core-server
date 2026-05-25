@@ -1,15 +1,19 @@
-name: Destroy Azure
-description: Terraform plan destroy e destroy da stack live/prod
+name: Destroy - Remocao Azure
+description: Plano e execucao de destroy Terraform da stack live/prod
 
 inputs:
   azure_client_id:
+    description: ID do cliente do app registration Azure (OIDC)
     required: false
     default: ""
   azure_tenant_id:
+    description: ID do locatario Azure
     required: true
   azure_subscription_id:
+    description: ID da assinatura Azure
     required: true
   azure_credentials:
+    description: JSON do service principal (fallback se OIDC nao configurado)
     required: false
     default: ""
   confirm_token:
@@ -28,7 +32,7 @@ runs:
           exit 1
         fi
 
-    - name: Login Azure
+    - name: Autenticar no Azure
       uses: ./.github/actions/shared/azure-login
       with:
         azure_client_id: ${{ inputs.azure_client_id }}
@@ -36,7 +40,7 @@ runs:
         azure_subscription_id: ${{ inputs.azure_subscription_id }}
         azure_credentials: ${{ inputs.azure_credentials }}
 
-    - name: Setup Terraform
+    - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: "1.9.8"
@@ -50,7 +54,7 @@ runs:
           echo "tenant_id = \"${{ inputs.azure_tenant_id }}\""
         } > infra/terraform/live/prod/terraform.tfvars
 
-    - name: Limpar recursos do Kubernetes (AKS Nativo)
+    - name: Limpar recursos Kubernetes no AKS
       shell: bash
       run: |
         echo "Obtendo credenciais do AKS para limpeza de recursos..."
@@ -61,7 +65,7 @@ runs:
           echo "AKS nao encontrado ou indisponivel. Continuando com o destroy direto..."
         fi
 
-    - name: Terraform plan destroy
+    - name: Plano de destroy Terraform
       shell: bash
       env:
         ARM_USE_AZUREAD: true
@@ -71,14 +75,14 @@ runs:
         terraform plan -destroy -input=false -no-color -out=destroy.tfplan
         terraform show -no-color destroy.tfplan > destroy-plan.txt
 
-    - name: Publicar plano destroy
+    - name: Publicar artefato do plano de destroy
       uses: actions/upload-artifact@v4
       with:
         name: terraform-destroy-plan-${{ github.run_id }}
         path: infra/terraform/live/prod/destroy-plan.txt
         retention-days: 14
 
-    - name: Terraform destroy
+    - name: Executar destroy Terraform
       shell: bash
       env:
         ARM_USE_AZUREAD: true

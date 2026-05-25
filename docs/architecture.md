@@ -1,134 +1,164 @@
-# Arquitetura e DDD
+# Arquitetura
 
-## Visao geral
+Visao da stack completa: codigo do repositorio, entrega local, infraestrutura Azure (Terraform), orquestracao Kubernetes e runtime do servidor Minecraft Fabric.
 
-O projeto separa **dados e configuracao do jogo** (`app/src/`) da **orquestracao de entrega** (`infra/`, Makefile, `app/scripts/`). Isso aproxima o layout de Clean Architecture e DDD estrutural, mesmo sem camada de aplicacao em Python dentro de `src/`.
-
-## Clean Architecture
+## Diagrama — producao (Azure AKS)
 
 ```mermaid
 flowchart TB
-  subgraph root [Raiz - Orquestracao]
-    env[".env"]
-    compose["infra/docker/"]
-    makefile["Makefile"]
-    scripts["app/scripts/python/"]
-    tf["infra/terraform/live/prod"]
-    k8s["infra/kubernetes/overlays/prod"]
+  subgraph dev [Desenvolvedor]
+    git[Git push main]
+    gh[GitHub Actions]
   end
-  subgraph azure [Azure]
-    aks["AKS"]
-    acr["ACR"]
+  subgraph azure [Azure brazilsouth]
+    rg[rg-minecraft-server-prod]
+    vnet[vnet 10.10.0.0/16]
+    aks[aks-minecraft-server-prod K8s 1.31]
+    acr[acrminecraftserverprod]
+    st[stminecraftserverprod001]
+    id[id-mc-world-backup-prod]
   end
-  subgraph srcLayer [app/src/]
-    domain["domain/world-data"]
-    app["application/configs"]
-    iface["interface/mods+plugins"]
-    infra["infrastructure/logging+database"]
+  subgraph k8s [Namespace minecraft-server-prod]
+    sts[StatefulSet mc-server]
+    pvc[PVC mc-data 32Gi Retain]
+    svcLB[Service mc-server-game LB :25565]
+    svcRCON[Service mc-server-rcon ClusterIP]
+    cron[CronJob mc-world-backup]
   end
-  subgraph container [Pod mc-server]
-    data["/data/*"]
+  subgraph jogador [Cliente Minecraft]
+    client[Conexao TCP 25565]
   end
-  env --> compose
-  makefile --> scripts
-  scripts --> iface
-  compose --> container
-  tf --> aks
-  acr --> aks
-  k8s --> aks
-  aks --> container
-  domain --> data
-  app --> data
-  iface --> data
-  infra --> data
+  git --> gh
+  gh -->|terraform apply| aks
+  gh -->|docker push| acr
+  gh -->|kubectl apply| sts
+  acr --> sts
+  pvc --> sts
+  sts --> svcLB
+  svcLB --> client
+  cron -->|tar.gz blob| st
+  id --> cron
+  aks --> k8s
+  rg --> vnet
+  vnet --> aks
 ```
 
-Entrega local: Docker Compose. Entrega cloud: Terraform provisiona AKS/ACR; Kubernetes monta os mesmos caminhos `/data/*` via PVC subPaths e ConfigMap.
+## Diagrama — desenvolvimento local
 
-### Mapeamento de volumes
-
-| Host | Container | Modo | Camada |
-|------|-----------|------|--------|
-| `app/src/domain/world-data` | `/data/world` | rw | Dominio |
-| `app/src/application/configs/server.properties` | `/data/server.properties` | ro | Aplicacao |
-| `app/src/interface/mods` | `/data/mods` | rw | Interface |
-| `app/src/interface/plugins` | `/data/plugins` | rw | Interface |
-| `app/src/infrastructure/logging` | `/data/logs` | rw | Infraestrutura |
-| `app/src/infrastructure/database` | `/data/database` | rw | Infraestrutura (auth/SQLite) |
-
-### Regra de dependencia
-
-- **Dominio** nao depende de nada externo ao estado do jogo
-- **Aplicacao** define politicas (`server.properties`)
-- **Interface** isola extensoes (mods/plugins)
-- **Infraestrutura** persiste logs e aspectos operacionais
-- **Scripts/Docker** dependem de `src/`, nunca o contrario
-
-### Limitacoes atuais
-
-| Aspecto | Situacao |
-|---------|----------|
-| Codigo Python em `src/` | `src/infrastructure/mods/` (sync, providers Modrinth/CurseForge) |
-| Entrypoint fino | `app/scripts/python/sync_mods.py` e `python -m infrastructure.mods` |
-| Templates no Dockerfile (`/templates/`) | Sobrescritos por bind mounts em runtime |
-| Camada Presentation | Nao aplicavel (sem UI/API HTTP) |
-
-## DDD (Domain-Driven Design)
-
-### Contexto delimitado
-
-**Servidor Minecraft Fabric** — hospedar mundo, mods versionados e configuracao de jogo via container.
-
-### Linguagem ubiqua
-
-| Termo | Significado no projeto |
-|-------|------------------------|
-| Mundo | Dados em `src/domain/world-data` |
-| Manifesto | `mods-manifest.json` (lockfile de dependencias) |
-| Sync | Download idempotente de JARs via `infrastructure.mods` |
-| Modo hibrido | `online-mode=false` (original + offline) |
-
-### Bounded contexts (pastas)
-
-- **Domain**: agregado de persistencia do mundo (dados, nao codigo)
-- **Application**: politicas de servidor (`server.properties`)
-- **Interface**: adapters de extensao (mods/plugins)
-- **Infrastructure**: logging e integracao externa (Modrinth API via script)
-
-### DDD tatico
-
-Nao ha entidades, value objects ou repositorios implementados em codigo. O DDD aqui e **organizacional** (pastas + manifesto como anti-corruption layer para Modrinth/CurseForge).
-
-### Estrategia de mods (lockfile)
-
-```json
-{
-  "schema_version": 1,
-  "minecraft_version": "1.20.6",
-  "loader": "fabric",
-  "mods": [
-    {
-      "id": "fabric-api",
-      "version": "0.100.8+1.20.6",
-      "source": "modrinth",
-      "project_slug": "fabric-api",
-      "sha256": "",
-      "download_url": ""
-    }
-  ]
-}
+```mermaid
+flowchart LR
+  manifest[mods-manifest.json]
+  sync[python -m infrastructure.mods]
+  compose[Docker Compose mc-server]
+  src[app/src/domain world-data]
+  manifest --> sync
+  sync --> compose
+  src -->|bind mount /data/world| compose
 ```
 
-- JARs **nao** entram no Git principal
-- CI/local roda `python -m infrastructure.mods` antes do `up`
-- Atualizacoes de mods em **branch separada**, testadas antes do merge
+## Camadas do repositorio
 
-## Scorecard arquitetural
+| Camada | Pasta / artefato | Responsabilidade |
+|--------|------------------|------------------|
+| Dominio | `app/src/domain/world-data` | Persistencia do mundo (nao versionado no Git) |
+| Aplicacao | `app/src/application/configs` | Politicas (`server.properties`) |
+| Interface | `app/src/interface/mods`, `plugins` | Extensoes; JARs via sync |
+| Infra app | `app/src/infrastructure/mods` | Download Modrinth/CurseForge |
+| Infra app | `app/src/infrastructure/logging`, `database` | Logs e auth SQLite |
+| Entrega local | `infra/docker/` | Dockerfile + Compose |
+| IaC | `infra/terraform/live/prod` | AKS, ACR, rede, identidade backup |
+| Runtime cloud | `infra/kubernetes/` | StatefulSet, servicos, backup, rede |
+
+### Regra de dependencia (Clean Architecture)
+
+- Codigo em `app/src/` nao depende de Terraform nem de YAML do Kubernetes
+- Scripts e Makefile dependem de `src/`, nunca o contrario
+- Manifestos K8s referenciam imagem do ACR e secrets injetados pelo CD
+
+## Mapeamento de volumes
+
+| Host (local) | Pod AKS | Caminho no container | Conteudo |
+|--------------|---------|----------------------|----------|
+| `app/src/domain/world-data` | subPath `world` | `/data/world` | Chunks, jogadores |
+| `app/src/application/configs/server.properties` | ConfigMap | `/data/server.properties` | Politicas (K8s) |
+| `app/src/interface/mods` | subPath `mods` | `/data/mods` | JARs Fabric |
+| `app/src/interface/plugins` | subPath `plugins` | `/data/plugins` | Plugins |
+| `app/src/infrastructure/logging` | subPath `logs` | `/data/logs` | Logs |
+| `app/src/infrastructure/database` | subPath `database` | `/data/database` | SQLite / auth |
+
+No AKS um unico PVC `mc-data` (32Gi, `mc-standard-ssd`, **Retain**) agrupa os subPaths.
+
+## Servidor Minecraft (runtime)
+
+| Parametro | Valor producao (StatefulSet) | Local (`.env`) |
+|-----------|------------------------------|----------------|
+| Versao | `1.20.6` | `MINECRAFT_VERSION` |
+| Loader | `FABRIC` | `SERVER_TYPE` |
+| Memoria | `2G` (limite pod 3Gi) | `MEMORY_LIMIT` |
+| Porta jogo | `25565` | `GAME_PORT` |
+| RCON | `25575` (ClusterIP no AKS) | `RCON_PORT` (localhost only) |
+| Online mode | `true` | `ONLINE_MODE` |
+| Whitelist | Secret `mc-access` | `MINECRAFT_WHITELIST` |
+| Flags JVM | `USE_AIKAR_FLAGS=true` | idem |
+| Probes | TCP `25565` startup/liveness/readiness | healthcheck `mc-health` |
+
+Imagem base: `itzg/minecraft-server:java21`, estendida em `infra/docker/Dockerfile` e publicada como `minecraft-core-server:<tag>` no ACR.
+
+## Infraestrutura Azure (Terraform)
+
+Stack: `infra/terraform/live/prod` (regiao `brazilsouth`).
+
+| Modulo | Recursos principais |
+|--------|---------------------|
+| `network` | VNet, subnet AKS `10.10.0.0/22`, NSG (Minecraft 25565, RCON opcional, egress) |
+| `acr` | Registry Basic, pull via kubelet identity |
+| `aks` | Cluster Free tier, 1x `Standard_D2s_v6`, OIDC + Workload Identity |
+| `backup_identity` | UAMI `id-mc-world-backup-prod` + federated credential para SA `mc-world-backup` |
+
+Storage account `stminecraftserverprod001` (pre-existente / backend): containers `tfstate` e `world-backups`.
+
+Versao Kubernetes fixada em `1.31` (`variables.tf`) para evitar upgrade surpresa.
+
+## Kubernetes (Kustomize)
+
+| Caminho | Uso |
+|---------|-----|
+| `infra/kubernetes/base/` | Manifestos comuns (StatefulSet, PVC, Services, CronJob, NetworkPolicy) |
+| `infra/kubernetes/overlays/prod/` | Patches de recursos, DNS label do LB, annotations detalhadas |
+
+`commonAnnotations` (base) propagam metadados Azure e links de documentacao. Patch `annotations-recursos.yaml` adiciona detalhes por tipo de recurso (jogo, backup, rede).
+
+Script `app/scripts/bash/atualizar-annotations-k8s.sh` preenche conectividade e saude apos deploy. Catalogo completo de chaves e diagramas: [annotations.md](annotations.md).
+
+## CI/CD (resumo)
+
+| Evento | Efeito |
+|--------|--------|
+| Push `main` | CI: lint, testes, seguranca, validacao TF/K8s/Docker; deploy infra se TF mudou; release semantica |
+| Release publicada | CD: build imagem, push ACR, rollout AKS, annotations, testes |
+| Workflow Destroy manual | Remove namespace K8s, plan/apply destroy Terraform |
+
+Detalhes: [devops.md](devops.md) e [.github/README.md](../.github/README.md).
+
+## Sync de mods
+
+Manifesto: `app/src/interface/mods/mods-manifest.json`.
+
+```bash
+make docker-sync-mods
+cd app && python -m pytest tests/unit/infrastructure/mods/test_sync.py
+```
+
+JARs nao entram no Git; CI e desenvolvedor rodam sync antes do build.
+
+## Scorecard
 
 | Pilar | Nota | Observacao |
 |-------|------|------------|
-| Clean Architecture | 7/10 | Pastas corretas; codigo concentrado em `scripts/python/` |
-| DDD estrutural | 7/10 | Contexto claro; sem DDD tatico em codigo |
-| Isolamento de dados | 9/10 | Bind mounts + `.gitignore` adequados |
+| Separacao codigo / infra | 9/10 | Monorepo claro |
+| Producao Azure | 8/10 | Single node; observabilidade metricas pendente |
+| Persistencia | 9/10 | PVC Retain + backup blob diario |
+| Seguranca padrao | 8/10 | Whitelist + online-mode; RCON nao exposto em LB |
+| Metadados operacionais | 9/10 | Annotations `minecraft-server.io/*` |
 
-Ver tambem [principles.md](principles.md) e [roadmap.md](roadmap.md).
+Ver [principles.md](principles.md) e [roadmap.md](roadmap.md).

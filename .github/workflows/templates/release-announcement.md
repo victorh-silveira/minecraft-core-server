@@ -1,14 +1,14 @@
-# Minecraft Server — Release {VERSION}
+# Servidor Minecraft - Release {VERSION}
 
-Nova versao do servidor **Minecraft Fabric** (Docker Compose + sync de mods via manifesto).
+Nova versao do servidor **Minecraft Fabric** (Docker Compose e sincronizacao de mods via manifesto).
 
 ### Detalhes
 - **Versao:** `{VERSION}`
 - **Data:** `{DATE}`
-- **Stack:** Fabric, itzg/minecraft-server, Python sync_mods
+- **Stack:** Fabric, itzg/minecraft-server, sincronizacao Python de mods
 
 ### Historico
 {CHANGELOG}
 
 ---
-Release automatico (semantic-release).
+Release automatica (release semantica).

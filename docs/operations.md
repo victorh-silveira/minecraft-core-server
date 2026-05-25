@@ -1,6 +1,8 @@
 # Operacao
 
-## Checklist — primeiro boot
+Guia operacional para Docker local e Azure AKS. Arquitetura: [architecture.md](architecture.md). Deploy cloud: [azure.md](azure.md).
+
+## Checklist — primeiro boot (local)
 
 | # | Acao |
 |---|------|
@@ -56,7 +58,7 @@ Restaurar: extrair para `app/src/domain/world-data` com servidor **parado** (`ma
 
 ## Seguranca RCON
 
-RCON expoe administracao remota. Em modo hibrido, restrinja acesso.
+RCON expoe administracao remota. Restrinja acesso (localhost no Docker, port-forward no AKS).
 
 ### Windows Firewall (localhost)
 
@@ -179,11 +181,39 @@ Guia completo: [azure.md](azure.md)
 | 6 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
 | 7 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
 | 8 | `bash app/scripts/bash/test-aks.sh` |
-| 9 | Obter hostname: `terraform output game_fqdn` ou `kubectl get svc mc-server-game` |
+| 9 | `make k8s-annotate` e ler `conectividade-endereco` no Service `mc-server-game` |
+
+### Annotations (Azure, Kubernetes e Minecraft)
+
+Referencia completa (catalogo, diagramas, todas as chaves): **[annotations.md](annotations.md)**.
+
+Resumo operacional:
+
+```bash
+kubectl -n minecraft-server-prod get svc mc-server-game \
+  -o jsonpath='{.metadata.annotations.minecraft-server\.io/conectividade-endereco}{"\n"}'
+make k8s-annotate
+```
+
+O CD e o pos-deploy executam `atualizar-annotations-k8s.sh` apos o rollout.
 
 ### Backup do mundo (PVC)
 
-Com pod em execucao:
+Backup automatico (CronJob `mc-world-backup`, diario as 03:00 America/Sao_Paulo):
+
+- Compacta `/data/world` no pod `mc-server-0` e envia para o blob `world-backups` em `stminecraftserverprod001`
+- Autenticacao via Workload Identity (`id-mc-world-backup-prod`); requer `terraform apply` em `infra/terraform/live/prod` antes do primeiro deploy
+- Custo marginal: armazenamento LRS dos arquivos `.tar.gz` (centavos por GB/mes)
+
+Verificar ultimo job:
+
+```bash
+kubectl -n minecraft-server-prod get cronjob mc-world-backup
+kubectl -n minecraft-server-prod get jobs -l app.kubernetes.io/name=mc-world-backup --sort-by=.metadata.creationTimestamp
+az storage blob list --account-name stminecraftserverprod001 --container-name world-backups --auth-mode login -o table
+```
+
+Backup manual (com pod em execucao):
 
 ```bash
 POD=$(kubectl -n minecraft-server-prod get pod -l app.kubernetes.io/name=mc-server -o jsonpath='{.items[0].metadata.name}')
@@ -192,6 +222,10 @@ kubectl -n minecraft-server-prod cp "${POD}:/tmp/world-backup.tgz" "./backup-wor
 ```
 
 Storage de backup e tfstate: `stminecraftserverprod001` (containers `world-backups` e `tfstate`).
+
+### Disco persistente (Retain)
+
+A StorageClass `mc-standard-ssd` usa `reclaimPolicy: Retain`. Se o StatefulSet ou PVC for removido, o disco gerenciado permanece no Azure (custo continua ate exclusao manual no portal). Volumes ja provisionados com `Delete` nao mudam automaticamente; migre apenas se necessario.
 
 ### RCON no AKS
 

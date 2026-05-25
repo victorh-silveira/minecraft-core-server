@@ -1,149 +1,255 @@
-# Azure AKS - Infraestrutura e Deploy
+# Azure e AKS
 
-Guia de infraestrutura como codigo (Terraform) e manifestos Kubernetes para executar o servidor Minecraft no Microsoft Azure (`brazilsouth`).
+Guia de infraestrutura como codigo (Terraform), manifestos Kubernetes (Kustomize) e operacao do servidor Minecraft em **Microsoft Azure** (`brazilsouth`).
 
-## Arquitetura
+## Arquitetura de recursos
 
 ```mermaid
 flowchart TB
-  subgraph azure [Azure Brazil South]
-    rg[rg-minecraft-server-prod]
-    vnet[vnet-minecraft-server-prod-bs]
+  subgraph rg [rg-minecraft-server-prod]
+    vnet[vnet-minecraft-server-prod-bs 10.10.0.0/16]
+    snet[snet-aks 10.10.0.0/22]
+    nsg[NSG permitir-minecraft-tcp / rcon / saida]
     aks[aks-minecraft-server-prod]
-    acr[acrminecraftserverprod]
-    st[stminecraftserverprod001]
+    acr[acrminecraftserverprod Basic]
+    st[stminecraftserverprod001 LRS]
+    uami[id-mc-world-backup-prod]
   end
-  subgraph k8s [Namespace minecraft-server-prod]
-    sts[StatefulSet mc-server]
-    pvc[PVC mc-data 32Gi]
-    svcG[Service LB :25565]
-    svcR[Service LB :25575]
+  subgraph nodes [rg-minecraft-server-nodes-prod]
+    pool[1x Standard_D2s_v6]
   end
-  acr --> sts
-  pvc --> sts
-  sts --> svcG
-  sts --> svcR
+  aks --> pool
+  snet --> aks
+  nsg --> snet
+  vnet --> snet
+  acr -->|AcrPull| aks
+  uami -->|Blob Contributor| st
 ```
 
-## Estrutura do repositorio
+## Inventario
+
+| Recurso | Nome / valor | Notas |
+|---------|--------------|-------|
+| Regiao | `brazilsouth` | `locals.tf` |
+| Resource group | `rg-minecraft-server-prod` | Pre-existente; data source |
+| VNet | `vnet-minecraft-server-prod-bs` | `10.10.0.0/16` |
+| Subnet AKS | `snet-aks-minecraft-server-prod-bs` | `10.10.0.0/22` |
+| AKS | `aks-minecraft-server-prod` | Tier Free, K8s **1.31**, OIDC + Workload Identity |
+| Node pool | `default` | 1 no, VM **Standard_D2s_v6**, disco OS 64Gi |
+| ACR | `acrminecraftserverprod` | SKU Basic, admin desabilitado |
+| Storage | `stminecraftserverprod001` | `tfstate` + `world-backups` |
+| DNS label (LB K8s) | `minecraftserverprod` | Annotation no Service `mc-server-game` |
+| FQDN esperado | `minecraftserverprod.brazilsouth.cloudapp.azure.com` | Apos LB provisionar |
+
+## Estrutura Terraform
 
 ```text
 infra/terraform/
   modules/
+    acr/          Container Registry
+    aks/          Cluster + AcrPull + OIDC/WI
+    network/      VNet, subnet, NSG
+    storage/      Conta e containers (modulo; SA prod pre-existente)
+    resource-group/
+    public-ip/    Modulo disponivel; nao usado na stack prod atual
   live/prod/
-
-infra/kubernetes/
-  base/
-  overlays/prod/
+    main.tf       network, acr, aks
+    backup_identity.tf
+    variables.tf  kubernetes_version padrao 1.31
+    outputs.tf
+    providers.tf  backend azurerm em stminecraftserverprod001
 ```
+
+Bootstrap do state: `infra/terraform/bootstrap/` (uso inicial).
 
 ## Pre-requisitos
 
 - Azure CLI (`az login`)
 - Terraform >= 1.6
-- kubectl
-- kustomize (incluso no kubectl)
-- Permissoes: Contributor na subscription + Storage Blob Data Contributor no state
+- kubectl + Kustomize (incluso no kubectl)
+- Permissoes: Contributor na subscription; **Storage Blob Data Contributor** no container `tfstate` para o backend
+- GitHub OIDC configurado para CI/CD (ver [.github/README.md](../.github/README.md))
 
 ## 1. Deploy da infraestrutura
 
-O remote state Terraform fica no mesmo resource group e storage account da producao (`rg-minecraft-server-prod` / `stminecraftserverprod001`, container `tfstate`).
+Remote state: `stminecraftserverprod001` / container `tfstate` / key `minecraft/prod.terraform.tfstate`.
 
 ```bash
 cd infra/terraform/live/prod
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Ajuste `admin_cidr_list` com seu IP publico (`curl -s ifconfig.me`/32).
+Edite `terraform.tfvars`:
+
+```hcl
+subscription_id = "<sua-subscription>"
+tenant_id       = "<seu-tenant>"
+kubernetes_version = "1.31"
+admin_cidr_list = ["<seu-ip-publico>/32"]
+game_cidr_list  = []
+game_dns_label  = "minecraftserverprod"
+```
+
+`admin_cidr_list` habilita regra NSG para RCON (25575) apenas dos CIDRs listados. `game_cidr_list` vazio permite Minecraft de qualquer origem (whitelist no servidor continua obrigatoria).
 
 ```bash
 terraform init
 terraform plan
 terraform apply
+az aks get-credentials --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod
 ```
 
-Obtenha credenciais do cluster:
+Outputs uteis:
 
 ```bash
-az aks get-credentials --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod
+terraform output aks_cluster_name
+terraform output acr_login_server
+terraform output world_backup_identity_client_id
+terraform output game_dns_label
 ```
 
 ## 2. Imagem no ACR
 
 ```bash
-ACR=$(terraform -chdir=infra/terraform/live/prod output -raw acr_login_server)
+ACR_LOGIN=$(terraform -chdir=infra/terraform/live/prod output -raw acr_login_server)
 az acr login --name acrminecraftserverprod
-docker build -t "${ACR}/minecraft-core-server:v1.0.0" .
-docker push "${ACR}/minecraft-core-server:v1.0.0"
+docker build -f infra/docker/Dockerfile -t "${ACR_LOGIN}/minecraft-core-server:v1.0.0" .
+docker push "${ACR_LOGIN}/minecraft-core-server:v1.0.0"
 ```
+
+Em producao o CD faz build e push automaticamente na release (tag semantica, sem `latest`).
 
 ## 3. Deploy Kubernetes
 
-Altere a senha RCON antes do apply:
+Secrets obrigatorios (CD ou manual):
 
 ```bash
-kubectl create namespace minecraft-server-prod --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -f infra/kubernetes/base/namespace.yaml
 kubectl -n minecraft-server-prod create secret generic mc-rcon \
   --from-literal=RCON_PASSWORD='sua-senha-forte' \
   --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n minecraft-server-prod create secret generic mc-access \
+  --from-literal=WHITELIST='nick1,nick2' \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-Consulte `infra/kubernetes/base/secret-rcon.yaml.example` (nao commitar senha real).
+Exemplos versionados (sem valores reais): `secret-rcon.yaml.example`, `secret-access.yaml.example`.
+
+```bash
+make k8s-apply
+make k8s-annotate
+```
+
+Ou apenas:
 
 ```bash
 kubectl apply -k infra/kubernetes/overlays/prod
+bash app/scripts/bash/atualizar-annotations-k8s.sh
 ```
 
-## 4. Migracao do mundo
+## 4. Conectar no jogo
 
-Copie dados locais para o pod:
+Consulte o endereco nas annotations (recomendado):
 
 ```bash
-POD=$(kubectl -n minecraft-server-prod get pod -l app.kubernetes.io/name=mc-server -o jsonpath='{.items[0].metadata.name}')
-kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/world/"
+kubectl -n minecraft-server-prod get svc mc-server-game \
+  -o jsonpath='{.metadata.annotations.minecraft-server\.io/conectividade-endereco}{"\n"}'
 ```
 
-## 5. Validacao
+Hostname Azure (quando LB usa DNS label):
+
+```text
+minecraftserverprod.brazilsouth.cloudapp.azure.com
+```
+
+Porta padrao **25565** (sem sufixo `:25565` em hostnames DNS).
+
+Guia de acesso e whitelist: [access-and-hostname.md](access-and-hostname.md).
+
+## 5. Migracao do mundo
+
+Com pod em execucao:
+
+```bash
+POD=mc-server-0
+kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/world/" -c mc-server
+```
+
+## 6. Validacao
+
+```bash
+make k8s-test
+```
+
+Ou:
 
 ```bash
 bash app/scripts/bash/test-aks.sh
 ```
 
-IP do jogo (hostname Azure gratuito alocado dinamicamente pelo AKS):
+## Backup automatico
+
+| Item | Valor |
+|------|-------|
+| CronJob | `mc-world-backup` |
+| Horario | 03:00 `America/Sao_Paulo` |
+| Origem | `/data/world` no pod `mc-server-0` |
+| Destino | container `world-backups` em `stminecraftserverprod001` |
+| Auth | Workload Identity `id-mc-world-backup-prod` |
+
+Requer `terraform apply` em `live/prod` (recurso `backup_identity.tf`) antes do primeiro backup bem-sucedido.
 
 ```bash
-kubectl -n minecraft-server-prod get svc mc-server-game
+kubectl -n minecraft-server-prod get cronjob mc-world-backup
+kubectl -n minecraft-server-prod create job --from=cronjob/mc-world-backup test-backup-manual
 ```
 
-Conecte no cliente Minecraft usando o FQDN exibido nas anotações/status do Service (porta padrão 25565). Detalhes: [docs/access-and-hostname.md](../docs/access-and-hostname.md).
+## Disco persistente (Retain)
+
+StorageClass `mc-standard-ssd`: `reclaimPolicy: Retain`.
+
+Se o PVC ou StatefulSet for removido, o disco gerenciado **permanece** no Azure (custo continua). Exclua manualmente no portal apos backup se necessario.
+
+## Rede e seguranca
+
+| Porta | Exposicao | Controle |
+|-------|-----------|----------|
+| 25565 | LoadBalancer publico | NSG opcional (`game_cidr_list`) + whitelist + online-mode |
+| 25575 | ClusterIP apenas | `kubectl port-forward`; NSG admin opcional |
+
+NetworkPolicy no namespace restringe trafego dos pods (ingress jogo/RCON interno, egress DNS/HTTPS).
 
 ## Custos estimados (prod minimo)
 
 | Recurso | SKU | Nota |
 |---------|-----|------|
-| AKS control plane | Free tier | Sem cobranca de gerenciamento |
-| Node pool | 1x Standard_B2s | Principal custo fixo |
-| Disco PVC | StandardSSD 32Gi | Mundo + mods + logs |
-| Load Balancer | Standard | 1-2 IPs publicos |
-| ACR | Basic | Armazenamento de imagem |
+| AKS control plane | Free | Sem taxa de gerenciamento |
+| Node | 1x Standard_D2s_v6 | Principal custo fixo |
+| Disco PVC | StandardSSD 32Gi | Retain se apagar PVC |
+| Load Balancer | Standard | IP publico do jogo |
+| ACR | Basic | Imagens |
+| Blob backup | LRS | Centavos por GB/mes |
+| Workload Identity | Incluso | Sem custo extra |
 
-Use creditos Azure iniciais para homologacao. Spot nodes apenas em ambientes nao-prod.
+## Observabilidade
 
-## Seguranca
+Exporter Prometheus / sidecar **nao** incluido (economia de RAM no unico node). Saude operacional via probes TCP, logs e annotations `minecraft-server.io/saude-*`. Ver [roadmap.md](roadmap.md) prioridade 9.
 
-Guia completo: [access-and-hostname.md](access-and-hostname.md)
-
-- Whitelist + `online-mode=true` (conta Mojang obrigatoria)
-- RCON via `kubectl port-forward svc/mc-server-rcon 25575:25575` (ClusterIP)
-- NSG opcional: `game_cidr_list` e `admin_cidr_list` no Terraform
-- Hostname gratuito: `minecraftserverprod.brazilsouth.cloudapp.azure.com`
-
-## Qualidade (Terraform)
+## Qualidade Terraform
 
 ```bash
-terraform fmt -recursive infra/terraform/
-tflint --init && tflint --recursive --config linters/.tflint.hcl
-tfsec --config-file linters/.tfsec.yml .
+make terraform-fmt
+terraform -chdir=infra/terraform/live/prod validate
 ```
 
-Hooks pre-commit e job CI `Terraform - Validate` executam as mesmas checagens.
+CI executa tflint, tfsec e validate (ver [devops.md](devops.md)).
+
+## Destroy
+
+Workflow GitHub **Destroy** (manual, confirmar `DESTROY`):
+
+1. Remove namespace `minecraft-server-prod` (libera LB)
+2. `terraform plan -destroy` / `apply`
+3. Discos Retain e storage account `tfstate` podem permanecer
+
+Ver [operations.md](operations.md).

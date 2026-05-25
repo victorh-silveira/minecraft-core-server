@@ -1,18 +1,22 @@
-name: CD Deploy App
-description: Build imagem, push ACR, secret RCON e rollout Kubernetes
+name: CD - Deploy da aplicacao
+description: Construcao da imagem, publicacao no ACR, segredos RCON e rollout no Kubernetes
 
 inputs:
   image_tag:
     description: Tag da imagem no ACR
     required: true
   azure_client_id:
+    description: ID do cliente do app registration Azure (OIDC)
     required: false
     default: ""
   azure_tenant_id:
+    description: ID do locatario Azure
     required: true
   azure_subscription_id:
+    description: ID da assinatura Azure
     required: true
   azure_credentials:
+    description: JSON do service principal (fallback se OIDC nao configurado)
     required: false
     default: ""
   rcon_password:
@@ -22,12 +26,15 @@ inputs:
     description: Nicks permitidos separados por virgula (GitHub Secret MINECRAFT_WHITELIST)
     required: true
   resource_group:
+    description: Nome do grupo de recursos Azure
     required: false
     default: rg-minecraft-server-prod
   aks_cluster_name:
+    description: Nome do cluster AKS
     required: false
     default: aks-minecraft-server-prod
   acr_name:
+    description: Nome do Azure Container Registry
     required: false
     default: acrminecraftserverprod
 
@@ -35,7 +42,7 @@ runs:
   using: composite
 
   steps:
-    - name: Login Azure
+    - name: Autenticar no Azure
       uses: ./.github/actions/shared/azure-login
       with:
         azure_client_id: ${{ inputs.azure_client_id }}
@@ -49,11 +56,11 @@ runs:
         resource-group: ${{ inputs.resource_group }}
         cluster-name: ${{ inputs.aks_cluster_name }}
 
-    - name: Login ACR
+    - name: Autenticar no ACR
       shell: bash
       run: az acr login --name ${{ inputs.acr_name }}
 
-    - name: Build e push imagem
+    - name: Construir e publicar imagem
       shell: bash
       run: |
         ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
@@ -61,31 +68,40 @@ runs:
         docker build -f infra/docker/Dockerfile -t "${IMAGE}" .
         docker push "${IMAGE}"
 
-    - name: Namespace
+    - name: Aplicar namespace
       shell: bash
       run: kubectl apply -f infra/kubernetes/base/namespace.yaml
 
-    - name: Secret RCON
+    - name: Secret de RCON
       shell: bash
       run: |
         kubectl -n minecraft-server-prod create secret generic mc-rcon \
           --from-literal=RCON_PASSWORD="${{ inputs.rcon_password }}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
-    - name: Secret acesso
+    - name: Secret de acesso
       shell: bash
       run: |
         kubectl -n minecraft-server-prod create secret generic mc-access \
           --from-literal=WHITELIST="${{ inputs.minecraft_whitelist }}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
-    - name: Apply Kubernetes
+    - name: Aplicar manifests Kubernetes
       shell: bash
       run: |
         ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
         IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
-        kubectl kustomize infra/kubernetes/overlays/prod \
-          | sed "s|acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g" \
-          | kubectl apply -f -
+        BACKUP_CLIENT_ID=$(az identity show \
+          --resource-group ${{ inputs.resource_group }} \
+          --name id-mc-world-backup-prod \
+          --query clientId -o tsv 2>/dev/null || true)
+        MANIFEST=$(kubectl kustomize infra/kubernetes/overlays/prod \
+          | sed "s|acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g")
+        if [ -n "${BACKUP_CLIENT_ID}" ]; then
+          MANIFEST=$(printf '%s' "${MANIFEST}" \
+            | sed "s|BACKUP_AZURE_CLIENT_ID_PLACEHOLDER|${BACKUP_CLIENT_ID}|g")
+        fi
+        printf '%s' "${MANIFEST}" | kubectl apply -f -
         kubectl -n minecraft-server-prod delete pod mc-server-0 --ignore-not-found --wait=false
         kubectl -n minecraft-server-prod rollout status statefulset/mc-server --timeout=1200s
+        bash app/scripts/bash/atualizar-annotations-k8s.sh

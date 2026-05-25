@@ -1,28 +1,28 @@
 variable "subscription_id" {
   type        = string
-  description = "Azure subscription ID"
+  description = "ID da assinatura Azure"
 }
 
 variable "tenant_id" {
   type        = string
-  description = "Azure tenant ID"
+  description = "ID do locatario Azure"
 }
 
 variable "kubernetes_version" {
   type        = string
-  description = "AKS Kubernetes version (null = default do Azure)"
-  default     = null
+  description = "Versao do Kubernetes no AKS (fixada para evitar upgrades automaticos inesperados)"
+  default     = "1.31"
 }
 
 variable "admin_cidr_list" {
   type        = list(string)
-  description = "CIDR blocks allowed for RCON at NSG level (defina em terraform.tfvars)"
+  description = "Blocos CIDR permitidos para RCON no NSG (defina em terraform.tfvars)"
   default     = []
 }
 
 variable "game_cidr_list" {
   type        = list(string)
-  description = "CIDR blocks allowed for Minecraft 25565 at NSG level (vazio = internet, use whitelist no servidor)"
+  description = "Blocos CIDR permitidos para Minecraft na porta 25565 no NSG (vazio = internet; use whitelist no servidor)"
   default     = []
 }
 

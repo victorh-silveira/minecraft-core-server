@@ -1,6 +1,20 @@
 # Minecraft Server
 
-Servidor Minecraft **Fabric** com Clean Architecture, Docker local e deploy opcional em **Azure AKS**.
+Servidor Minecraft **Fabric 1.20.6** com Clean Architecture, entrega local via Docker Compose e producao em **Azure AKS** (IaC Terraform + manifestos Kubernetes).
+
+## Arquitetura em uma linha
+
+| Camada | Tecnologia | Papel |
+|--------|------------|-------|
+| Jogo | itzg/minecraft-server (Java 21) | Processo do servidor Fabric |
+| App | Python `infrastructure.mods` | Sync de mods via manifesto |
+| Container local | Docker Compose | Desenvolvimento e testes |
+| Orquestracao cloud | AKS 1.31 (1 node) | StatefulSet + PVC + LoadBalancer |
+| IaC | Terraform `live/prod` | RG, VNet, ACR, AKS, identidade de backup |
+| CI/CD | GitHub Actions | Validacao, GitOps de infra, release, deploy |
+| Dados | Azure Disk (Retain) + Blob `world-backups` | Mundo persistente e backup diario |
+
+Diagrama completo: [docs/architecture.md](docs/architecture.md). Deploy Azure: [docs/azure.md](docs/azure.md).
 
 ## Estrutura do repositorio
 
@@ -8,81 +22,94 @@ Servidor Minecraft **Fabric** com Clean Architecture, Docker local e deploy opci
 minecraft-server/
 ├── README.md
 ├── Makefile
-├── .dockerignore
-├── .gitignore
-├── .github/
+├── .github/                 workflows CI, CD, Destroy e composite actions
 ├── infra/
-│   ├── docker/          # Dockerfile, Compose, .env.example
-│   ├── kubernetes/      # Manifestos K8s (base + overlays)
-│   └── terraform/       # IaC Azure (modules, live/prod)
+│   ├── docker/              Dockerfile, Compose, .env
+│   ├── kubernetes/          base + overlay prod (Kustomize)
+│   └── terraform/           modules + live/prod (brazilsouth)
 ├── app/
-│   ├── src/             # Clean Architecture (mundo, configs, mods)
-│   ├── scripts/         # python, bash, powershell
+│   ├── src/                 domain, application, interface, infrastructure/mods
+│   ├── scripts/             bash (test-aks, annotations), python (quality gate)
 │   ├── tests/
-│   ├── tools/           # semantic-release, commitlint
-│   ├── pyproject.toml
-│   └── requirements*.txt
-├── docs/                # Documentacao tecnica
-└── linters/             # tflint, tfsec
+│   └── tools/               commitlint, releaserc
+├── docs/                    documentacao tecnica (indice em docs/README.md)
+└── linters/                 tflint, tfsec (ver linters/README.md)
 ```
-
-### O que fica na raiz
-
-| Arquivo | Motivo |
-|---------|--------|
-| `README.md` | Entrada do projeto |
-| `Makefile` | Orquestracao de comandos |
-| `.gitignore` / `.gitattributes` | Convencao Git |
-| `.dockerignore` | Build context na raiz do monorepo |
-| `.github/` | GitHub Actions (exigencia da plataforma) |
 
 ## Inicio rapido (Docker local)
 
 ```powershell
 Copy-Item infra/docker/.env.example infra/docker/.env
+```
+
+Referencia minima de variaveis na raiz: `.env.example` (o Compose usa `infra/docker/.env`).
 pip install -r app/requirements-dev.txt
 make pre-commit-install
+make docker-sync-mods
 make docker-build-up
 make docker-logs
 ```
 
-## Comandos principais
+Conecte em `localhost:25565` (ou `GAME_PORT` do `.env`).
+
+## Inicio rapido (AKS)
+
+Pre-requisitos: Azure CLI, Terraform, kubectl, credenciais no GitHub (OIDC).
 
 ```bash
-make docker-build-up
-make docker-test
+cd infra/terraform/live/prod
+cp terraform.tfvars.example terraform.tfvars
+terraform init && terraform apply
+az aks get-credentials -g rg-minecraft-server-prod -n aks-minecraft-server-prod
 make k8s-apply
+make k8s-annotate
 make k8s-test
-make terraform-fmt
-make pre-commit-install
 ```
+
+Endereco do jogo (apos LoadBalancer provisionar):
+
+```bash
+kubectl -n minecraft-server-prod get svc mc-server-game \
+  -o jsonpath='{.metadata.annotations.minecraft-server\.io/conectividade-endereco}{"\n"}'
+```
+
+## Comandos principais
+
+| Comando | Descricao |
+|---------|-----------|
+| `make docker-build-up` | Sync mods, build e sobe servidor local |
+| `make docker-test` | Valida Docker local |
+| `make ci-lint` / `make ci-test` | Espelha gates do CI |
+| `make k8s-apply` | Aplica overlay prod + atualiza annotations |
+| `make k8s-annotate` | Atualiza annotations de conectividade e saude |
+| `make k8s-test` | Diagnostico AKS pos-deploy |
+| `make terraform-plan` | Plan Terraform live/prod |
 
 ## Documentacao
 
 | Documento | Conteudo |
 |-----------|----------|
-| [docs/architecture.md](docs/architecture.md) | Clean Architecture e DDD |
-| [docs/azure.md](docs/azure.md) | Terraform, AKS, ACR |
-| [docs/devops.md](docs/devops.md) | Docker, CI, pre-commit |
-| [docs/operations.md](docs/operations.md) | Operacao, backup, RCON |
-| [docs/configuration.md](docs/configuration.md) | `.env`, `server.properties` |
 | [docs/README.md](docs/README.md) | Indice completo |
+| [docs/architecture.md](docs/architecture.md) | Azure, Kubernetes, Minecraft |
+| [docs/annotations.md](docs/annotations.md) | Catalogo `minecraft-server.io/*` e diagramas |
+| [docs/azure.md](docs/azure.md) | Terraform, AKS, backup, custos |
+| [docs/devops.md](docs/devops.md) | Docker, CI/CD, pre-commit |
+| [docs/operations.md](docs/operations.md) | Operacao, backup, troubleshooting |
+| [docs/configuration.md](docs/configuration.md) | `.env`, mods, server.properties |
+| [docs/access-and-hostname.md](docs/access-and-hostname.md) | Whitelist, hostname, NSG |
+| [docs/principles.md](docs/principles.md) | DRY, SOLID, qualidade |
+| [docs/roadmap.md](docs/roadmap.md) | Evolucao pendente |
+| [.github/README.md](.github/README.md) | Workflows e secrets |
+
+Historico de versoes: [docs/CHANGELOG.md](docs/CHANGELOG.md) (gerado por release semantica).
 
 ## Pre-commit
 
-Configuracao em [`.pre-commit-config.yaml`](.pre-commit-config.yaml). Padrao de nome: `Area | Acao`.
-
-| Area | Hooks locais |
-|------|----------------|
-| Codigo | Lint e formatacao Python (Ruff), validacao JSON do manifesto |
-| Infra | Formatar e validar Terraform, validar sintaxe YAML |
-| Docker | Lint do Dockerfile |
-| Arquivo | Newline no fim, remover espacos finais |
-| Commit | Conventional Commits (hook `commit-msg`) |
-
-Testes, seguranca e kubeconform rodam no CI (`make ci-test`, workflow `ci.yml`).
+Padrao de hooks: `Area | Acao` em [`.pre-commit-config.yaml`](.pre-commit-config.yaml).
 
 ```bash
 make pre-commit-install
 pre-commit run --all-files
 ```
+
+Testes, seguranca, kubeconform e Terraform validate rodam no workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).

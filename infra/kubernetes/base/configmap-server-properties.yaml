@@ -3,6 +3,9 @@ kind: ConfigMap
 metadata:
   name: mc-server-properties
   namespace: minecraft-server-prod
+  labels:
+    app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: servidor-jogo
 data:
   server.properties: |
     enable-jmx-monitoring=false

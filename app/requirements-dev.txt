@@ -1,17 +1,11 @@
 -r requirements.txt
-
-# ---- LINTING E QUALIDADE DE CODIGO ----
-ruff>=0.15.13               # Linter e formatador de codigo (substitui Flake8/Isort)
-interrogate>=1.7.0          # Verifica cobertura de docstrings no projeto
-pre-commit>=4.6.0           # Hooks de verificacao antes de cada commit
-vulture>=2.16               # Detecta codigo Python nao utilizado (dead code)
-pylint>=3.0.0               # Analise de codigo duplicado
-
-# ---- SEGURANCA ----
-bandit>=1.9.4               # Analise de vulnerabilidades comuns no codigo
-pip-audit>=2.10.0           # Auditoria de CVEs nas dependencias
-
-# ---- TESTES ----
-pytest>=9.0.3               # Framework de testes
-pytest-mock>=3.15.1         # Mocks e spies para testes unitarios
-coverage>=7.14.0            # Medicao de cobertura de codigo
+ruff>=0.15.13
+interrogate>=1.7.0
+pre-commit>=4.6.0
+vulture>=2.16
+pylint>=3.0.0
+bandit>=1.9.4
+pip-audit>=2.10.0
+pytest>=9.0.3
+pytest-mock>=3.15.1
+coverage>=7.14.0

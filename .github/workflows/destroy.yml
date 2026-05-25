@@ -1,4 +1,4 @@
-name: Destroy
+name: Destroy - Remocao Azure
 
 on:
   workflow_dispatch:
@@ -24,10 +24,10 @@ jobs:
     environment: production-destroy
 
     steps:
-      - name: Checkout
+      - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Destroy stack Azure
+      - name: Remover stack Azure
         uses: ./.github/actions/destroy/azure
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}

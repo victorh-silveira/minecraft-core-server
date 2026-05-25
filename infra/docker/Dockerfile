@@ -9,7 +9,7 @@ ARG BUILD_DATE=unknown
 ARG VCS_REF=local
 ARG IMAGE_VERSION=0.1.0
 
-LABEL org.opencontainers.image.title="Minecraft Core Server"
+LABEL org.opencontainers.image.title="Servidor Minecraft Core"
 LABEL org.opencontainers.image.description="Servidor Minecraft Fabric com Clean Architecture e mods versionados"
 LABEL org.opencontainers.image.version="${IMAGE_VERSION}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"

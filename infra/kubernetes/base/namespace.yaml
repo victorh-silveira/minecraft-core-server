@@ -5,3 +5,4 @@ metadata:
   labels:
     app.kubernetes.io/name: minecraft-server
     app.kubernetes.io/part-of: minecraft-server
+    app.kubernetes.io/component: ambiente

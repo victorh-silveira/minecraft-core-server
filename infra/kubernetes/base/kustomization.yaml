@@ -14,6 +14,27 @@ resources:
   - networkpolicy.yaml
   - statefulset.yaml
   - poddisruptionbudget.yaml
+  - configmap-world-backup.yaml
+  - serviceaccount-world-backup.yaml
+  - rbac-world-backup.yaml
+  - cronjob-world-backup.yaml
+
+commonAnnotations:
+  minecraft-server.io/projeto: minecraft-server
+  minecraft-server.io/ambiente: prod
+  minecraft-server.io/gerenciado-por: kustomize-terraform
+  minecraft-server.io/documentacao-operacoes: docs/operations.md
+  minecraft-server.io/documentacao-azure: docs/azure.md
+  minecraft-server.io/documentacao-acesso: docs/access-and-hostname.md
+  minecraft-server.io/azure-regiao: brazilsouth
+  minecraft-server.io/azure-resource-group: rg-minecraft-server-prod
+  minecraft-server.io/azure-aks-cluster: aks-minecraft-server-prod
+  minecraft-server.io/azure-acr: acrminecraftserverprod
+  minecraft-server.io/azure-storage-account: stminecraftserverprod001
+  minecraft-server.io/azure-container-backup: world-backups
+  minecraft-server.io/azure-container-tfstate: tfstate
+  minecraft-server.io/azure-identidade-backup: id-mc-world-backup-prod
+  minecraft-server.io/azure-dns-label-padrao: minecraftserverprod
 
 labels:
   - includeSelectors: false

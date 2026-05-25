@@ -22,7 +22,7 @@ resource "azurerm_network_security_group" "aks" {
 
 # tfsec:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "minecraft" {
-  name                        = "allow-minecraft-tcp"
+  name                        = "permitir-minecraft-tcp"
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Allow"
@@ -38,7 +38,7 @@ resource "azurerm_network_security_rule" "minecraft" {
 
 resource "azurerm_network_security_rule" "rcon" {
   count                       = length(var.admin_cidr_list) > 0 ? 1 : 0
-  name                        = "allow-rcon-tcp-admin"
+  name                        = "permitir-rcon-tcp-admin"
   priority                    = 110
   direction                   = "Inbound"
   access                      = "Allow"
@@ -53,7 +53,7 @@ resource "azurerm_network_security_rule" "rcon" {
 
 # tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound" {
-  name                        = "allow-outbound"
+  name                        = "permitir-saida"
   priority                    = 200
   direction                   = "Outbound"
   access                      = "Allow"

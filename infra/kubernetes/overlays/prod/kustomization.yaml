@@ -12,3 +12,4 @@ images:
 patches:
   - path: patches/resources.yaml
   - path: patches/service-game-lb.yaml
+  - path: patches/annotations-recursos.yaml

@@ -5,6 +5,7 @@ metadata:
   namespace: minecraft-server-prod
   labels:
     app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: servidor-jogo
 spec:
   serviceName: mc-server-headless
   replicas: 1
@@ -15,6 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: mc-server
+        app.kubernetes.io/component: servidor-jogo
     spec:
       securityContext:
         fsGroup: 1000

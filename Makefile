@@ -7,7 +7,7 @@ SERVICE := mc-server
 CONTAINER := minecraft_core_server
 TF_LIVE := infra/terraform/live/prod
 
-.PHONY: help docker-help ci-lint ci-test ci-validate terraform-fmt terraform-validate terraform-plan docker-env-check docker-sync-mods docker-build docker-pull docker-up docker-build-up docker-down docker-restart docker-logs docker-sh docker-clean docker-test docker-nuke k8s-apply k8s-test pre-commit-install
+.PHONY: help docker-help ci-lint ci-test ci-validate terraform-fmt terraform-validate terraform-plan docker-env-check docker-sync-mods docker-build docker-pull docker-up docker-build-up docker-down docker-restart docker-logs docker-sh docker-clean docker-test docker-nuke k8s-apply k8s-annotate k8s-test pre-commit-install
 
 help:
 	@echo "Comandos Minecraft Server"
@@ -36,6 +36,7 @@ help:
 	@echo ""
 	@echo "  Kubernetes:"
 	@echo "    make k8s-apply            Aplica overlay prod no AKS"
+	@echo "    make k8s-annotate         Atualiza annotations de conectividade e saude"
 	@echo "    make k8s-test             Valida deploy AKS"
 	@echo ""
 	@echo "    make pre-commit-install   Instala hooks (.pre-commit-config.yaml)"
@@ -105,6 +106,10 @@ docker-nuke:
 
 k8s-apply:
 	kubectl apply -k infra/kubernetes/overlays/prod
+	bash app/scripts/bash/atualizar-annotations-k8s.sh || true
+
+k8s-annotate:
+	bash app/scripts/bash/atualizar-annotations-k8s.sh
 
 k8s-test:
 	bash app/scripts/bash/test-aks.sh

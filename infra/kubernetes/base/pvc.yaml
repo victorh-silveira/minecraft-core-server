@@ -3,6 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: mc-data
   namespace: minecraft-server-prod
+  labels:
+    app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: armazenamento
 spec:
   accessModes:
     - ReadWriteOnce
