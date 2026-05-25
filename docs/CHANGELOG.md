@@ -1,3 +1,9 @@
+## [1.11.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.10.0...v1.11.0) (2026-05-25)
+
+### Funcionalidades
+
+* **ci:** pipeline completo com deploy e pos-deploy no push main ([9dd445d](https://github.com/victorh-silveira/minecraft-server/commit/9dd445d61440271ce958bf8c7d106b70be512bf6))
+
 ## [1.10.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.9.0...v1.10.0) (2026-05-25)
 
 ### Funcionalidades
