@@ -61,7 +61,7 @@ step "Verificando recursos na Azure"
 if command -v az >/dev/null 2>&1; then
   pass "Azure CLI encontrada"
 
-  RG_STATE="$(az group show --name rg-minecraft-server-prod --query properties.provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  RG_STATE="$(az group show --name rg-minecraft-server-prod --query properties.provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
   if [[ "$RG_STATE" == "Succeeded" ]]; then
     pass "Grupo de recursos rg-minecraft-server-prod: Succeeded"
     RG_STATUS="Sucesso"
@@ -70,7 +70,7 @@ if command -v az >/dev/null 2>&1; then
     RG_STATUS="Falhou (${RG_STATE})"
   fi
 
-  VNET_STATE="$(az network vnet show --resource-group rg-minecraft-server-prod --name vnet-minecraft-server-prod-bs --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  VNET_STATE="$(az network vnet show --resource-group rg-minecraft-server-prod --name vnet-minecraft-server-prod-bs --query provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
   if [[ "$VNET_STATE" == "Succeeded" ]]; then
     pass "Rede virtual vnet-minecraft-server-prod-bs: Succeeded"
     VNET_STATUS="Sucesso"
@@ -79,7 +79,7 @@ if command -v az >/dev/null 2>&1; then
     VNET_STATUS="Falhou (${VNET_STATE})"
   fi
 
-  SA_STATE="$(az storage account show --name stminecraftserverprod001 --resource-group rg-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  SA_STATE="$(az storage account show --name stminecraftserverprod001 --resource-group rg-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
   if [[ "$SA_STATE" == "Succeeded" ]]; then
     pass "Conta de armazenamento stminecraftserverprod001: Succeeded"
     SA_STATUS="Sucesso"
@@ -88,7 +88,7 @@ if command -v az >/dev/null 2>&1; then
     SA_STATUS="Falhou (${SA_STATE})"
   fi
 
-  ACR_STATE="$(az acr show --name acrminecraftserverprod --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  ACR_STATE="$(az acr show --name acrminecraftserverprod --query provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
   if [[ "$ACR_STATE" == "Succeeded" ]]; then
     pass "Container Registry acrminecraftserverprod: Succeeded"
     ACR_STATUS="Sucesso"
@@ -97,7 +97,7 @@ if command -v az >/dev/null 2>&1; then
     ACR_STATUS="Falhou (${ACR_STATE})"
   fi
 
-  AKS_STATE="$(az aks show --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  AKS_STATE="$(az aks show --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
   if [[ "$AKS_STATE" == "Succeeded" ]]; then
     pass "Cluster AKS aks-minecraft-server-prod: Succeeded"
     AKS_STATUS="Sucesso"

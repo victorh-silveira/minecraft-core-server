@@ -16,7 +16,7 @@ Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelis
 ## Docker local
 
 1. `Copy-Item infra/docker/.env.example infra/docker/.env`
-2. `MINECRAFT_WHITELIST=SeuNick,OutroNick` (nicks exatos na whitelist)
+2. `MINECRAFT_WHITELIST=AnonymousNoobz` (ou varios nicks separados por virgula)
 3. `ONLINE_MODE=false`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
 4. `make docker-build-up`
 
@@ -29,14 +29,14 @@ RCON: `127.0.0.1:25575` no host (Compose publica RCON só em localhost).
 | Secret | Uso |
 |--------|-----|
 | `RCON_PASSWORD` | Secret `mc-rcon` |
-| `MINECRAFT_WHITELIST` | Secret `mc-access` (virgula, sem espacos extras) |
+| `MINECRAFT_WHITELIST` | Secret `mc-access` (virgula, sem espacos extras; padrao `AnonymousNoobz` no workflow se ausente) |
 
-O CD recria os secrets a cada `deploy-app`.
+O pipeline recria os secrets a cada `deploy-app` (`ci.yml` apos nova tag, ou `cd.yml` manual).
 
 ### Atualizar whitelist
 
 1. Altere `MINECRAFT_WHITELIST` em GitHub Secrets
-2. Dispare CD modo `deploy-app` ou aguarde proxima release
+2. Push em `main` com nova release, ou dispare `cd.yml` modo `deploy-app`
 
 ### RCON administrativo
 

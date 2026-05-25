@@ -86,6 +86,16 @@ jobs:
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Resolver whitelist
+        id: whitelist
+        shell: bash
+        run: |
+          NICKS="${{ secrets.MINECRAFT_WHITELIST }}"
+          if [ -z "${NICKS}" ]; then
+            NICKS="AnonymousNoobz"
+          fi
+          echo "nicks=${NICKS}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy aplicacao
         uses: ./.github/actions/cd/deploy-app
         with:
@@ -95,7 +105,7 @@ jobs:
           azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           rcon_password: ${{ secrets.RCON_PASSWORD }}
-          minecraft_whitelist: ${{ secrets.MINECRAFT_WHITELIST }}
+          minecraft_whitelist: ${{ steps.whitelist.outputs.nicks }}
 
   post-deploy:
     name: CD - Pos-deploy

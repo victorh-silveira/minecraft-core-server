@@ -6,8 +6,8 @@ Pipelines de integracao, entrega e destroy da stack Minecraft Server na Azure.
 
 | Workflow | Nome | Gatilho | Jobs |
 |----------|------|---------|------|
-| [ci.yml](workflows/ci.yml) | CI - Integracao Continua | push `main`, manual | Linter, Validacao, Deploy Infra GitOps, Versao semantica |
-| [cd.yml](workflows/cd.yml) | CD - Entrega Continua | release, manual | Deploy Infra, Deploy App, Pos-deploy |
+| [ci.yml](workflows/ci.yml) | CI/CD - Pipeline completo | push `main`, manual | Linter, Validacao, Deploy Infra, Release, Deploy App, Pos-deploy |
+| [cd.yml](workflows/cd.yml) | CD - Entrega Continua | release, manual | Deploy Infra, Deploy App, Pos-deploy (manual ou release externa) |
 | [destroy.yml](workflows/destroy.yml) | Destroy - Remocao Azure | manual | Destroy Azure |
 
 ## Composite actions
@@ -41,7 +41,7 @@ Pipelines de integracao, entrega e destroy da stack Minecraft Server na Azure.
 | `AZURE_SUBSCRIPTION_ID` | Azure / Terraform ARM |
 | `AZURE_CREDENTIALS` | Fallback JSON service principal |
 | `RCON_PASSWORD` | Secret `mc-rcon` no AKS |
-| `MINECRAFT_WHITELIST` | Secret `mc-access` (nicks separados por virgula) |
+| `MINECRAFT_WHITELIST` | Secret `mc-access` (nicks separados por virgula; padrao `AnonymousNoobz` se ausente) |
 | `GITHUB_TOKEN` | Release e Gitleaks (automatico) |
 
 ### OIDC
@@ -70,10 +70,13 @@ Pipelines de integracao, entrega e destroy da stack Minecraft Server na Azure.
 
 ### Ciclo GitOps (main)
 
-1. Push `main` -> CI valida codigo e infra.
-2. Se `infra/terraform/**` mudou (ou AKS ausente) -> `terraform apply`.
-3. Release semantica -> tag e CHANGELOG.
-4. Release publicada -> CD build/push imagem -> rollout AKS -> `atualizar-annotations-k8s.sh` -> `test-aks.sh`.
+1. Push `main` -> CI: linter, testes, validacao Terraform/Kubernetes/Docker.
+2. Deploy infra: se `infra/terraform/**` mudou (ou AKS ausente) -> `terraform apply` (environment `production-infra`).
+3. Release semantica: nova tag e CHANGELOG quando houver commits releasable.
+4. Se nova tag: deploy-app no mesmo workflow (build ACR, secrets, rollout AKS).
+5. Pos-deploy: annotations dinamicas + `test-aks.sh` (TCP 25565 e logs).
+
+Releases criadas pelo bot com `GITHUB_TOKEN` nao disparam `cd.yml` em `release: published`; o deploy roda no job `deploy-app` de `ci.yml`. Use `cd.yml` manual para re-deploy ou quando a release vier de outra origem.
 
 ### Operacao
 
