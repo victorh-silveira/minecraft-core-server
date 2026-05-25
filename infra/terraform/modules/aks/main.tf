@@ -9,6 +9,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   sku_tier                          = var.sku_tier
   tags                              = var.tags
   role_based_access_control_enabled = true
+  node_resource_group               = "rg-minecraft-server-nodes-prod"
 
   default_node_pool {
     name                         = "default"
