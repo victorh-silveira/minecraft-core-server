@@ -53,6 +53,13 @@ repos:
         language: system
         stages: [commit-msg]
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        name: "Workflows | Lint GitHub Actions"
+        files: ^\.github/workflows/
+
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.0
     hooks:
