@@ -15,7 +15,7 @@ runs:
         EULA_ACCEPTED=TRUE
         GAME_PORT=25565
         RCON_PORT=25575
-        ONLINE_MODE=true
+        ONLINE_MODE=false
         WHITE_LIST=true
         ENFORCE_WHITELIST=true
         MINECRAFT_WHITELIST=ci-test-player

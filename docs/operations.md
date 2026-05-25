@@ -80,7 +80,7 @@ Para VPN de gerenciamento, substitua `127.0.0.1` pelo CIDR da rede privada.
 
 - `RCON_PASSWORD` forte e unico no `.env`
 - `MINECRAFT_WHITELIST` com nicks Mojang permitidos
-- `ONLINE_MODE=true` em producao
+- `ONLINE_MODE=false` (sem autenticacao Mojang)
 - Nunca commitar `.env`
 - Guia completo: [access-and-hostname.md](access-and-hostname.md)
 

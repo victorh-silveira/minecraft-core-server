@@ -36,7 +36,7 @@ Producao AKS nao usa este `.env`; equivalentes estao no StatefulSet e nos Secret
 | Config | Origem |
 |--------|--------|
 | `VERSION`, `TYPE`, `MEMORY`, `DIFFICULTY`, `MAX_PLAYERS` | `infra/kubernetes/base/statefulset.yaml` |
-| `ONLINE_MODE`, `WHITE_LIST`, `ENFORCE_WHITELIST` | StatefulSet (`TRUE`) |
+| `ONLINE_MODE`, `WHITE_LIST`, `ENFORCE_WHITELIST` | StatefulSet (`ONLINE_MODE=FALSE`, sem conta Mojang) |
 | `WHITELIST` | Secret `mc-access` (CD) |
 | `RCON_PASSWORD` | Secret `mc-rcon` (CD) |
 | Limites CPU/RAM | Patch `overlays/prod/patches/resources.yaml` |
@@ -51,7 +51,7 @@ Montado em `/data/server.properties` (gravavel pela imagem itzg).
 
 | Propriedade | Padrao no arquivo | Producao efetiva |
 |-------------|-------------------|------------------|
-| `online-mode` | `false` no arquivo | Sobrescrito por `ONLINE_MODE=TRUE` no K8s |
+| `online-mode` | `false` | Alinhado a `ONLINE_MODE=FALSE` (local e K8s) |
 | `difficulty` | `hard` | Alinhado ao env |
 | `max-players` | `20` | Alinhado ao env |
 | `enable-rcon` | `true` | RCON ativo |

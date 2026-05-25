@@ -97,7 +97,7 @@ No AKS um unico PVC `mc-data` (32Gi, `mc-standard-ssd`, **Retain**) agrupa os su
 | Memoria | `2G` (limite pod 3Gi) | `MEMORY_LIMIT` |
 | Porta jogo | `25565` | `GAME_PORT` |
 | RCON | `25575` (ClusterIP no AKS) | `RCON_PORT` (localhost only) |
-| Online mode | `true` | `ONLINE_MODE` |
+| Online mode | `false` | `ONLINE_MODE` |
 | Whitelist | Secret `mc-access` | `MINECRAFT_WHITELIST` |
 | Flags JVM | `USE_AIKAR_FLAGS=true` | idem |
 | Probes | TCP `25565` startup/liveness/readiness | healthcheck `mc-health` |

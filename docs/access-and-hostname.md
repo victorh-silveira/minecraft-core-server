@@ -6,18 +6,18 @@ Quem pode entrar no servidor e como conectar de forma estavel (hostname em vez d
 
 | Camada | Docker local | AKS producao |
 |--------|--------------|--------------|
-| Conta Mojang | `ONLINE_MODE=true` no `.env` | `ONLINE_MODE=TRUE` no StatefulSet |
+| Conta Mojang | `ONLINE_MODE=false` no `.env` | `ONLINE_MODE=FALSE` no StatefulSet |
 | Whitelist | `MINECRAFT_WHITELIST` no `.env` | Secret `mc-access` / GitHub `MINECRAFT_WHITELIST` |
 | RCON | Porta `127.0.0.1:25575` apenas | Service `mc-server-rcon` ClusterIP + port-forward |
 | Rede (opcional) | Firewall do host | NSG `game_cidr_list` no Terraform |
 
-Jogadores precisam de conta Mojang legitima **e** nick na whitelist.
+Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelist continua validando nicks permitidos.
 
 ## Docker local
 
 1. `Copy-Item infra/docker/.env.example infra/docker/.env`
-2. `MINECRAFT_WHITELIST=SeuNick,OutroNick` (nicks exatos Mojang)
-3. `ONLINE_MODE=true`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
+2. `MINECRAFT_WHITELIST=SeuNick,OutroNick` (nicks exatos na whitelist)
+3. `ONLINE_MODE=false`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
 4. `make docker-build-up`
 
 RCON: `127.0.0.1:25575` no host (Compose publica RCON só em localhost).
