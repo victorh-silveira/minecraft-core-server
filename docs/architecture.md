@@ -13,7 +13,7 @@ flowchart TB
   subgraph azure [Azure brazilsouth]
     rg[rg-minecraft-server-prod]
     vnet[vnet 10.10.0.0/16]
-    aks[aks-minecraft-server-prod K8s 1.31]
+    aks[aks-minecraft-server-prod K8s 1.34]
     acr[acrminecraftserverprod]
     st[stminecraftserverprod001]
     id[id-mc-world-backup-prod]
@@ -117,7 +117,7 @@ Stack: `infra/terraform/live/prod` (regiao `brazilsouth`).
 
 Storage account `stminecraftserverprod001` (pre-existente / backend): containers `tfstate` e `world-backups`.
 
-Versao Kubernetes fixada em `1.31` (`variables.tf`) para evitar upgrade surpresa.
+Versao Kubernetes alinhada ao cluster em `variables.tf` (padrao `1.34`); o modulo AKS ignora drift de versao para evitar downgrade.
 
 ## Kubernetes (Kustomize)
 

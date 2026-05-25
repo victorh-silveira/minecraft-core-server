@@ -104,7 +104,7 @@ JARs em `app/src/interface/mods/*.jar` estao no `.gitignore`.
 | Variavel | Descricao |
 |----------|-----------|
 | `subscription_id`, `tenant_id` | Azure |
-| `kubernetes_version` | Padrao `1.31` |
+| `kubernetes_version` | Padrao `1.34` (sem downgrade no Azure) |
 | `admin_cidr_list` | CIDRs para RCON no NSG |
 | `game_cidr_list` | CIDRs para porta 25565 (vazio = qualquer) |
 | `game_dns_label` | Label DNS do LB (alinhar com patch K8s) |

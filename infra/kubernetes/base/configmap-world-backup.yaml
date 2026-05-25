@@ -12,4 +12,4 @@ data:
   TARGET_NAMESPACE: minecraft-server-prod
   TARGET_POD: mc-server-0
   TARGET_CONTAINER: mc-server
-  KUBECTL_VERSION: v1.31.0
+  KUBECTL_VERSION: v1.34.0

@@ -21,7 +21,7 @@ Gaps e prioridades apos a stack Azure AKS + backup + annotations. O [CHANGELOG.m
 - [x] Terraform modules + live/prod (AKS, ACR, rede)
 - [x] Kubernetes base + overlay prod
 - [x] AKS Workload Identity + backup CronJob para blob
-- [x] StorageClass Retain e K8s 1.31 pinado
+- [x] StorageClass Retain e K8s 1.34 alinhado ao cluster
 - [x] CD GitOps (infra + app + pos-deploy)
 - [x] Annotations `minecraft-server.io/*` (Azure, K8s, Minecraft, saude)
 - [x] Documentacao alinhada a arquitetura atual

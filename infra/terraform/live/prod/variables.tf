@@ -10,8 +10,8 @@ variable "tenant_id" {
 
 variable "kubernetes_version" {
   type        = string
-  description = "Versao do Kubernetes no AKS (fixada para evitar upgrades automaticos inesperados)"
-  default     = "1.31"
+  description = "Versao do Kubernetes no AKS (deve ser >= a versao atual do cluster; Azure nao permite downgrade)"
+  default     = "1.34"
 }
 
 variable "admin_cidr_list" {

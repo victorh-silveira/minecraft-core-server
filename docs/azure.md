@@ -34,7 +34,7 @@ flowchart TB
 | Resource group | `rg-minecraft-server-prod` | Pre-existente; data source |
 | VNet | `vnet-minecraft-server-prod-bs` | `10.10.0.0/16` |
 | Subnet AKS | `snet-aks-minecraft-server-prod-bs` | `10.10.0.0/22` |
-| AKS | `aks-minecraft-server-prod` | Tier Free, K8s **1.31**, OIDC + Workload Identity |
+| AKS | `aks-minecraft-server-prod` | Tier Free, K8s **1.34**, OIDC + Workload Identity |
 | Node pool | `default` | 1 no, VM **Standard_D2s_v6**, disco OS 64Gi |
 | ACR | `acrminecraftserverprod` | SKU Basic, admin desabilitado |
 | Storage | `stminecraftserverprod001` | `tfstate` + `world-backups` |
@@ -55,7 +55,7 @@ infra/terraform/
   live/prod/
     main.tf       network, acr, aks
     backup_identity.tf
-    variables.tf  kubernetes_version padrao 1.31
+    variables.tf  kubernetes_version padrao 1.34
     outputs.tf
     providers.tf  backend azurerm em stminecraftserverprod001
 ```
@@ -84,7 +84,7 @@ Edite `terraform.tfvars`:
 ```hcl
 subscription_id = "<sua-subscription>"
 tenant_id       = "<seu-tenant>"
-kubernetes_version = "1.31"
+kubernetes_version = "1.34"
 admin_cidr_list = ["<seu-ip-publico>/32"]
 game_cidr_list  = []
 game_dns_label  = "minecraftserverprod"
