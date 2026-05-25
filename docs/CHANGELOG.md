@@ -1,3 +1,10 @@
+## [1.4.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.3.0...v1.4.0) (2026-05-25)
+
+### Funcionalidades
+
+* **cd:** adicionar validacao holistica de recursos azure no pos-deploy ([60a2ab4](https://github.com/victorh-silveira/minecraft-server/commit/60a2ab4bffc18cf0491ffa694e943937ae19a0c2))
+* **infra:** permitir forcar deploy de infraestrutura via commit message [force-infra] ([94f49b9](https://github.com/victorh-silveira/minecraft-server/commit/94f49b9aaa87accd6a1f0d60e5e68e6ab35f328d))
+
 ## [1.3.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.6...v1.3.0) (2026-05-25)
 
 ### Funcionalidades
