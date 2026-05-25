@@ -99,27 +99,27 @@ JSON
 }
 
 assign_roles() {
+  echo "Atribuindo role 'Contributor' na assinatura..."
   az role assignment create \
     --assignee-object-id "$SP_OBJECT_ID" \
     --assignee-principal-type ServicePrincipal \
     --role "Contributor" \
-    --scope "/subscriptions/${SUBSCRIPTION_ID}" \
-    >/dev/null 2>&1 || echo "Role Contributor ja atribuida ou sem permissao para criar"
+    --scope "/subscriptions/${SUBSCRIPTION_ID}" || echo "Role Contributor ja atribuida ou sem permissao para criar (continuando...)"
 
+  echo "Atribuindo role 'User Access Administrator' na assinatura..."
   az role assignment create \
     --assignee-object-id "$SP_OBJECT_ID" \
     --assignee-principal-type ServicePrincipal \
     --role "User Access Administrator" \
-    --scope "/subscriptions/${SUBSCRIPTION_ID}" \
-    >/dev/null 2>&1 || echo "Role User Access Administrator ja atribuida ou sem permissao para criar"
+    --scope "/subscriptions/${SUBSCRIPTION_ID}" || echo "Role User Access Administrator ja atribuida ou sem permissao para criar (continuando...)"
 
   if az storage account show --name "$TFSTATE_SA" --resource-group "$TFSTATE_RG" >/dev/null 2>&1; then
+    echo "Atribuindo role 'Storage Blob Data Contributor' na storage account de bootstrap..."
     az role assignment create \
       --assignee-object-id "$SP_OBJECT_ID" \
       --assignee-principal-type ServicePrincipal \
       --role "Storage Blob Data Contributor" \
-      --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${TFSTATE_RG}/providers/Microsoft.Storage/storageAccounts/${TFSTATE_SA}" \
-      >/dev/null 2>&1 || echo "Role Storage Blob Data Contributor (SA) ja atribuida"
+      --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${TFSTATE_RG}/providers/Microsoft.Storage/storageAccounts/${TFSTATE_SA}" || echo "Role Storage Blob Data Contributor (SA) ja atribuida ou erro ao criar (continuando...)"
   else
     echo "Storage account ${TFSTATE_SA} ainda nao existe. Rode deploy-infra ou terraform apply em live/prod."
   fi
