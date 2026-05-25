@@ -1,3 +1,15 @@
+## [1.7.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.6.0...v1.7.0) (2026-05-25)
+
+### Funcionalidades
+
+* **infra:** backup AKS, annotations e documentacao PT-BR ([d1410e1](https://github.com/victorh-silveira/minecraft-server/commit/d1410e18876bb8ce0d574054341d2d11e2fb30ad))
+
+### Correcoes de Bug
+
+* **infra:** alinhar backup_identity.tf ao terraform fmt ([c547d2b](https://github.com/victorh-silveira/minecraft-server/commit/c547d2b6f9f69b4cdc386c1c8bb87fccbd080829))
+* **infra:** alinhar versao AKS 1.34 e evitar downgrade no apply ([f089cee](https://github.com/victorh-silveira/minecraft-server/commit/f089cee59dd5133c3273c213654fb64fd35f8e97))
+* **infra:** aplicar terraform fmt 1.9 no backup_identity.tf ([3e23d2e](https://github.com/victorh-silveira/minecraft-server/commit/3e23d2ee9ca9464bd387ea5697386a93d274a458))
+
 ## [1.6.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.5.0...v1.6.0) (2026-05-25)
 
 ### Funcionalidades
