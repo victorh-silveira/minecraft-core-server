@@ -11,11 +11,11 @@ resource "azurerm_user_assigned_identity" "world_backup" {
 }
 
 resource "azurerm_federated_identity_credential" "world_backup" {
-  name                = "fic-mc-world-backup-${local.environment}"
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = module.aks.oidc_issuer_url
-  parent_id           = azurerm_user_assigned_identity.world_backup.id
-  subject             = "system:serviceaccount:minecraft-server-prod:mc-world-backup"
+  name      = "fic-mc-world-backup-${local.environment}"
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = module.aks.oidc_issuer_url
+  parent_id = azurerm_user_assigned_identity.world_backup.id
+  subject   = "system:serviceaccount:minecraft-server-prod:mc-world-backup"
 }
 
 resource "azurerm_role_assignment" "world_backup_blob" {
