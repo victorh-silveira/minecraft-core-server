@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/victorh-silveira/minecraft-server/compare/v1.4.0...v1.4.1) (2026-05-25)
+
+### Correcoes de Bug
+
+* **azure:** melhorar logs e diagnosticos de atribuicao de roles no script de setup ([30d444f](https://github.com/victorh-silveira/minecraft-server/commit/30d444f51803278e4d728d9e13cc383495aa2668))
+* **ci:** verificar dinamicamente a existencia da infra para evitar skips incorretos ([0d0c4be](https://github.com/victorh-silveira/minecraft-server/commit/0d0c4be8f300b25b7330964b4bcce97f46c2eaaf))
+
 ## [1.4.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.3.0...v1.4.0) (2026-05-25)
 
 ### Funcionalidades
