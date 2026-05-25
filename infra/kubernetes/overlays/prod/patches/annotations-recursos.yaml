@@ -3,8 +3,9 @@ kind: Namespace
 metadata:
   name: minecraft-server-prod
   annotations:
-    minecraft-server.io/papel: ambiente-producao
-    minecraft-server.io/kubernetes-namespace: minecraft-server-prod
+    minecraft-server.io/ambiente: prod
+    minecraft-server.io/azure-aks-cluster: aks-minecraft-server-prod
+    minecraft-server.io/documentacao-acesso: docs/access-and-hostname.md
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -15,35 +16,6 @@ metadata:
     minecraft-server.io/jogo-versao: "1.20.6"
     minecraft-server.io/jogo-tipo: FABRIC
     minecraft-server.io/jogo-porta: "25565"
-    minecraft-server.io/jogo-porta-rcon: "25575"
-    minecraft-server.io/jogo-memoria: 2G
-    minecraft-server.io/jogo-max-jogadores: "20"
-    minecraft-server.io/jogo-dificuldade: hard
-    minecraft-server.io/jogo-online-mode: "true"
-    minecraft-server.io/jogo-whitelist: "true"
-    minecraft-server.io/jogo-aikar-flags: "true"
-    minecraft-server.io/pvc-dados: mc-data
-    minecraft-server.io/pvc-tamanho: 32Gi
-    minecraft-server.io/pvc-storage-class: mc-standard-ssd
-    minecraft-server.io/pvc-reclaim-policy: Retain
-    minecraft-server.io/saude-startup-probe: "tcp:25565"
-    minecraft-server.io/saude-liveness-probe: "tcp:25565"
-    minecraft-server.io/saude-readiness-probe: "tcp:25565"
-    minecraft-server.io/acesso-rcon: "kubectl port-forward svc/mc-server-rcon 25575:25575"
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: mc-server
-  namespace: minecraft-server-prod
-spec:
-  template:
-    metadata:
-      annotations:
-        minecraft-server.io/jogo-versao: "1.20.6"
-        minecraft-server.io/jogo-tipo: FABRIC
-        minecraft-server.io/jogo-porta: "25565"
-        minecraft-server.io/container-principal: mc-server
 ---
 apiVersion: v1
 kind: Service
@@ -51,53 +23,8 @@ metadata:
   name: mc-server-game
   namespace: minecraft-server-prod
   annotations:
-    minecraft-server.io/servico-tipo: LoadBalancer
-    minecraft-server.io/jogo-porta: "25565"
-    minecraft-server.io/conectividade-protocolo: tcp
     minecraft-server.io/azure-dns-fqdn-esperado: minecraftserverprod.brazilsouth.cloudapp.azure.com
-    minecraft-server.io/conectividade-instrucao: "Conecte no multiplayer usando o host anotado em minecraft-server.io/conectividade-endereco"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mc-server-rcon
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/servico-tipo: ClusterIP
-    minecraft-server.io/jogo-porta-rcon: "25575"
-    minecraft-server.io/acesso: port-forward-clusterip
-    minecraft-server.io/acesso-comando: "kubectl port-forward -n minecraft-server-prod svc/mc-server-rcon 25575:25575"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mc-server-headless
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/servico-tipo: ClusterIP
-    minecraft-server.io/servico-headless: "true"
-    minecraft-server.io/statefulset: mc-server
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mc-data
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/armazenamento-tipo: AzureDisk-StandardSSD
-    minecraft-server.io/armazenamento-tamanho: 32Gi
-    minecraft-server.io/dados-world: /data/world
-    minecraft-server.io/dados-mods: /data/mods
-    minecraft-server.io/dados-logs: /data/logs
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: mc-standard-ssd
-  annotations:
-    minecraft-server.io/provisioner: disk.csi.azure.com
-    minecraft-server.io/azure-sku: StandardSSD_LRS
-    minecraft-server.io/reclaim-policy: Retain
+    minecraft-server.io/conectividade-porta: "25565"
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -106,36 +33,3 @@ metadata:
   namespace: minecraft-server-prod
   annotations:
     minecraft-server.io/backup-agendamento: "0 3 * * *"
-    minecraft-server.io/backup-fuso: America/Sao_Paulo
-    minecraft-server.io/backup-destino-conta: stminecraftserverprod001
-    minecraft-server.io/backup-destino-container: world-backups
-    minecraft-server.io/backup-origem: /data/world
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: mc-server-netpol
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/rede-ingress-jogo: "tcp/25565"
-    minecraft-server.io/rede-ingress-rcon: "tcp/25575"
-    minecraft-server.io/rede-egress-dns: "udp+tcp/53"
-    minecraft-server.io/rede-egress-https: "tcp/443"
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: mc-server-pdb
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/disrupcao-min-available: "0"
-    minecraft-server.io/statefulset: mc-server
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mc-server-properties
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/config-tipo: server-properties
-    minecraft-server.io/config-mount: /data/server.properties

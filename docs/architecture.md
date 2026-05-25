@@ -126,7 +126,7 @@ Versao Kubernetes alinhada ao cluster em `variables.tf` (padrao `1.34`); o modul
 | `infra/kubernetes/base/` | Manifestos comuns (StatefulSet, PVC, Services, CronJob, NetworkPolicy) |
 | `infra/kubernetes/overlays/prod/` | Patches de recursos, DNS label do LB, annotations detalhadas |
 
-`commonAnnotations` (base) propagam metadados Azure e links de documentacao. Patch `annotations-recursos.yaml` adiciona detalhes por tipo de recurso (jogo, backup, rede).
+Patch `annotations-recursos.yaml` define ate 14 metadados essenciais por recurso (namespace, StatefulSet, Service game, CronJob backup).
 
 Script `app/scripts/bash/atualizar-annotations-k8s.sh` preenche conectividade e saude apos deploy. Catalogo completo de chaves e diagramas: [annotations.md](annotations.md).
 

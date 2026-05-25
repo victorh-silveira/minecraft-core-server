@@ -36,15 +36,43 @@ summary_path = os.environ["SUMMARY"]
 prefix = os.environ["PREFIX"]
 repo_root = os.environ["REPO_ROOT"]
 
-rows: list[tuple[str, str, str, str]] = []
+curated = [
+    ("ambiente", "Ambiente"),
+    ("conectividade-endereco", "Endereco Minecraft"),
+    ("conectividade-host", "Host publico"),
+    ("conectividade-loadbalancer", "Load Balancer"),
+    ("conectividade-porta", "Porta do jogo"),
+    ("saude-tcp-externa", "Porta 25565 (TCP)"),
+    ("saude-statefulset", "Replicas prontas"),
+    ("saude-logs", "Estado nos logs"),
+    ("jogo-versao", "Versao Minecraft"),
+    ("jogo-tipo", "Loader"),
+    ("azure-dns-fqdn-esperado", "DNS Azure esperado"),
+    ("backup-agendamento", "Backup (cron)"),
+    ("documentacao-acesso", "Documentacao"),
+    ("atualizado-em", "Ultima atualizacao"),
+]
+
+source_order = [
+    ("service", "mc-server-game"),
+    ("statefulset", "mc-server"),
+    ("namespace", namespace),
+    ("pod", "mc-server-0"),
+    ("cronjob", "mc-world-backup"),
+]
+
+collected: dict[str, tuple[str, str, str]] = {}
 
 
-def add_rows(kind: str, name: str, annotations: dict | None) -> None:
+def ingest(kind: str, name: str, annotations: dict | None) -> None:
     if not annotations:
         return
-    for key in sorted(annotations):
-        if key.startswith(prefix):
-            rows.append((kind, name, key, str(annotations[key])))
+    for suffix, _label in curated:
+        key = f"{prefix}{suffix}"
+        if key not in annotations:
+            continue
+        if suffix not in collected:
+            collected[suffix] = (kind, name, str(annotations[key]))
 
 
 def load_static() -> None:
@@ -58,36 +86,14 @@ def load_static() -> None:
         kind = doc.get("kind") or "?"
         meta = doc.get("metadata") or {}
         name = meta.get("name") or "?"
-        add_rows(kind, name, meta.get("annotations"))
-        spec = doc.get("spec") or {}
-        template = spec.get("template") or {}
-        tmeta = template.get("metadata") or {}
-        add_rows(f"{kind}/PodTemplate", name, tmeta.get("annotations"))
+        ingest(kind, name, meta.get("annotations"))
 
 
 def load_live() -> None:
-    targets = [
-        ("namespace", namespace),
-        ("statefulset", "mc-server"),
-        ("service", "mc-server-game"),
-        ("service", "mc-server-rcon"),
-        ("pod", "mc-server-0"),
-        ("pvc", "mc-data"),
-        ("cronjob", "mc-world-backup"),
-    ]
-    for kind, name in targets:
+    for kind, name in source_order:
         try:
             raw = subprocess.check_output(
-                [
-                    "kubectl",
-                    "-n",
-                    namespace,
-                    "get",
-                    kind,
-                    name,
-                    "-o",
-                    "json",
-                ],
+                ["kubectl", "-n", namespace, "get", kind, name, "-o", "json"],
                 text=True,
                 stderr=subprocess.DEVNULL,
             )
@@ -95,46 +101,45 @@ def load_live() -> None:
             continue
         doc = json.loads(raw)
         meta = doc.get("metadata") or {}
-        add_rows(kind, name, meta.get("annotations"))
+        for suffix, _label in curated:
+            key = f"{prefix}{suffix}"
+            if key not in (meta.get("annotations") or {}):
+                continue
+            collected[suffix] = (kind, name, str(meta["annotations"][key]))
 
 
+load_static()
 if mode == "live":
     load_live()
-    title = "Annotations minecraft-server.io (cluster AKS)"
-    note = "Valores de conectividade e saude refletem o estado atual do cluster."
+    title = "Servidor Minecraft (resumo operacional)"
+    note = "Estado atual do cluster AKS (ate 14 informacoes essenciais)."
 else:
-    load_static()
-    title = "Annotations minecraft-server.io (manifestos Kustomize)"
-    note = (
-        "Valores estaticos do overlay prod. Conectividade e saude dinamicas "
-        "aparecem no job CD - Pos-deploy apos release."
-    )
+    title = "Servidor Minecraft (manifestos)"
+    note = "Valores estaticos. Conectividade e saude dinamicas aparecem apos o CD."
 
 with open(summary_path, "a", encoding="utf-8") as out:
     out.write(f"## {title}\n\n")
     out.write(f"{note}\n\n")
-    if not rows:
-        out.write("_Nenhuma annotation encontrada._\n")
-    else:
-        out.write("| Recurso | Nome | Chave | Valor |\n")
-        out.write("|---------|------|-------|-------|\n")
-        for kind, name, key, value in rows:
-            safe = value.replace("|", "\\|").replace("\n", " ")
-            out.write(f"| {kind} | {name} | `{key}` | {safe} |\n")
-        out.write(f"\n**Total:** {len(rows)} chaves `{prefix}`*\n")
+    out.write("| Informacao | Valor | Origem |\n")
+    out.write("|------------|-------|--------|\n")
+    shown = 0
+    for suffix, label in curated:
+        if suffix not in collected:
+            continue
+        kind, name, value = collected[suffix]
+        safe = value.replace("|", "\\|").replace("\n", " ")
+        out.write(f"| {label} | {safe} | {kind}/{name} |\n")
+        shown += 1
+    if shown == 0:
+        out.write("| _nenhum_ | _sem dados_ | _ |\n")
+    out.write(f"\n**Total:** {shown} informacoes essenciais.\n")
 
-highlight_keys = (
-    f"{prefix}conectividade-endereco",
-    f"{prefix}conectividade-host",
-    f"{prefix}saude-tcp-externa",
-    f"{prefix}saude-statefulset",
-    f"{prefix}atualizado-em",
-)
-
-for kind, name, key, value in rows:
-    if key in highlight_keys and value not in ("", "pendente"):
-        title = f"{kind}/{name}"
-        print(f"::notice title={title}::{key}={value}")
+for suffix, label in curated:
+    if suffix not in collected:
+        continue
+    kind, name, value = collected[suffix]
+    if suffix in ("conectividade-endereco", "saude-tcp-externa", "saude-statefulset") and value not in ("", "pendente"):
+        print(f"::notice title={label}::{value} ({kind}/{name})")
 PY
 
 if [[ "${CLEANUP_SUMMARY}" -eq 1 ]]; then
@@ -142,4 +147,4 @@ if [[ "${CLEANUP_SUMMARY}" -eq 1 ]]; then
   rm -f "${SUMMARY}"
 fi
 
-echo "[OK] Resumo de annotations publicado (modo ${MODE})."
+echo "[OK] Resumo essencial publicado (modo ${MODE})."

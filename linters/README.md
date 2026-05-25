@@ -157,7 +157,7 @@ Valida workflows em `.github/workflows/` (sintaxe, expressoes, versões de actio
 | Item | Motivo |
 |------|--------|
 | `app/src/domain/world-data` | Dados de jogo; excluido de hooks de arquivo |
-| Valores dinamicos de annotations | Atualizados por `atualizar-annotations-k8s.sh` em runtime |
+| Valores dinamicos de annotations | 14 chaves essenciais; `atualizar-annotations-k8s.sh` em runtime |
 | Conteudo de secrets K8s | Nao versionados |
 
 Documentacao de annotations: [docs/annotations.md](../docs/annotations.md).
