@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.4.1...v1.5.0) (2026-05-25)
+
+### Funcionalidades
+
+* **test:** gerar relatorio de pos-deploy e conexao no github step summary ([4ada391](https://github.com/victorh-silveira/minecraft-server/commit/4ada391494fb1c944ee8ed564fca47249b50cdc2))
+
 ## [1.4.1](https://github.com/victorh-silveira/minecraft-server/compare/v1.4.0...v1.4.1) (2026-05-25)
 
 ### Correcoes de Bug
