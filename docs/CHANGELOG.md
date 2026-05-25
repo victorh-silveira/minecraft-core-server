@@ -1,3 +1,9 @@
+## [1.11.1](https://github.com/victorh-silveira/minecraft-server/compare/v1.11.0...v1.11.1) (2026-05-25)
+
+### Correcoes de Bug
+
+* **deploy:** converter whitelist para UUID offline em modo offline ([b308873](https://github.com/victorh-silveira/minecraft-server/commit/b308873012427bde0fee9f2880f44df6fde32fda))
+
 ## [1.11.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.10.0...v1.11.0) (2026-05-25)
 
 ### Funcionalidades
