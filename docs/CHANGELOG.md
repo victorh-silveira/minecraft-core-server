@@ -1,3 +1,28 @@
+## [1.3.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.6...v1.3.0) (2026-05-25)
+
+### Funcionalidades
+
+* **infra:** automatizar pipeline de cd para fluxo gitops completo ([1aafb02](https://github.com/victorh-silveira/minecraft-server/commit/1aafb0256493679075185daff8bb506ac815873d))
+* **infra:** desacoplar backend do terraform para suportar destroy e rebuild continuo ([1622d24](https://github.com/victorh-silveira/minecraft-server/commit/1622d24dba3b07419a4816f05632adb52a01cb9e))
+* **infra:** unificar gitops, migrar para aks nativo e hardening de seguranca ([11387d8](https://github.com/victorh-silveira/minecraft-server/commit/11387d8f2e5927c7e753e0583eeba19dd5573817))
+
+### Correcoes de Bug
+
+* **infra:** alinhar formatacao do terraform e adicionar actionlint no precommit ([c7ae40b](https://github.com/victorh-silveira/minecraft-server/commit/c7ae40b66ad051bc2ddea4ec6ddcb2e4421440ae))
+* **infra:** corrigir alertas tfsec e sincronizar precommit com cicd ([a96b4ae](https://github.com/victorh-silveira/minecraft-server/commit/a96b4ae28eb32f4e4211d7af893449cc7aeee9ef))
+* **infra:** corrigir alinhamento do terraform e namespace no patch do kustomize ([df00819](https://github.com/victorh-silveira/minecraft-server/commit/df008192e8749a98fbad52bf943afd8fb4077d4c))
+* **infra:** importar container tfstate existente na SA prod ([f28b841](https://github.com/victorh-silveira/minecraft-server/commit/f28b841ac060dee5dff1287bce31b7d07133a2cb))
+* **infra:** remover moved ciclico no modulo storage ([5d22bbf](https://github.com/victorh-silveira/minecraft-server/commit/5d22bbf80b230f91dfe71e26fddc4f87306892c9))
+
+### Melhorias de Performance
+
+* **ci:** otimizar deploy-infra com caminhos filtrados ([4a0be6b](https://github.com/victorh-silveira/minecraft-server/commit/4a0be6bd5142afd941856d7385063d22e44e3b5b))
+
+### Refatoracoes Tecnicas
+
+* **infra:** consolidar tfstate e backup em um RG e storage account ([776c542](https://github.com/victorh-silveira/minecraft-server/commit/776c542030556c570996967e010d1f415a157b52))
+* **infra:** padronizar nomenclatura minecraft-server-prod ([568698c](https://github.com/victorh-silveira/minecraft-server/commit/568698c4246ffa3e009b14d03d9120e4aa5b3d06))
+
 ## [1.2.6](https://github.com/victorh-silveira/minecraft-server/compare/v1.2.5...v1.2.6) (2026-05-23)
 
 ### Correcoes de Bug
