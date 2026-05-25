@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.5.0...v1.6.0) (2026-05-25)
+
+### Funcionalidades
+
+* **infra:** customizar nome do resource group de nodes do AKS para evitar MC_ padrao ([e65b078](https://github.com/victorh-silveira/minecraft-server/commit/e65b0787aefcd2b51e4657da0b5eafb4518e5d2c))
+
 ## [1.5.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.4.1...v1.5.0) (2026-05-25)
 
 ### Funcionalidades
