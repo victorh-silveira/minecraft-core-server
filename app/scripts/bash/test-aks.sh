@@ -41,6 +41,53 @@ else
   fail "nenhum contexto kubectl configurado"
 fi
 
+step "Verificando Recursos na Azure"
+if command -v az >/dev/null 2>&1; then
+  pass "Azure CLI encontrada"
+  
+  # 1. Resource Group
+  RG_STATE="$(az group show --name rg-minecraft-server-prod --query properties.provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  if [[ "$RG_STATE" == "Succeeded" ]]; then
+    pass "Azure Resource Group rg-minecraft-server-prod: Succeeded"
+  else
+    fail "Azure Resource Group rg-minecraft-server-prod esta em estado: ${RG_STATE}"
+  fi
+  
+  # 2. VNet
+  VNET_STATE="$(az network vnet show --resource-group rg-minecraft-server-prod --name vnet-minecraft-server-prod-bs --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  if [[ "$VNET_STATE" == "Succeeded" ]]; then
+    pass "Azure Virtual Network vnet-minecraft-server-prod-bs: Succeeded"
+  else
+    fail "Azure Virtual Network vnet-minecraft-server-prod-bs esta em estado: ${VNET_STATE}"
+  fi
+  
+  # 3. Storage Account
+  SA_STATE="$(az storage account show --name stminecraftserverprod001 --resource-group rg-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  if [[ "$SA_STATE" == "Succeeded" ]]; then
+    pass "Azure Storage Account stminecraftserverprod001: Succeeded"
+  else
+    fail "Azure Storage Account stminecraftserverprod001 esta em estado: ${SA_STATE}"
+  fi
+  
+  # 4. ACR
+  ACR_STATE="$(az acr show --name acrminecraftserverprod --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  if [[ "$ACR_STATE" == "Succeeded" ]]; then
+    pass "Azure Container Registry acrminecraftserverprod: Succeeded"
+  else
+    fail "Azure Container Registry acrminecraftserverprod esta em estado: ${ACR_STATE}"
+  fi
+
+  # 5. AKS
+  AKS_STATE="$(az aks show --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null || echo "NotFound")"
+  if [[ "$AKS_STATE" == "Succeeded" ]]; then
+    pass "Azure Kubernetes Service aks-minecraft-server-prod: Succeeded"
+  else
+    fail "Azure Kubernetes Service aks-minecraft-server-prod esta em estado: ${AKS_STATE}"
+  fi
+else
+  warn "Azure CLI nao encontrada; pulando validacao de recursos Azure"
+fi
+
 step "Verificando namespace ${NAMESPACE}"
 if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
   pass "namespace ${NAMESPACE} existe"
