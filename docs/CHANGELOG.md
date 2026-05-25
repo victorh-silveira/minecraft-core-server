@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.7.0...v1.8.0) (2026-05-25)
+
+### Funcionalidades
+
+* **ci:** CI local via WSL e Terraform 1.15.4 ([754a591](https://github.com/victorh-silveira/minecraft-server/commit/754a5910a9535b7062acd1bc6540054092ccf171))
+
 ## [1.7.0](https://github.com/victorh-silveira/minecraft-server/compare/v1.6.0...v1.7.0) (2026-05-25)
 
 ### Funcionalidades
