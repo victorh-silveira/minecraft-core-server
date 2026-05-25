@@ -20,6 +20,7 @@ resource "azurerm_network_security_group" "aks" {
   tags                = var.tags
 }
 
+# tfsec:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "minecraft" {
   name                        = "allow-minecraft-tcp"
   priority                    = 100
@@ -50,6 +51,7 @@ resource "azurerm_network_security_rule" "rcon" {
   network_security_group_name = azurerm_network_security_group.aks.name
 }
 
+# tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound" {
   name                        = "allow-outbound"
   priority                    = 200

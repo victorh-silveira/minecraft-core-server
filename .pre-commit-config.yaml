@@ -33,6 +33,20 @@ repos:
         pass_filenames: false
         always_run: true
 
+      - id: tflint
+        name: "Infra | TFLint"
+        entry: bash -c "tflint --config=$(pwd)/linters/.tflint.hcl --recursive --minimum-failure-severity=error"
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: tfsec
+        name: "Infra | TFSec"
+        entry: bash -c "tfsec --config-file $(pwd)/linters/.tfsec.yml ."
+        language: system
+        pass_filenames: false
+        always_run: true
+
       - id: commitlint
         name: "Commit | Validar Conventional Commits"
         entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config app/tools/commitlint.config.mjs --edit
