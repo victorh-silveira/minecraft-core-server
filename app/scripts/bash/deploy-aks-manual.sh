@@ -8,7 +8,8 @@ IMAGE_TAG="${IMAGE_TAG:-v1.10.0}"
 IMAGE="acrminecraftserverprod.azurecr.io/minecraft-core-server:${IMAGE_TAG}"
 NAMESPACE="${NAMESPACE:-minecraft-server-prod}"
 RCON_PASSWORD="${RCON_PASSWORD:-deploy-test-local}"
-WHITELIST="${MINECRAFT_WHITELIST:-AnonymousNoobz}"
+WHITELIST_RAW="${MINECRAFT_WHITELIST:-AnonymousNoobz}"
+WHITELIST="$(bash app/scripts/bash/resolve-whitelist.sh "${WHITELIST_RAW}")"
 
 kubectl apply -f infra/kubernetes/base/namespace.yaml
 

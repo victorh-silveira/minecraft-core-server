@@ -82,8 +82,9 @@ runs:
     - name: Secret de acesso
       shell: bash
       run: |
+        RESOLVED="$(bash app/scripts/bash/resolve-whitelist.sh "${{ inputs.minecraft_whitelist }}")"
         kubectl -n minecraft-server-prod create secret generic mc-access \
-          --from-literal=WHITELIST="${{ inputs.minecraft_whitelist }}" \
+          --from-literal=WHITELIST="${RESOLVED}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Aplicar manifests Kubernetes

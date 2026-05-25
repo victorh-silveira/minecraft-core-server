@@ -11,7 +11,7 @@ Quem pode entrar no servidor e como conectar de forma estavel (hostname em vez d
 | RCON | Porta `127.0.0.1:25575` apenas | Service `mc-server-rcon` ClusterIP + port-forward |
 | Rede (opcional) | Firewall do host | NSG `game_cidr_list` no Terraform |
 
-Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelist continua validando nicks permitidos.
+Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelist continua validando nicks permitidos. No deploy, nicks do secret `MINECRAFT_WHITELIST` sao convertidos para UUID offline (PlayerDB nao resolve nicks sem conta Mojang).
 
 ## Docker local
 
