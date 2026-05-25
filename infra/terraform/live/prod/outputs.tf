@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = module.resource_group.name
+  value = data.azurerm_resource_group.this.name
 }
 
 output "aks_cluster_name" {
@@ -23,22 +23,22 @@ output "aks_subnet_id" {
 }
 
 output "storage_account_name" {
-  value = module.storage.storage_account_name
+  value = local.storage_account_name
 }
 
 output "tfstate_container_name" {
-  value = module.storage.tfstate_container_name
+  value = "tfstate"
 }
 
 output "backups_container_name" {
-  value = module.storage.backups_container_name
+  value = "world-backups"
 }
 
 output "backend_config" {
   value = {
-    resource_group_name  = module.resource_group.name
-    storage_account_name = module.storage.storage_account_name
-    container_name       = module.storage.tfstate_container_name
+    resource_group_name  = data.azurerm_resource_group.this.name
+    storage_account_name = local.storage_account_name
+    container_name       = "tfstate"
     key                  = "minecraft/prod.terraform.tfstate"
   }
 }
