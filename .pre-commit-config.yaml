@@ -21,28 +21,14 @@ repos:
     hooks:
       - id: terraform-fmt
         name: "Infra | Formatar Terraform"
-        entry: bash -c "terraform fmt -check -recursive -diff infra/terraform"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/ci-infra-local.sh fmt
         language: system
         pass_filenames: false
         always_run: true
 
       - id: terraform-validate
-        name: "Infra | Validar Terraform"
-        entry: bash -c "set -euo pipefail; for d in infra/terraform/live/prod; do echo \">>> Validando ${d}\"; (cd \"${d}\" && terraform init -backend=false -input=false && terraform validate); done"
-        language: system
-        pass_filenames: false
-        always_run: true
-
-      - id: tflint
-        name: "Infra | TFLint"
-        entry: bash -c "tflint --config=$(pwd)/linters/.tflint.hcl --recursive --minimum-failure-severity=error"
-        language: system
-        pass_filenames: false
-        always_run: true
-
-      - id: tfsec
-        name: "Infra | TFSec"
-        entry: bash -c "tfsec --config-file $(pwd)/linters/.tfsec.yml ."
+        name: "Infra | Validar Terraform (tflint, tfsec, validate)"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/ci-infra-local.sh validate
         language: system
         pass_filenames: false
         always_run: true

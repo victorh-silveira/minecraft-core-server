@@ -30,9 +30,7 @@ def stage_lint():
     subprocess.run(fix_cmd, check=True, text=True, cwd=REPO_ROOT)
     run_tool("ruff", ["check", *targets], "Ruff Check", cwd=REPO_ROOT)
     run_tool("ruff", ["format", *targets], "Ruff Format", cwd=REPO_ROOT)
-    run_tool(
-        "vulture", ["app/src/infrastructure/mods", "app/scripts/python"], "Vulture - codigo morto", cwd=REPO_ROOT
-    )
+    run_tool("vulture", ["app/src/infrastructure/mods", "app/scripts/python"], "Vulture - codigo morto", cwd=REPO_ROOT)
     run_tool(
         "pylint",
         [
@@ -76,7 +74,12 @@ def stage_test(fail_under=100):
         text=True,
         cwd=APP_ROOT,
     )
-    run_tool("coverage", ["report", f"--fail-under={fail_under}"], f"Relatorio de cobertura (minimo {fail_under}%)", cwd=APP_ROOT)
+    run_tool(
+        "coverage",
+        ["report", f"--fail-under={fail_under}"],
+        f"Relatorio de cobertura (minimo {fail_under}%)",
+        cwd=APP_ROOT,
+    )
 
 
 def stage_security():

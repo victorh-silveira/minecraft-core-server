@@ -43,7 +43,7 @@ runs:
     - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: "1.9.8"
+        terraform_version: "1.15.4"
         terraform_wrapper: false
 
     - name: Preparar terraform.tfvars

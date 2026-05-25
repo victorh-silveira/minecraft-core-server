@@ -6,6 +6,7 @@ Configuracao centralizada de analise estatica para codigo Python, Terraform, Doc
 
 | Arquivo | Ferramenta | Escopo |
 |---------|------------|--------|
+| [`linters/.terraform-version`](.terraform-version) | Terraform CLI | Versao alinhada entre CI GitHub Actions, local (WSL) e bootstrap em `.tools/` |
 | [`linters/.tflint.hcl`](.tflint.hcl) | [TFLint](https://github.com/terraform-linters/tflint) | Terraform em `infra/terraform/` (preset recommended + ruleset azurerm) |
 | [`linters/.tfsec.yml`](.tfsec.yml) | [tfsec](https://github.com/aquasecurity/tfsec) | Seguranca Terraform; severidade minima MEDIUM; exclude `AZU-0001` |
 | [`app/pyproject.toml`](../app/pyproject.toml) | [Ruff](https://docs.astral.sh/ruff/) | Lint e format Python (`app/src/infrastructure/mods`, scripts, tests) |
@@ -21,7 +22,30 @@ pip install -r app/requirements-dev.txt
 make pre-commit-install
 ```
 
-Execucao completa:
+Antes de commit ou push (formatacao automatica + lint + validate infra). No Windows, use **WSL** (nao PowerShell nem Git Bash direto para Terraform):
+
+```bash
+wsl
+cd ~/minecraft-server
+make ci-pre-push
+```
+
+Ou a partir do PowerShell (delega ao WSL):
+
+```powershell
+wsl make -C /mnt/c/Users/<voce>/Desktop/minecraft-server ci-pre-push
+```
+
+Ou por etapa:
+
+```bash
+make ci-fmt
+make ci-lint
+make ci-validate-infra
+make ci-infra
+```
+
+Execucao completa (pre-commit):
 
 ```bash
 make ci-lint
@@ -35,10 +59,8 @@ pre-commit run --all-files
 | Codigo | Lint Python (Ruff) | `app/src/infrastructure/mods`, `app/tests` — com `--fix` |
 | Codigo | Formatar Python (Ruff) | Formatacao |
 | Codigo | Validar JSON | `app/src/interface/mods/mods-manifest.json` |
-| Infra | Formatar Terraform | `terraform fmt -check -recursive infra/terraform` |
-| Infra | Validar Terraform | `terraform validate` em `live/prod` |
-| Infra | TFLint | `.tflint.hcl`, severidade error |
-| Infra | TFSec | `.tfsec.yml` no repositorio |
+| Infra | Formatar Terraform | `ci-infra-local.sh fmt` (versao em `linters/.terraform-version`, padrao 1.15.4) |
+| Infra | Validar Terraform | `ci-infra-local.sh validate` (tflint, tfsec, `terraform validate` em `live/prod`) |
 | Infra | Validar sintaxe YAML | `infra/kubernetes/`, `.github/workflows/` |
 | Docker | Lint Dockerfile | Hadolint em `infra/docker/Dockerfile` (ignore DL3006) |
 | Workflows | Lint GitHub Actions | actionlint |
@@ -58,10 +80,17 @@ Workflow [`ci.yml`](../.github/workflows/ci.yml):
 Script unificado local (espelha parte do CI):
 
 ```bash
+make ci-pre-push
 make ci-test
 cd app && python scripts/python/clean_workspace.py --stage lint
 cd app && python scripts/python/clean_workspace.py --stage security
 ```
+
+Infra isolada (`app/scripts/bash/ci-infra-local.sh`): `fmt`, `lint`, `validate`, `all`. Usa `terraform` do PATH no WSL; se ausente, baixa a versao de `linters/.terraform-version` em `.tools/`.
+
+Ferramentas de infra rodam apenas em Linux/WSL (`run-in-linux-env.sh` redireciona hosts Windows). Nao instale Terraform no PowerShell; use WSL ou `.tools/` criado pelo script no WSL.
+
+No WSL com repo em `/mnt/c/`, `terraform validate` pode alterar `.terraform.lock.hcl`; o script restaura o arquivo ao final. Prefira clonar em `~/` no WSL.
 
 ## TFLint
 
