@@ -14,4 +14,8 @@ runs:
     - name: Validar manifestos
       shell: bash
       run: |
-        kubectl kustomize infra/kubernetes/overlays/prod | kubeconform -kubernetes-version 1.29.0 -summary -ignore-missing-schemas
+        kubectl kustomize infra/kubernetes/overlays/prod | kubeconform -kubernetes-version 1.34.0 -summary -ignore-missing-schemas
+
+    - name: Publicar annotations no resumo do workflow
+      shell: bash
+      run: bash app/scripts/bash/publicar-annotations-github.sh static

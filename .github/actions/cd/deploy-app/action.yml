@@ -105,3 +105,4 @@ runs:
         kubectl -n minecraft-server-prod delete pod mc-server-0 --ignore-not-found --wait=false
         kubectl -n minecraft-server-prod rollout status statefulset/mc-server --timeout=1200s
         bash app/scripts/bash/atualizar-annotations-k8s.sh
+        bash app/scripts/bash/publicar-annotations-github.sh live

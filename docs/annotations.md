@@ -35,6 +35,21 @@ flowchart LR
 | `app/scripts/bash/atualizar-annotations-k8s.sh` | CD, pos-deploy, `make k8s-annotate` | Host/IP, saude TCP, logs, fase do pod, timestamp |
 | `azure.workload.identity/client-id` | SA `mc-world-backup` | Client ID da UAMI (substituido no CD) |
 
+## GitHub Actions (onde ver no portal)
+
+O painel **Annotations** de cada job no GitHub lista avisos do runner (ex.: deprecacao Node.js), **nao** as annotations do Kubernetes.
+
+As chaves `minecraft-server.io/*` aparecem no **Summary** (resumo) do workflow:
+
+| Job | Conteudo |
+|-----|----------|
+| CI - Validacao | Tabela das annotations estaticas do `kubectl kustomize` (overlay prod) |
+| CD - Deploy App / CD - Pos-deploy | Tabela das annotations **ao vivo** no AKS apos `atualizar-annotations-k8s.sh` |
+
+Algumas chaves importantes tambem viram notices no painel Annotations (`conectividade-endereco`, `saude-tcp-externa`, etc.) quando ja possuem valor no cluster.
+
+Script: `app/scripts/bash/publicar-annotations-github.sh` (`static` no CI, `live` no CD).
+
 ## Consulta rapida
 
 Endereco para jogar:

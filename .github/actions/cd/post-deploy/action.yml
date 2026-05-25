@@ -21,6 +21,12 @@ runs:
         NAMESPACE: ${{ inputs.namespace }}
       run: bash app/scripts/bash/atualizar-annotations-k8s.sh
 
+    - name: Publicar annotations no resumo do workflow
+      shell: bash
+      env:
+        NAMESPACE: ${{ inputs.namespace }}
+      run: bash app/scripts/bash/publicar-annotations-github.sh live
+
     - name: Testes pos-deploy
       shell: bash
       env:
