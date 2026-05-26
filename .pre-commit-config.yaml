@@ -63,7 +63,6 @@ repos:
         exclude: |
           (?x)^(
             \.github/workflows/templates/|
-            infra/kubernetes/base/rbac-world-backup\.yaml|
             infra/kubernetes/overlays/.*/patches/
           )
 

@@ -5,8 +5,8 @@ resources:
   - ../../base
 
 images:
-  - name: acrminecraftserverprod.azurecr.io/minecraft-core-server
-    newName: acrminecraftserverprod.azurecr.io/minecraft-core-server
+  - name: ghcr.io/victorh-silveira/minecraft-core-server
+    newName: ghcr.io/victorh-silveira/minecraft-core-server
     newTag: placeholder
 
 patches:

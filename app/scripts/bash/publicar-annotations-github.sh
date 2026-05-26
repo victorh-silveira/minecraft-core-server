@@ -58,7 +58,6 @@ source_order = [
     ("statefulset", "mc-server"),
     ("namespace", namespace),
     ("pod", "mc-server-0"),
-    ("cronjob", "mc-world-backup"),
 ]
 
 collected: dict[str, tuple[str, str, str]] = {}

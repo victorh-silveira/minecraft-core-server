@@ -88,14 +88,8 @@ if command -v az >/dev/null 2>&1; then
     SA_STATUS="Falhou (${SA_STATE})"
   fi
 
-  ACR_STATE="$(az acr show --name acrminecraftserverprod --query provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
-  if [[ "$ACR_STATE" == "Succeeded" ]]; then
-    pass "Container Registry acrminecraftserverprod: Succeeded"
-    ACR_STATUS="Sucesso"
-  else
-    fail "Container Registry acrminecraftserverprod em estado: ${ACR_STATE}"
-    ACR_STATUS="Falhou (${ACR_STATE})"
-  fi
+  pass "Imagens via GHCR (ghcr.io/victorh-silveira/minecraft-core-server) - tier gratuito"
+  ACR_STATUS="GHCR (sem ACR pago)"
 
   AKS_STATE="$(az aks show --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod --query provisioningState -o tsv 2>/dev/null | tr -d '\r' || echo "NotFound")"
   if [[ "$AKS_STATE" == "Succeeded" ]]; then
@@ -110,7 +104,7 @@ else
   RG_STATUS="Ignorado (sem az CLI)"
   VNET_STATUS="Ignorado (sem az CLI)"
   SA_STATUS="Ignorado (sem az CLI)"
-  ACR_STATUS="Ignorado (sem az CLI)"
+  ACR_STATUS="GHCR (sem az CLI)"
   AKS_STATUS="Ignorado (sem az CLI)"
 fi
 
@@ -236,7 +230,7 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo "| Grupo de recursos | \`rg-minecraft-server-prod\` | ${RG_STATUS} |"
     echo "| Rede virtual | \`vnet-minecraft-server-prod-bs\` | ${VNET_STATUS} |"
     echo "| Conta de armazenamento | \`stminecraftserverprod001\` | ${SA_STATUS} |"
-    echo "| Container Registry | \`acrminecraftserverprod\` | ${ACR_STATUS} |"
+    echo "| Registro de imagens | \`ghcr.io/victorh-silveira/minecraft-core-server\` | ${ACR_STATUS} |"
     echo "| Kubernetes (AKS) | \`aks-minecraft-server-prod\` | ${AKS_STATUS} |"
     echo ""
     echo "### 3. Kubernetes e Minecraft"

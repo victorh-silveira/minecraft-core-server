@@ -44,24 +44,19 @@ variable "node_count" {
 variable "vm_size" {
   type        = string
   description = "Tamanho da VM dos nos do pool"
-  default     = "Standard_B2s"
+  default     = "Standard_B2ats_v2"
 }
 
 variable "os_disk_size_gb" {
   type        = number
   description = "Tamanho do disco OS dos nos em GB"
-  default     = 64
+  default     = 30
 }
 
 variable "enable_auto_scaling" {
   type        = bool
   description = "Habilita auto-scaling no pool de nos"
   default     = false
-}
-
-variable "acr_id" {
-  type        = string
-  description = "ID do ACR para vinculo de pull de imagens (AcrPull)"
 }
 
 variable "tags" {

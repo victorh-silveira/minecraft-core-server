@@ -14,10 +14,6 @@ resources:
   - networkpolicy.yaml
   - statefulset.yaml
   - poddisruptionbudget.yaml
-  - configmap-world-backup.yaml
-  - serviceaccount-world-backup.yaml
-  - rbac-world-backup.yaml
-  - cronjob-world-backup.yaml
 
 labels:
   - includeSelectors: false

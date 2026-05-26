@@ -9,10 +9,10 @@ Servidor Minecraft **Fabric 1.20.6** com Clean Architecture, entrega local via D
 | Jogo | itzg/minecraft-server (Java 21) | Processo do servidor Fabric |
 | App | Python `infrastructure.mods` | Sync de mods via manifesto |
 | Container local | Docker Compose | Desenvolvimento e testes |
-| Orquestracao cloud | AKS 1.34 (1 node) | StatefulSet + PVC + LoadBalancer |
-| IaC | Terraform `live/prod` | RG, VNet, ACR, AKS, identidade de backup |
+| Orquestracao cloud | AKS 1.34 Free (1x B2ats_v2) | StatefulSet + PVC 8Gi LRS + LoadBalancer |
+| IaC | Terraform `live/prod` | RG, VNet, AKS Free tier, tfstate LRS |
 | CI/CD | GitHub Actions | Validacao, GitOps de infra, release, deploy |
-| Dados | Azure Disk (Retain) + Blob `world-backups` | Mundo persistente e backup diario |
+| Dados | Azure Disk LRS 8Gi (Retain) | Mundo persistente no PVC |
 
 Diagrama completo: [docs/architecture.md](docs/architecture.md). Deploy Azure: [docs/azure.md](docs/azure.md).
 

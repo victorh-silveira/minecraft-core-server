@@ -8,7 +8,6 @@ RG_NAME="${TFSTATE_RG:-rg-minecraft-server-prod}"
 LOCATION="${AZURE_LOCATION:-brazilsouth}"
 SA_NAME="${TFSTATE_SA:-stminecraftserverprod001}"
 TFSTATE_CONTAINER="${TFSTATE_CONTAINER:-tfstate}"
-BACKUP_CONTAINER="${BACKUP_CONTAINER:-world-backups}"
 
 if ! command -v az >/dev/null 2>&1; then
   echo "[ERRO] Azure CLI nao encontrado"
@@ -42,11 +41,6 @@ fi
 echo ">>> Garantindo containers de blob..."
 az storage container create \
   --name "${TFSTATE_CONTAINER}" \
-  --account-name "${SA_NAME}" \
-  --auth-mode login \
-  --output none 2>/dev/null || true
-az storage container create \
-  --name "${BACKUP_CONTAINER}" \
   --account-name "${SA_NAME}" \
   --auth-mode login \
   --output none 2>/dev/null || true

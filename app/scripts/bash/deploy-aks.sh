@@ -5,7 +5,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "${REPO_ROOT}"
 
 IMAGE_TAG="${IMAGE_TAG:-$(git describe --tags --abbrev=0 2>/dev/null || echo v1.0.0)}"
-IMAGE="acrminecraftserverprod.azurecr.io/minecraft-core-server:${IMAGE_TAG}"
+IMAGE="ghcr.io/victorh-silveira/minecraft-core-server:${IMAGE_TAG}"
 NAMESPACE="${NAMESPACE:-minecraft-server-prod}"
 RCON_PASSWORD="${RCON_PASSWORD:?Defina RCON_PASSWORD}"
 WHITELIST_RAW="${MINECRAFT_WHITELIST:-AnonymousNoobz}"
@@ -21,18 +21,8 @@ kubectl -n "${NAMESPACE}" create secret generic mc-access \
   --from-literal=WHITELIST="${WHITELIST}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
-BACKUP_CLIENT_ID="$(az identity show \
-  -g rg-minecraft-server-prod \
-  -n id-mc-world-backup-prod \
-  --query clientId -o tsv 2>/dev/null || true)"
-
 MANIFEST="$(kubectl kustomize infra/kubernetes/overlays/prod \
-  | sed "s|acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g")"
-
-if [[ -n "${BACKUP_CLIENT_ID}" ]]; then
-  MANIFEST="$(printf '%s' "${MANIFEST}" \
-    | sed "s|BACKUP_AZURE_CLIENT_ID_PLACEHOLDER|${BACKUP_CLIENT_ID}|g")"
-fi
+  | sed "s|ghcr.io/victorh-silveira/minecraft-core-server:placeholder|${IMAGE}|g")"
 
 printf '%s' "${MANIFEST}" | kubectl apply -f -
 kubectl -n "${NAMESPACE}" delete pod mc-server-0 --ignore-not-found --wait=false

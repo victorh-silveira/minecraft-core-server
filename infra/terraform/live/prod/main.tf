@@ -15,16 +15,6 @@ module "network" {
   tags                = local.tags
 }
 
-module "acr" {
-  source              = "../../modules/acr"
-  name                = local.acr_name
-  resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
-  sku                 = "Basic"
-  admin_enabled       = false
-  tags                = local.tags
-}
-
 module "aks" {
   source              = "../../modules/aks"
   cluster_name        = local.aks_cluster_name
@@ -35,9 +25,8 @@ module "aks" {
   kubernetes_version  = var.kubernetes_version
   sku_tier            = "Free"
   node_count          = 1
-  vm_size             = "Standard_D2s_v6"
-  os_disk_size_gb     = 64
+  vm_size             = var.node_vm_size
+  os_disk_size_gb     = var.node_os_disk_size_gb
   enable_auto_scaling = false
-  acr_id              = module.acr.id
   tags                = local.tags
 }

@@ -11,19 +11,17 @@ flowchart TB
     snet[snet-aks 10.10.0.0/22]
     nsg[NSG permitir-minecraft-tcp / rcon / saida]
     aks[aks-minecraft-server-prod]
-    acr[acrminecraftserverprod Basic]
-    st[stminecraftserverprod001 LRS]
-    uami[id-mc-world-backup-prod]
+    st[stminecraftserverprod001 LRS tfstate]
   end
   subgraph nodes [rg-minecraft-server-nodes-prod]
-    pool[1x Standard_D2s_v6]
+    pool[1x Standard_B2ats_v2]
   end
+  ghcr[GHCR imagem gratuita]
   aks --> pool
   snet --> aks
   nsg --> snet
   vnet --> snet
-  acr -->|AcrPull| aks
-  uami -->|Blob Contributor| st
+  ghcr -->|pull| aks
 ```
 
 ## Inventario
@@ -35,9 +33,9 @@ flowchart TB
 | VNet | `vnet-minecraft-server-prod-bs` | `10.10.0.0/16` |
 | Subnet AKS | `snet-aks-minecraft-server-prod-bs` | `10.10.0.0/22` |
 | AKS | `aks-minecraft-server-prod` | Tier Free, K8s **1.34**, OIDC + Workload Identity |
-| Node pool | `default` | 1 no, VM **Standard_D2s_v6**, disco OS 64Gi |
-| ACR | `acrminecraftserverprod` | SKU Basic, admin desabilitado |
-| Storage | `stminecraftserverprod001` | `tfstate` + `world-backups` |
+| Node pool | `default` | 1 no, VM **Standard_B2ats_v2**, disco OS 30Gi |
+| Imagens | `ghcr.io/victorh-silveira/minecraft-core-server` | GHCR publico (sem ACR pago) |
+| Storage | `stminecraftserverprod001` | Apenas `tfstate` (LRS) |
 | DNS label (LB K8s) | `minecraftserverprod` | Annotation no Service `mc-server-game` |
 | FQDN esperado | `minecraftserverprod.brazilsouth.cloudapp.azure.com` | Apos LB provisionar |
 
@@ -46,13 +44,11 @@ flowchart TB
 ```text
 infra/terraform/
   modules/
-    acr/          Container Registry
-    aks/          Cluster + AcrPull + OIDC/WI
+    aks/          Cluster Free tier + OIDC/WI
     network/      VNet, subnet, NSG
   live/prod/
-    main.tf       network, acr, aks
-    backup_identity.tf
-    variables.tf  kubernetes_version padrao 1.34
+    main.tf       network, aks
+    variables.tf  kubernetes_version, node_vm_size B2ats_v2
     outputs.tf
     providers.tf  backend azurerm em stminecraftserverprod001
 ```
@@ -69,7 +65,7 @@ Bootstrap do state: `infra/terraform/bootstrap/` (uso inicial).
 
 ## 1. Deploy da infraestrutura
 
-O CI/CD e o script `app/scripts/bash/ensure-tfstate-backend.sh` criam o resource group, a storage account e os containers `tfstate` e `world-backups` antes do `terraform apply`.
+O CI/CD e o script `app/scripts/bash/ensure-tfstate-backend.sh` criam o resource group, a storage account e o container `tfstate` antes do `terraform apply`.
 
 Remote state: `stminecraftserverprod001` / container `tfstate` / key `minecraft/prod.terraform.tfstate`.
 
@@ -102,21 +98,19 @@ Outputs uteis:
 
 ```bash
 terraform output aks_cluster_name
-terraform output acr_login_server
-terraform output world_backup_identity_client_id
+terraform output container_image_repository
 terraform output game_dns_label
 ```
 
-## 2. Imagem no ACR
+## 2. Imagem no GHCR
 
 ```bash
-ACR_LOGIN=$(terraform -chdir=infra/terraform/live/prod output -raw acr_login_server)
-az acr login --name acrminecraftserverprod
-docker build -f infra/docker/Dockerfile -t "${ACR_LOGIN}/minecraft-core-server:v1.0.0" .
-docker push "${ACR_LOGIN}/minecraft-core-server:v1.0.0"
+docker build -f infra/docker/Dockerfile -t ghcr.io/victorh-silveira/minecraft-core-server:v1.0.0 .
+echo "$GITHUB_TOKEN" | docker login ghcr.io -u USER --password-stdin
+docker push ghcr.io/victorh-silveira/minecraft-core-server:v1.0.0
 ```
 
-Em producao o CD faz build e push automaticamente na release (tag semantica, sem `latest`).
+Em producao o CD publica no GHCR na release (tag semantica, sem `latest`). Deixe o pacote publico em GitHub Packages.
 
 ## 3. Deploy Kubernetes
 
@@ -188,24 +182,11 @@ bash app/scripts/bash/test-aks.sh
 
 ## Backup automatico
 
-| Item | Valor |
-|------|-------|
-| CronJob | `mc-world-backup` |
-| Horario | 03:00 `America/Sao_Paulo` |
-| Origem | `/data/world` no pod `mc-server-0` |
-| Destino | container `world-backups` em `stminecraftserverprod001` |
-| Auth | Workload Identity `id-mc-world-backup-prod` |
-
-Requer `terraform apply` em `live/prod` (recurso `backup_identity.tf`) antes do primeiro backup bem-sucedido.
-
-```bash
-kubectl -n minecraft-server-prod get cronjob mc-world-backup
-kubectl -n minecraft-server-prod create job --from=cronjob/mc-world-backup test-backup-manual
-```
+Desativado no perfil Free Tier (sem CronJob nem blob `world-backups`). Para backup manual do mundo use `kubectl cp` conforme [operations.md](operations.md).
 
 ## Disco persistente (Retain)
 
-StorageClass `mc-standard-ssd`: `reclaimPolicy: Retain`.
+StorageClass `mc-standard-ssd` (SKU **Standard_LRS** 8Gi): `reclaimPolicy: Retain`.
 
 Se o PVC ou StatefulSet for removido, o disco gerenciado **permanece** no Azure (custo continua). Exclua manualmente no portal apos backup se necessario.
 
@@ -218,17 +199,20 @@ Se o PVC ou StatefulSet for removido, o disco gerenciado **permanece** no Azure 
 
 NetworkPolicy no namespace restringe trafego dos pods (ingress jogo/RCON interno, egress DNS/HTTPS).
 
-## Custos estimados (prod minimo)
+## Free Tier e custos
 
-| Recurso | SKU | Nota |
-|---------|-----|------|
-| AKS control plane | Free | Sem taxa de gerenciamento |
-| Node | 1x Standard_D2s_v6 | Principal custo fixo |
-| Disco PVC | StandardSSD 32Gi | Retain se apagar PVC |
-| Load Balancer | Standard | IP publico do jogo |
-| ACR | Basic | Imagens |
-| Blob backup | LRS | Centavos por GB/mes |
-| Workload Identity | Incluso | Sem custo extra |
+| Recurso | SKU / origem | Free? |
+|---------|----------------|-------|
+| AKS control plane | Free | Sim |
+| VNet, NSG, subnet | - | Sim |
+| Storage tfstate | Standard LRS (poucos GB) | Dentro da cota gratuita da conta |
+| Imagens | GHCR | Sim (repo publico) |
+| GitHub Actions | - | Sim (cota publica) |
+| Node AKS | Standard_B2ats_v2, 30Gi OS | Cota B-series da conta gratuita (750 h/mes no 1o ano) |
+| Disco PVC mundo | Standard_LRS 8Gi | Baixo custo; HDD em vez de SSD |
+| Load Balancer | Standard (AKS 1.34+) | Nao ha tier gratuito; custo residual obrigatorio para IP publico |
+
+Nao e possivel ter Minecraft publico em AKS com custo zero absoluto: o Load Balancer Standard e cobrado. O restante foi reduzido ao minimo compativel com Fabric 1.20.6 e 1G de heap.
 
 ## Observabilidade
 

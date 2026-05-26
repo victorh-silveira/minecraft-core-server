@@ -31,3 +31,15 @@ variable "game_dns_label" {
   description = "Label DNS gratuito Azure (unico na regiao). Vazio usa minecraftserverprod."
   default     = ""
 }
+
+variable "node_vm_size" {
+  type        = string
+  description = "SKU do no AKS (B2ats_v2 alinha com cota gratuita de VM B-series na conta Azure)"
+  default     = "Standard_B2ats_v2"
+}
+
+variable "node_os_disk_size_gb" {
+  type        = number
+  description = "Disco OS do no em GB (minimo 30 no AKS)"
+  default     = 30
+}

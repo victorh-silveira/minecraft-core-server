@@ -25,11 +25,3 @@ metadata:
   annotations:
     minecraft-server.io/azure-dns-fqdn-esperado: minecraftserverprod.brazilsouth.cloudapp.azure.com
     minecraft-server.io/conectividade-porta: "25565"
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: mc-world-backup
-  namespace: minecraft-server-prod
-  annotations:
-    minecraft-server.io/backup-agendamento: "0 3 * * *"

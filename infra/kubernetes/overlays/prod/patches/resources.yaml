@@ -10,11 +10,11 @@ spec:
         - name: mc-server
           env:
             - name: MEMORY
-              value: "2G"
+              value: "1G"
           resources:
             requests:
-              cpu: 500m
-              memory: 2Gi
+              cpu: 250m
+              memory: 1Gi
             limits:
-              cpu: "2"
-              memory: 3Gi
+              cpu: "1"
+              memory: 1536Mi

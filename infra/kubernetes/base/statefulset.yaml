@@ -40,7 +40,7 @@ spec:
             allowPrivilegeEscalation: false
       containers:
         - name: mc-server
-          image: acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder
+          image: ghcr.io/victorh-silveira/minecraft-core-server:placeholder
           imagePullPolicy: Always
           ports:
             - name: minecraft
@@ -57,7 +57,7 @@ spec:
             - name: TYPE
               value: "FABRIC"
             - name: MEMORY
-              value: "2G"
+              value: "1G"
             - name: ONLINE_MODE
               value: "FALSE"
             - name: WHITE_LIST

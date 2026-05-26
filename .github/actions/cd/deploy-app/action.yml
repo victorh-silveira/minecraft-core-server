@@ -1,10 +1,14 @@
 name: CD - Deploy da aplicacao
-description: Construcao da imagem, publicacao no ACR e rollout no Kubernetes
+description: Construcao da imagem, publicacao no GHCR e rollout no Kubernetes
 
 inputs:
   image_tag:
-    description: Tag da imagem no ACR
+    description: Tag da imagem no GHCR
     required: true
+  image_repository:
+    description: Repositorio da imagem no GHCR (sem registry)
+    required: false
+    default: victorh-silveira/minecraft-core-server
   azure_client_id:
     description: ID do cliente do app registration Azure (OIDC)
     required: false
@@ -33,10 +37,6 @@ inputs:
     description: Nome do cluster AKS
     required: false
     default: aks-minecraft-server-prod
-  acr_name:
-    description: Nome do Azure Container Registry
-    required: false
-    default: acrminecraftserverprod
 
 runs:
   using: composite
@@ -56,18 +56,20 @@ runs:
         resource-group: ${{ inputs.resource_group }}
         cluster-name: ${{ inputs.aks_cluster_name }}
 
-    - name: Autenticar no ACR
-      shell: bash
-      run: az acr login --name ${{ inputs.acr_name }}
-
     - name: Definir imagem
       id: image
       shell: bash
       run: |
-        ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
-        IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
+        IMAGE="ghcr.io/${{ inputs.image_repository }}:${{ inputs.image_tag }}"
         echo "ref=${IMAGE}" >> "$GITHUB_OUTPUT"
         echo "Imagem: ${IMAGE}"
+
+    - name: Login no GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
 
     - name: Marcar inicio da build
       shell: bash
@@ -111,16 +113,9 @@ runs:
       shell: bash
       run: |
         IMAGE="${{ steps.image.outputs.ref }}"
-        BACKUP_CLIENT_ID=$(az identity show \
-          --resource-group ${{ inputs.resource_group }} \
-          --name id-mc-world-backup-prod \
-          --query clientId -o tsv 2>/dev/null || true)
+        PLACEHOLDER="ghcr.io/victorh-silveira/minecraft-core-server:placeholder"
         MANIFEST=$(kubectl kustomize infra/kubernetes/overlays/prod \
-          | sed "s|acrminecraftserverprod.azurecr.io/minecraft-core-server:placeholder|${IMAGE}|g")
-        if [ -n "${BACKUP_CLIENT_ID}" ]; then
-          MANIFEST=$(printf '%s' "${MANIFEST}" \
-            | sed "s|BACKUP_AZURE_CLIENT_ID_PLACEHOLDER|${BACKUP_CLIENT_ID}|g")
-        fi
+          | sed "s|${PLACEHOLDER}|${IMAGE}|g")
         printf '%s' "${MANIFEST}" | kubectl apply -f -
         kubectl -n minecraft-server-prod delete pod mc-server-0 --ignore-not-found --wait=false
         kubectl -n minecraft-server-prod rollout status statefulset/mc-server --timeout=1200s

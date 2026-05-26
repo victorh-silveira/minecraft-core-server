@@ -64,6 +64,11 @@ jobs:
     timeout-minutes: 45
     environment: production
 
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
     steps:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
