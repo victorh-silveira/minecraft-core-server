@@ -57,7 +57,11 @@ runs:
     - name: Aplicar Terraform
       shell: bash
       env:
+        ARM_USE_OIDC: true
         ARM_USE_AZUREAD: true
+        ARM_CLIENT_ID: ${{ inputs.azure_client_id }}
+        ARM_TENANT_ID: ${{ inputs.azure_tenant_id }}
+        ARM_SUBSCRIPTION_ID: ${{ inputs.azure_subscription_id }}
       run: |
         cd infra/terraform/live/prod
         terraform init -input=false

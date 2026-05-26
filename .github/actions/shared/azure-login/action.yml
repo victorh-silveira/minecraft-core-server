@@ -44,3 +44,9 @@ runs:
         echo "ARM_CLIENT_ID=${{ inputs.azure_client_id }}" >> "$GITHUB_ENV"
         echo "ARM_TENANT_ID=${{ inputs.azure_tenant_id }}" >> "$GITHUB_ENV"
         echo "ARM_SUBSCRIPTION_ID=${{ inputs.azure_subscription_id }}" >> "$GITHUB_ENV"
+        if [ -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]; then
+          echo "ARM_OIDC_REQUEST_TOKEN=${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" >> "$GITHUB_ENV"
+        fi
+        if [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+          echo "ARM_OIDC_REQUEST_URL=${ACTIONS_ID_TOKEN_REQUEST_URL}" >> "$GITHUB_ENV"
+        fi
