@@ -1,5 +1,5 @@
 # ---- ORQUESTRADOR DO SERVIDOR MINECRAFT (DOCKER COMPOSE) ----
-name: minecraft-server
+name: minecraft-core-server
 
 # ---- LOGGING PADRAO (ROTACAO JSON) ----
 x-logging-default: &logging-default

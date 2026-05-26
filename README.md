@@ -19,7 +19,7 @@ Diagrama completo: [docs/architecture.md](docs/architecture.md). Deploy Azure: [
 ## Estrutura do repositorio
 
 ```text
-minecraft-server/
+minecraft-core-server/
 ├── README.md
 ├── Makefile
 ├── .github/                 workflows CI, CD, Destroy e composite actions

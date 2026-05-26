@@ -2,7 +2,7 @@
 set -euo pipefail
 
 GITHUB_ORG="${GITHUB_ORG:-victorh-silveira}"
-GITHUB_REPO="${GITHUB_REPO:-minecraft-server}"
+GITHUB_REPO="${GITHUB_REPO:-minecraft-core-server}"
 SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-28c9f836-6ad3-45a3-8c33-36531a68fe51}"
 TENANT_ID="${TENANT_ID:-8d4a2319-f160-4911-aa05-1875d2772226}"
 APP_NAME="${APP_NAME:-github-minecraft-server-actions}"

@@ -16,7 +16,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.revision="${VCS_REF}"
 LABEL org.opencontainers.image.vendor="minecraft-server"
 LABEL org.opencontainers.image.base.name="${BASE_IMAGE}"
-LABEL org.opencontainers.image.source="https://github.com/local/minecraft-server"
+LABEL org.opencontainers.image.source="https://github.com/victorh-silveira/minecraft-core-server"
 
 USER root
 

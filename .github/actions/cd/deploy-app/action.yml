@@ -145,7 +145,7 @@ runs:
           echo ""
           echo "| Campo | Valor |"
           echo "|-------|-------|"
-          echo "| Nome | minecraft-server/infra/docker |"
+          echo "| Nome | minecraft-core-server/infra/docker |"
           echo "| Status | concluido |"
           echo "| Duracao | ${DURATION}s |"
           echo "| Imagem | \`${IMAGE}\` |"
