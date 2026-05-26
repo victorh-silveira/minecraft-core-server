@@ -69,6 +69,8 @@ Bootstrap do state: `infra/terraform/bootstrap/` (uso inicial).
 
 ## 1. Deploy da infraestrutura
 
+O CI/CD e o script `app/scripts/bash/ensure-tfstate-backend.sh` criam o resource group, a storage account e os containers `tfstate` e `world-backups` antes do `terraform apply`.
+
 Remote state: `stminecraftserverprod001` / container `tfstate` / key `minecraft/prod.terraform.tfstate`.
 
 ```bash
@@ -246,7 +248,10 @@ CI executa tflint, tfsec e validate (ver [devops.md](devops.md)).
 Workflow GitHub **Destroy** (manual, confirmar `DESTROY`):
 
 1. Remove namespace `minecraft-server-prod` (libera LB)
-2. `terraform plan -destroy` / `apply`
-3. Discos Retain e storage account `tfstate` podem permanecer
+2. Remove cluster AKS e resource group de nodes
+3. `terraform plan -destroy` / `apply` (recursos gerenciados pelo Terraform)
+4. Remove `rg-minecraft-server-prod` e `rg-minecraft-server-nodes-prod` (storage, tfstate e restolhos)
+
+Local: `bash app/scripts/bash/teardown-azure-stack.sh` apos limpar o que o Terraform gerencia.
 
 Ver [operations.md](operations.md).

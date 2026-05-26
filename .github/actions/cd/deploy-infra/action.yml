@@ -54,6 +54,10 @@ runs:
           echo "tenant_id = \"${{ inputs.azure_tenant_id }}\""
         } > infra/terraform/live/prod/terraform.tfvars
 
+    - name: Provisionar backend do Terraform
+      shell: bash
+      run: bash app/scripts/bash/ensure-tfstate-backend.sh
+
     - name: Aplicar Terraform
       shell: bash
       env:
