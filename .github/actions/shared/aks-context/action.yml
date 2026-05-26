@@ -1,0 +1,22 @@
+name: Credenciais AKS
+description: Configura kubectl para o cluster de producao
+
+inputs:
+  resource_group:
+    description: Grupo de recursos Azure
+    required: false
+    default: rg-minecraft-server-prod
+  cluster_name:
+    description: Nome do cluster AKS
+    required: false
+    default: aks-minecraft-server-prod
+
+runs:
+  using: composite
+
+  steps:
+    - name: Credenciais AKS
+      uses: azure/aks-set-context@v4
+      with:
+        resource-group: ${{ inputs.resource_group }}
+        cluster-name: ${{ inputs.cluster_name }}

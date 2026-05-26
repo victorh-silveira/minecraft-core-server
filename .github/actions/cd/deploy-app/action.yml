@@ -1,5 +1,5 @@
 name: CD - Deploy da aplicacao
-description: Construcao da imagem, publicacao no ACR, segredos RCON e rollout no Kubernetes
+description: Construcao da imagem, publicacao no ACR e rollout no Kubernetes
 
 inputs:
   image_tag:
@@ -51,7 +51,7 @@ runs:
         azure_credentials: ${{ inputs.azure_credentials }}
 
     - name: Credenciais AKS
-      uses: azure/aks-set-context@v4
+      uses: ./.github/actions/shared/aks-context
       with:
         resource-group: ${{ inputs.resource_group }}
         cluster-name: ${{ inputs.aks_cluster_name }}
@@ -60,13 +60,27 @@ runs:
       shell: bash
       run: az acr login --name ${{ inputs.acr_name }}
 
-    - name: Construir e publicar imagem
+    - name: Definir imagem
+      id: image
       shell: bash
       run: |
         ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
         IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
-        docker build -f infra/docker/Dockerfile -t "${IMAGE}" .
-        docker push "${IMAGE}"
+        echo "ref=${IMAGE}" >> "$GITHUB_OUTPUT"
+        echo "Imagem: ${IMAGE}"
+
+    - name: Configurar Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Construir e publicar imagem
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: infra/docker/Dockerfile
+        push: true
+        tags: ${{ steps.image.outputs.ref }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Aplicar namespace
       shell: bash
@@ -82,16 +96,14 @@ runs:
     - name: Secret de acesso
       shell: bash
       run: |
-        RESOLVED="$(bash app/scripts/bash/resolve-whitelist.sh "${{ inputs.minecraft_whitelist }}")"
         kubectl -n minecraft-server-prod create secret generic mc-access \
-          --from-literal=WHITELIST="${RESOLVED}" \
+          --from-literal=WHITELIST="${{ inputs.minecraft_whitelist }}" \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Aplicar manifests Kubernetes
       shell: bash
       run: |
-        ACR_LOGIN=$(az acr show --name ${{ inputs.acr_name }} --query loginServer -o tsv)
-        IMAGE="${ACR_LOGIN}/minecraft-core-server:${{ inputs.image_tag }}"
+        IMAGE="${{ steps.image.outputs.ref }}"
         BACKUP_CLIENT_ID=$(az identity show \
           --resource-group ${{ inputs.resource_group }} \
           --name id-mc-world-backup-prod \
@@ -105,5 +117,3 @@ runs:
         printf '%s' "${MANIFEST}" | kubectl apply -f -
         kubectl -n minecraft-server-prod delete pod mc-server-0 --ignore-not-found --wait=false
         kubectl -n minecraft-server-prod rollout status statefulset/mc-server --timeout=1200s
-        bash app/scripts/bash/atualizar-annotations-k8s.sh
-        bash app/scripts/bash/publicar-annotations-github.sh live

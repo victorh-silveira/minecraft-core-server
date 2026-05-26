@@ -1,4 +1,4 @@
-name: CD - Entrega Continua
+name: CD - Entrega manual
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -16,6 +16,7 @@ on:
         options:
           - deploy-app
           - deploy-infra
+          - deploy-app-and-verify
       image_tag:
         description: Tag da imagem (deploy-app). Nao use latest.
         required: false
@@ -26,7 +27,7 @@ on:
         type: string
 
 concurrency:
-  group: cd-${{ github.workflow }}-${{ github.ref }}
+  group: cd-${{ github.workflow }}-${{ github.event.release.tag_name || github.run_id }}
   cancel-in-progress: false
 
 permissions:
@@ -56,7 +57,9 @@ jobs:
 
   deploy-app:
     name: CD - Deploy App
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy-app')
+    if: >-
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'deploy-app' || inputs.mode == 'deploy-app-and-verify'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production
@@ -88,13 +91,9 @@ jobs:
 
       - name: Resolver whitelist
         id: whitelist
-        shell: bash
-        run: |
-          NICKS="${{ secrets.MINECRAFT_WHITELIST }}"
-          if [ -z "${NICKS}" ]; then
-            NICKS="AnonymousNoobz"
-          fi
-          echo "nicks=${NICKS}" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/shared/resolve-whitelist
+        with:
+          whitelist: ${{ secrets.MINECRAFT_WHITELIST }}
 
       - name: Deploy aplicacao
         uses: ./.github/actions/cd/deploy-app
@@ -105,7 +104,7 @@ jobs:
           azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           rcon_password: ${{ secrets.RCON_PASSWORD }}
-          minecraft_whitelist: ${{ steps.whitelist.outputs.nicks }}
+          minecraft_whitelist: ${{ steps.whitelist.outputs.resolved }}
 
   post-deploy:
     name: CD - Pos-deploy
@@ -114,10 +113,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production
-
-    permissions:
-      contents: read
-      id-token: write
 
     steps:
       - name: Obter codigo fonte
@@ -132,10 +127,7 @@ jobs:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Credenciais AKS
-        uses: azure/aks-set-context@v4
-        with:
-          resource-group: rg-minecraft-server-prod
-          cluster-name: aks-minecraft-server-prod
+        uses: ./.github/actions/shared/aks-context
 
       - name: Testes pos-deploy
         uses: ./.github/actions/cd/post-deploy

@@ -92,24 +92,29 @@ Hooks: `Codigo |`, `Infra |`, `Docker |`, `Workflows |`, `Commit |` (ver `.pre-c
 
 Detalhe de secrets: [.github/README.md](../.github/README.md).
 
-### CI — `ci.yml`
+### CI/CD — `ci.yml`
 
 | Job | Conteudo |
 |-----|----------|
-| `CI - Linter` | Ruff, Terraform fmt, Hadolint, actionlint, YAML |
-| `CI - Validacao` | pytest, Bandit, pip-audit, Gitleaks, Docker config, kubeconform, tflint, tfsec |
-| `CD - Deploy Infra (GitOps)` | `terraform apply` se TF mudou ou AKS ausente |
-| `CI - Versao semantica` | sync tags + semantic-release |
+| `CI - Linter` | Ruff, Terraform fmt, Hadolint, actionlint, YAML (paralelo) |
+| `CI - Validacao` | pytest, Bandit, pip-audit, Gitleaks, Docker, kubeconform, tflint, tfsec |
+| `CD - Deploy Infra` | `terraform apply` condicional + environment `production-infra` |
+| `CI - Release` | sync tags + semantic-release apos gates |
+| `CD - Deploy App` | build/push ACR com cache GHA, rollout AKS, environment `production` |
+| `CD - Pos-deploy` | annotations, `test-aks.sh`, probe TCP 25565 |
+| `CI/CD - Resumo` | tabela de status no GitHub Summary |
 
-### CD — `cd.yml`
+PR em `main`: apenas Linter + Validacao.
 
-| Job | Gatilho |
-|-----|---------|
-| `CD - Deploy Infra` | Manual + `APPLY_INFRA` |
-| `CD - Deploy App` | Release publicada ou manual + `image_tag` |
-| `CD - Pos-deploy` | Apos deploy-app: annotations + `test-aks.sh` + probe TCP |
+### CD manual — `cd.yml`
 
-Fluxo tipico: push `main` -> CI valida -> infra se necessario -> release -> CD build/push ACR -> rollout AKS -> annotations -> testes.
+| Modo | Jobs |
+|------|------|
+| `deploy-infra` | Terraform apply (`APPLY_INFRA`) |
+| `deploy-app` | Imagem + rollout (informar `image_tag`) |
+| `deploy-app-and-verify` | deploy-app + pos-deploy |
+
+Fluxo automatico: push `main` -> CI -> infra (se necessario) -> release -> deploy -> pos-deploy.
 
 Tag `latest` proibida no CD.
 

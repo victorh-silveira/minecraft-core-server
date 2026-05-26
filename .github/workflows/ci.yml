@@ -1,4 +1,4 @@
-name: CI - Integracao Continua
+name: CI/CD - Pipeline principal
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -18,11 +18,37 @@ on:
       - "Makefile"
       - "README.md"
 
+  pull_request:
+    branches: [main]
+    paths:
+      - ".dockerignore"
+      - ".gitattributes"
+      - ".gitignore"
+      - ".github/**"
+      - "app/**"
+      - "docs/**"
+      - "infra/**"
+      - "linters/**"
+      - "Makefile"
+      - "README.md"
+
   workflow_dispatch:
+    inputs:
+      skip_cd:
+        description: Apenas CI (sem release, deploy app ou pos-deploy)
+        type: boolean
+        default: false
+      force_infra:
+        description: Forcar terraform apply mesmo sem mudancas em infra/
+        type: boolean
+        default: false
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   linter:
@@ -46,7 +72,7 @@ jobs:
   validate:
     name: CI - Validacao
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Obter codigo fonte
@@ -72,7 +98,7 @@ jobs:
         uses: ./.github/actions/ci/validate-terraform
 
   deploy-infra:
-    name: CD - Deploy Infra (GitOps)
+    name: CD - Deploy Infra
     needs: [linter, validate]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -94,9 +120,8 @@ jobs:
           filters: |
             infra:
               - 'infra/terraform/**'
-              - 'infra/modules/**'
 
-      - name: Autenticar no Azure para verificacao
+      - name: Autenticar no Azure
         uses: ./.github/actions/shared/azure-login
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -108,17 +133,19 @@ jobs:
         id: check-infra
         shell: bash
         run: |
-          echo "Verificando se o AKS 'aks-minecraft-server-prod' existe..."
           if az aks show --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod --query id -o tsv >/dev/null 2>&1; then
-            echo "AKS encontrado. Infraestrutura ativa."
             echo "active=true" >> "$GITHUB_OUTPUT"
           else
-            echo "AKS nao encontrado! Forcando criacao da infraestrutura completa."
             echo "active=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Deploy infraestrutura
-        if: steps.check-infra.outputs.active == 'false' || steps.filter.outputs.infra == 'true' || contains(github.event.head_commit.message, '[force-infra]')
+        id: deploy
+        if: >-
+          steps.check-infra.outputs.active == 'false' ||
+          steps.filter.outputs.infra == 'true' ||
+          github.event.inputs.force_infra == 'true' ||
+          contains(github.event.head_commit.message, '[force-infra]')
         uses: ./.github/actions/cd/deploy-infra
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -128,9 +155,15 @@ jobs:
           confirm_token: "APPLY_INFRA"
 
   release:
-    name: CI - Versao semantica
-    needs: [deploy-infra]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: CI - Release
+    needs: [linter, validate, deploy-infra]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.linter.result == 'success' &&
+      needs.validate.result == 'success' &&
+      needs.deploy-infra.result == 'success' &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_cd != 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -162,7 +195,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release semantico
+      - name: Release semantica
         uses: ./.github/actions/ci/release
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -186,7 +219,8 @@ jobs:
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      needs.release.outputs.published == 'true'
+      needs.release.outputs.published == 'true' &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_cd != 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production
@@ -203,13 +237,9 @@ jobs:
 
       - name: Resolver whitelist
         id: whitelist
-        shell: bash
-        run: |
-          NICKS="${{ secrets.MINECRAFT_WHITELIST }}"
-          if [ -z "${NICKS}" ]; then
-            NICKS="AnonymousNoobz"
-          fi
-          echo "nicks=${NICKS}" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/shared/resolve-whitelist
+        with:
+          whitelist: ${{ secrets.MINECRAFT_WHITELIST }}
 
       - name: Deploy aplicacao
         uses: ./.github/actions/cd/deploy-app
@@ -220,7 +250,7 @@ jobs:
           azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           rcon_password: ${{ secrets.RCON_PASSWORD }}
-          minecraft_whitelist: ${{ steps.whitelist.outputs.nicks }}
+          minecraft_whitelist: ${{ steps.whitelist.outputs.resolved }}
 
   post-deploy:
     name: CD - Pos-deploy
@@ -250,10 +280,27 @@ jobs:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Credenciais AKS
-        uses: azure/aks-set-context@v4
-        with:
-          resource-group: rg-minecraft-server-prod
-          cluster-name: aks-minecraft-server-prod
+        uses: ./.github/actions/shared/aks-context
 
       - name: Testes pos-deploy
         uses: ./.github/actions/cd/post-deploy
+
+  pipeline-summary:
+    name: CI/CD - Resumo
+    needs: [linter, validate, deploy-infra, release, deploy-app, post-deploy]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Resumo do pipeline
+        uses: ./.github/actions/shared/pipeline-summary
+        with:
+          linter: ${{ needs.linter.result }}
+          validate: ${{ needs.validate.result }}
+          deploy_infra: ${{ needs.deploy-infra.result }}
+          release: ${{ needs.release.result }}
+          deploy_app: ${{ needs.deploy-app.result }}
+          post_deploy: ${{ needs.post-deploy.result }}
+          release_tag: ${{ needs.release.outputs.tag }}
+          release_published: ${{ needs.release.outputs.published }}
