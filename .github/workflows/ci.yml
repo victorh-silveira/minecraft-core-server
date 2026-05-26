@@ -293,6 +293,9 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Obter codigo fonte
+        uses: actions/checkout@v4
+
       - name: Resumo do pipeline
         uses: ./.github/actions/shared/pipeline-summary
         with:

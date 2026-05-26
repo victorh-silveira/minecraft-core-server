@@ -69,11 +69,18 @@ runs:
         echo "ref=${IMAGE}" >> "$GITHUB_OUTPUT"
         echo "Imagem: ${IMAGE}"
 
+    - name: Marcar inicio da build
+      shell: bash
+      run: echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
     - name: Configurar Docker Buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Construir e publicar imagem
+      id: docker-build
       uses: docker/build-push-action@v6
+      env:
+        DOCKER_BUILD_SUMMARY: false
       with:
         context: .
         file: infra/docker/Dockerfile
@@ -117,3 +124,47 @@ runs:
         printf '%s' "${MANIFEST}" | kubectl apply -f -
         kubectl -n minecraft-server-prod delete pod mc-server-0 --ignore-not-found --wait=false
         kubectl -n minecraft-server-prod rollout status statefulset/mc-server --timeout=1200s
+
+    - name: Publicar resumo do deploy
+      if: always()
+      shell: bash
+      run: |
+        END=$(date +%s)
+        START="${BUILD_STARTED_AT:-$END}"
+        DURATION=$((END - START))
+        IMAGE="${{ steps.image.outputs.ref }}"
+        DIGEST="${{ steps.docker-build.outputs.digest }}"
+        {
+          echo "## Resumo - Deploy da aplicacao"
+          echo ""
+          echo "### Build Docker"
+          echo ""
+          echo "Para analisar a build em detalhe, baixe o arquivo de registro (.dockerbuild) na secao **Artefatos** deste job e importe no Builds do Docker Desktop."
+          echo ""
+          echo "Os registros incluem tempo, dependencias, resultados, logs, traces e outras informacoes. [Documentacao](https://docs.docker.com/build/ci/github-actions/build-summary/)"
+          echo ""
+          echo "| Campo | Valor |"
+          echo "|-------|-------|"
+          echo "| Nome | minecraft-server/infra/docker |"
+          echo "| Status | concluido |"
+          echo "| Duracao | ${DURATION}s |"
+          echo "| Imagem | \`${IMAGE}\` |"
+          if [ -n "${DIGEST}" ]; then
+            echo "| Digest | \`${DIGEST}\` |"
+          fi
+          echo ""
+          echo "**Entradas da build**"
+          echo ""
+          echo "- Contexto: \`.\`"
+          echo "- Dockerfile: \`infra/docker/Dockerfile\`"
+          echo "- Push: \`true\`"
+          echo "- Cache: \`type=gha\`"
+          echo ""
+          echo "### Kubernetes"
+          echo ""
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Rollout do StatefulSet \`mc-server\` concluido no namespace \`minecraft-server-prod\`."
+          else
+            echo "Deploy interrompido ou com falha antes da conclusao do rollout."
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
