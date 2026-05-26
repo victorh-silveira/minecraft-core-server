@@ -1,3 +1,9 @@
+## [1.11.3](https://github.com/victorh-silveira/minecraft-server/compare/v1.11.2...v1.11.3) (2026-05-26)
+
+### Correcoes de Bug
+
+* **ci:** checkout antes do resumo e summary Docker em PT-BR ([770cb97](https://github.com/victorh-silveira/minecraft-server/commit/770cb978db55d8de2a3f2bfb7e2df07e08c2b98e))
+
 ## [1.11.2](https://github.com/victorh-silveira/minecraft-server/compare/v1.11.1...v1.11.2) (2026-05-26)
 
 ### Correcoes de Bug
