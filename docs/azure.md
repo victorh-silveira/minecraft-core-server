@@ -49,9 +49,6 @@ infra/terraform/
     acr/          Container Registry
     aks/          Cluster + AcrPull + OIDC/WI
     network/      VNet, subnet, NSG
-    storage/      Conta e containers (modulo; SA prod pre-existente)
-    resource-group/
-    public-ip/    Modulo disponivel; nao usado na stack prod atual
   live/prod/
     main.tf       network, acr, aks
     backup_identity.tf
@@ -233,12 +230,12 @@ NetworkPolicy no namespace restringe trafego dos pods (ingress jogo/RCON interno
 
 ## Observabilidade
 
-Exporter Prometheus / sidecar **nao** incluido (economia de RAM no unico node). Saude operacional via probes TCP, logs e annotations `minecraft-server.io/saude-*`. Ver [roadmap.md](roadmap.md) prioridade 9.
+Exporter Prometheus / sidecar **nao** incluido (economia de RAM no unico node). Saude operacional via probes TCP, logs e annotations `minecraft-server.io/saude-*`. Ver [devops.md](devops.md) (roadmap prioridade 6 — metricas).
 
 ## Qualidade Terraform
 
 ```bash
-make terraform-fmt
+make ci-fmt
 terraform -chdir=infra/terraform/live/prod validate
 ```
 

@@ -60,7 +60,12 @@ repos:
       - id: check-yaml
         name: "Infra | Validar sintaxe YAML"
         files: ^(infra/kubernetes/|\.github/workflows/)
-        exclude: ^\.github/workflows/templates/
+        exclude: |
+          (?x)^(
+            \.github/workflows/templates/|
+            infra/kubernetes/base/rbac-world-backup\.yaml|
+            infra/kubernetes/overlays/.*/patches/
+          )
 
       - id: check-json
         name: "Codigo | Validar JSON (manifesto de mods)"

@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UUID_RE='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+
+offline_uuid() {
+  python3 -c 'import hashlib,sys,uuid; u=sys.argv[1]; d=("OfflinePlayer:"+u).encode(); m=bytearray(hashlib.md5(d).digest()); m[6]=(m[6]&0x0f)|0x30; m[8]=(m[8]&0x3f)|0x80; print(uuid.UUID(bytes=bytes(m)))' "$1"
+}
 
 resolve_entry() {
   local entry="$1"
@@ -15,7 +18,7 @@ resolve_entry() {
     printf '%s' "${entry}"
     return
   fi
-  python3 "${SCRIPT_DIR}/minecraft-offline-uuid.py" "${entry}"
+  offline_uuid "${entry}"
 }
 
 input="${1:-}"

@@ -161,4 +161,4 @@ JARs nao entram no Git; CI e desenvolvedor rodam sync antes do build.
 | Seguranca padrao | 8/10 | Whitelist + online-mode; RCON nao exposto em LB |
 | Metadados operacionais | 9/10 | Annotations `minecraft-server.io/*` |
 
-Ver [principles.md](principles.md) e [roadmap.md](roadmap.md).
+Ver [devops.md](devops.md) (principios e roadmap).

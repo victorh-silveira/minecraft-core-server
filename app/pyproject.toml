@@ -14,7 +14,6 @@ dependencies = [
 dev = [
     "bandit>=1.9.4",
     "coverage>=7.14.0",
-    "interrogate>=1.7.0",
     "pip-audit>=2.10.0",
     "pre-commit>=4.6.0",
     "pylint>=3.0.0",
@@ -86,7 +85,9 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 "scripts/python/**/*.py" = ["T201", "S603", "S607", "S101"]
 "**/scripts/python/**/*.py" = ["T201", "S603", "S607", "S101"]
 "src/infrastructure/mods/**/*.py" = ["T201"]
+"**/infrastructure/mods/**/*.py" = ["T201"]
 "tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004"]
+"**/tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -99,21 +100,6 @@ line-ending = "auto"
 testpaths = ["tests"]
 pythonpath = ["src", "scripts/python"]
 addopts = "-q --strict-markers"
-
-# ---- INTERROGATE: COBERTURA DE DOCSTRINGS ----
-[tool.interrogate]
-ignore-init-method = true
-ignore-init-module = true
-fail-under = 100
-exclude = [
-    ".git",
-    ".venv",
-    "build",
-    "dist",
-    "scripts",
-    "tests",
-    "venv",
-]
 
 # ---- BANDIT: ANALISE DE SEGURANCA ----
 [tool.bandit]

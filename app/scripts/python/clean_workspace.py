@@ -125,10 +125,25 @@ def stage_clean():
             if path.is_file():
                 safe_remove(path)
 
-    for name in (".pytest_cache", ".ruff_cache", ".coverage", "htmlcov", "dist", "build"):
-        target = REPO_ROOT / name
+    cache_targets = [
+        REPO_ROOT / ".pytest_cache",
+        REPO_ROOT / ".ruff_cache",
+        REPO_ROOT / ".tools",
+        REPO_ROOT / ".coverage",
+        REPO_ROOT / "htmlcov",
+        REPO_ROOT / "dist",
+        REPO_ROOT / "build",
+        APP_ROOT / ".pytest_cache",
+        APP_ROOT / ".ruff_cache",
+        APP_ROOT / ".coverage",
+    ]
+    for target in cache_targets:
         if target.exists():
             safe_remove(target)
+
+    orphan_scripts_tests = APP_ROOT / "tests" / "unit" / "scripts"
+    if orphan_scripts_tests.is_dir() and not any(orphan_scripts_tests.rglob("*.py")):
+        safe_remove(orphan_scripts_tests)
 
 
 def main():

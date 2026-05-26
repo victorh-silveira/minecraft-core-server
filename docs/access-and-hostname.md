@@ -82,15 +82,7 @@ Label alternativo: configure `game_dns_label` em `terraform.tfvars` e alinhe o p
 
 ### Opcao 2 — DuckDNS
 
-Para subdominio personalizado (`meuminecraft.duckdns.org`):
-
-```bash
-export DUCKDNS_TOKEN=<token>
-export DUCKDNS_DOMAIN=meuminecraft
-bash app/scripts/bash/update-duckdns.sh
-```
-
-Execute apos cada mudanca de IP do LoadBalancer.
+Apos obter o IP do LoadBalancer (`make k8s-annotate`), atualize manualmente em https://www.duckdns.org com o token da sua conta.
 
 ### Opcao 3 — nip.io (teste rapido)
 

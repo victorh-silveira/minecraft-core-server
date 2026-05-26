@@ -46,7 +46,7 @@ Overlay prod: `kubectl apply -k infra/kubernetes/overlays/prod`.
 
 ## `server.properties`
 
-Arquivo: `app/src/application/configs/server.properties`  
+Arquivo: `app/src/application/configs/server.properties`
 Montado em `/data/server.properties` (gravavel pela imagem itzg).
 
 | Propriedade | Padrao no arquivo | Producao efetiva |
@@ -69,7 +69,7 @@ Compose injeta `ONLINE_MODE`, `DIFFICULTY`, `MAX_PLAYERS` e monta `server.proper
 | B | Apenas `server.properties`; remover env duplicado |
 | C (atual local) | Manter ambos com **valores identicos** |
 
-Ver [roadmap.md](roadmap.md) prioridade 1.
+Ver [devops.md](devops.md) (roadmap prioridade 1).
 
 ## Docker build args
 

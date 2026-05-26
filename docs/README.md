@@ -20,12 +20,10 @@ Indice dos guias do projeto **Minecraft Server** (Fabric, Docker, Azure AKS, Ter
 | [architecture.md](architecture.md) | Stack Azure + AKS + Minecraft, volumes, fluxos |
 | [annotations.md](annotations.md) | Catalogo completo `minecraft-server.io/*` e diagramas |
 | [azure.md](azure.md) | Terraform, modulos, AKS, ACR, backup, custos, destroy |
-| [devops.md](devops.md) | Dockerfile, Compose, Makefile, CI/CD, pre-commit |
+| [devops.md](devops.md) | Dockerfile, Compose, Makefile, CI/CD, principios, roadmap |
 | [operations.md](operations.md) | Checklists, backup, RCON, annotations, troubleshooting |
 | [configuration.md](configuration.md) | `infra/docker/.env`, `server.properties`, manifesto de mods |
 | [access-and-hostname.md](access-and-hostname.md) | Whitelist, online-mode, DNS Azure, DuckDNS, NSG |
-| [principles.md](principles.md) | DRY, SOLID, testes, conventional commits |
-| [roadmap.md](roadmap.md) | Gaps e prioridades futuras |
 | [CHANGELOG.md](CHANGELOG.md) | Historico de versoes (nao editar manualmente) |
 
 ## Recursos Azure (producao)
@@ -61,10 +59,10 @@ Metadados operacionais: annotations `minecraft-server.io/*` — [annotations.md]
 | `infra/docker/` | Imagem e Compose local |
 | `infra/kubernetes/base/` | Manifestos K8s reutilizaveis |
 | `infra/kubernetes/overlays/prod/` | Patch de producao (recursos, DNS LB, annotations) |
-| `infra/terraform/modules/` | Modulos ACR, AKS, network, storage, etc. |
+| `infra/terraform/modules/` | Modulos ACR, AKS, network |
 | `infra/terraform/live/prod/` | Stack de producao |
 | `app/src/` | Dados e codigo do dominio |
-| `app/scripts/bash/` | `test-aks.sh`, `atualizar-annotations-k8s.sh` |
+| `app/scripts/bash/` | `deploy-aks.sh`, `test-aks.sh`, `resolve-whitelist.sh` |
 | `docs/` | Esta documentacao |
 | `linters/` | Configuracao tflint e tfsec |
 
