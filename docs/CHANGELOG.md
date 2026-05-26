@@ -1,3 +1,13 @@
+## [1.11.2](https://github.com/victorh-silveira/minecraft-server/compare/v1.11.1...v1.11.2) (2026-05-26)
+
+### Correcoes de Bug
+
+* **test:** alinhar mock de iter_content com requests ([7e413e1](https://github.com/victorh-silveira/minecraft-server/commit/7e413e199e83e47b1d649af51978c05118a7a36d))
+
+### Refatoracoes Tecnicas
+
+* **repo:** limpeza do monorepo e ambiente make com venv ([be2a54c](https://github.com/victorh-silveira/minecraft-server/commit/be2a54c1937d6b74088bc6f5c30e7402493039be))
+
 ## [1.11.1](https://github.com/victorh-silveira/minecraft-server/compare/v1.11.0...v1.11.1) (2026-05-25)
 
 ### Correcoes de Bug
