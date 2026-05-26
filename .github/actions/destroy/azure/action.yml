@@ -76,7 +76,21 @@ runs:
       run: |
         cd infra/terraform/live/prod
         terraform init -input=false
-        terraform plan -destroy -input=false -no-color -out=destroy.tfplan
+        set +e
+        plan_out="$(terraform plan -destroy -input=false -no-color -out=destroy.tfplan 2>&1)"
+        plan_rc=$?
+        set -e
+        if [ "$plan_rc" -ne 0 ]; then
+          lock_id="$(printf '%s' "$plan_out" | awk '/^  ID:/{print $2; exit}')"
+          if [ -n "$lock_id" ]; then
+            echo "Lock stale detectado (${lock_id}). Liberando..."
+            terraform force-unlock -force "$lock_id"
+            terraform plan -destroy -input=false -no-color -out=destroy.tfplan
+          else
+            printf '%s\n' "$plan_out"
+            exit "$plan_rc"
+          fi
+        fi
         terraform show -no-color destroy.tfplan > destroy-plan.txt
 
     - name: Publicar artefato do plano de destroy
