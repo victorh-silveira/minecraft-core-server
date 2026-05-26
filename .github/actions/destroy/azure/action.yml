@@ -65,6 +65,23 @@ runs:
           echo "AKS nao encontrado ou indisponivel. Continuando com o destroy direto..."
         fi
 
+    - name: Remover cluster AKS
+      shell: bash
+      run: |
+        if az aks show --resource-group rg-minecraft-server-prod --name aks-minecraft-server-prod >/dev/null 2>&1; then
+          echo "Deletando cluster AKS (libera subnet e NICs dos nodes)..."
+          az aks delete \
+            --resource-group rg-minecraft-server-prod \
+            --name aks-minecraft-server-prod \
+            --yes
+        else
+          echo "Cluster AKS ja removido."
+        fi
+        if az group exists --name rg-minecraft-server-nodes-prod 2>/dev/null | grep -qi true; then
+          echo "Removendo resource group de nodes..."
+          az group delete --name rg-minecraft-server-nodes-prod --yes --no-wait
+        fi
+
     - name: Plano de destroy Terraform
       shell: bash
       env:
