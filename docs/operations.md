@@ -7,14 +7,13 @@ Guia operacional para Docker local e Azure AKS. Arquitetura: [architecture.md](a
 | # | Acao |
 |---|------|
 | 1 | `Copy-Item infra/docker/.env.example infra/docker/.env` e preencher valores reais |
-| 2 | `pip install -r app/requirements-dev.txt` |
-| 3 | `make pre-commit-install` |
-| 4 | `make docker-sync-mods` |
-| 5 | `make docker-build-up` |
-| 6 | `make docker-logs` — aguardar mensagem de servidor pronto |
-| 7 | Conectar clientes em `host:GAME_PORT` (padrao 25565) |
-| 8 | Configurar firewall RCON (secao abaixo) |
-| 9 | Agendar backup de `app/src/domain/world-data` |
+| 2 | `make app-setup` |
+| 3 | `make docker-sync-mods` |
+| 4 | `make docker-build-up` |
+| 5 | `make docker-logs` — aguardar mensagem de servidor pronto |
+| 6 | Conectar clientes em `host:GAME_PORT` (padrao 25565) |
+| 7 | Configurar firewall RCON (secao abaixo) |
+| 8 | Agendar backup de `app/runtime/world` |
 
 ---
 
@@ -36,7 +35,7 @@ make docker-sh
 ## Atualizacao de mods
 
 1. Criar branch: `feature/atualizar-mods`
-2. Editar `app/src/interface/mods/mods-manifest.json`
+2. Editar `app/runtime/mods/mods-manifest.json`
 3. `make docker-sync-mods`
 4. Testar localmente: `make docker-build-up`
 5. Validar servidor in-game e logs
@@ -49,10 +48,10 @@ Fixar `sha256` no manifesto apos validar em ambiente de teste.
 ## Backup do mundo
 
 ```powershell
-Compress-Archive -Path src\domain\world-data -DestinationPath backup-world-$(Get-Date -Format yyyyMMdd-HHmm).zip
+Compress-Archive -Path app\runtime\world -DestinationPath backup-world-$(Get-Date -Format yyyyMMdd-HHmm).zip
 ```
 
-Restaurar: extrair para `app/src/domain/world-data` com servidor **parado** (`make docker-down`).
+Restaurar: extrair para `app/runtime/world` com servidor **parado** (`make docker-down`).
 
 ---
 
@@ -88,24 +87,24 @@ Para VPN de gerenciamento, substitua `127.0.0.1` pelo CIDR da rede privada.
 
 ## JARs, Git e sync de mods
 
-JARs em `app/src/interface/mods/*.jar` estao no `.gitignore`. Apenas `mods-manifest.json` e versionado.
+JARs em `app/runtime/mods/*.jar` estao no `.gitignore`. Apenas `mods-manifest.json` e versionado.
 
 ```powershell
 make docker-sync-mods
-cd app && python -m pytest tests/unit/infrastructure/mods/test_sync.py
+make app-test
 ```
 
 Se um JAR entrou no Git por engano:
 
 ```powershell
-git rm --cached app/src/interface/mods/*.jar
+git rm --cached app/runtime/mods/*.jar
 ```
 
 ---
 
 ## Persistencia de autenticacao
 
-Pasta `app/src/infrastructure/database` montada em `/data/database` no container.
+Pasta `app/runtime/database` montada em `/data/database` no container.
 
 | Loader | Observacao |
 |--------|------------|
@@ -117,7 +116,7 @@ Configure o mod/plugin para gravar SQLite em caminho persistente sob `/data/data
 Backup:
 
 ```powershell
-Copy-Item -Recurse src\infrastructure\database backup-auth-$(Get-Date -Format yyyyMMdd)
+Copy-Item -Recurse app\runtime\database backup-auth-$(Get-Date -Format yyyyMMdd)
 ```
 
 ---
@@ -136,7 +135,7 @@ A imagem itzg ajusta ownership de `/data` no init quando `SKIP_CHOWN=false`.
 
 Se aparecer `Permission denied` nos logs:
 
-1. Verifique pastas em `app/src/domain`, `app/src/interface`, `app/src/infrastructure`
+1. Verifique pastas em `app/runtime/`
 2. Ajuste `UID`/`GID` no `.env` se necessario
 3. No WSL, prefira clonar o repo dentro do filesystem Linux (`~/`), nao em `/mnt/c/`
 
@@ -145,7 +144,7 @@ Se aparecer `Permission denied` nos logs:
 | Sintoma | Acao |
 |---------|------|
 | Container reinicia em loop | `make docker-logs` — verificar EULA, VERSION, TYPE |
-| Mods nao carregam | `make docker-sync-mods`; conferir JARs em `app/src/interface/mods/` |
+| Mods nao carregam | `make docker-sync-mods`; conferir JARs em `app/runtime/mods/` |
 | Porta em uso | Alterar `GAME_PORT` no `.env` |
 | `.env` nao encontrado | Copie `infra/docker/.env.example` para `infra/docker/.env` |
 | Healthcheck failing | Aguardar start-period (180s); Fabric + mods demoram |
@@ -161,7 +160,7 @@ Se aparecer `Permission denied` nos logs:
 | `make docker-down` | Para e remove containers/rede |
 | `make docker-clean` | + remove imagens locais e volumes anonimos |
 
-`docker-clean` **nao** apaga `app/src/domain/world-data` (bind mount, nao volume nomeado).
+`docker-clean` **nao** apaga `app/runtime/world` (bind mount, nao volume nomeado).
 
 ---
 
@@ -179,7 +178,7 @@ Guia completo: [azure.md](azure.md)
 | 4 | GitHub Secrets `RCON_PASSWORD` e `MINECRAFT_WHITELIST` |
 | 5 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
 | 6 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
-| 7 | Migrar mundo: `kubectl cp` de `app/src/domain/world-data` |
+| 7 | Migrar mundo: `kubectl cp` de `app/runtime/world` |
 | 8 | `bash app/scripts/bash/test-aks.sh` |
 | 9 | `make k8s-annotate` e ler `conectividade-endereco` no Service `mc-server-game` |
 

@@ -39,8 +39,12 @@ yarn-error.log*
 .agent/
 .agents/
 .antigravity/
-.cursor/
 .gemini/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/skills/
+!.cursor/skills/**
 
 # ---- IDEs E SISTEMA OPERACIONAL ----
 *.swp
@@ -59,24 +63,23 @@ infra/terraform/**/*.tfstate.*
 infra/terraform/**/terraform.tfvars
 !infra/terraform/**/terraform.tfvars.example
 
-# ---- SERVIDOR MINECRAFT: DADOS PERSISTENTES E BINARIOS ----
-app/src/domain/world-data/*
-!app/src/domain/world-data/.gitkeep
-app/src/domain/world-data/**/session.lock
-app/src/domain/world-data/**/level.dat
-app/src/domain/world-data/**/level.dat_old
-app/src/domain/world-data/**/*.mca
-app/src/domain/world-data/**/*.dat
+app/runtime/world/*
+!app/runtime/world/.gitkeep
+app/runtime/world/**/session.lock
+app/runtime/world/**/level.dat
+app/runtime/world/**/level.dat_old
+app/runtime/world/**/*.mca
+app/runtime/world/**/*.dat
 
-app/src/interface/mods/*.jar
-!app/src/interface/mods/mods-manifest.json
+app/runtime/mods/*.jar
+!app/runtime/mods/mods-manifest.json
 
-app/src/interface/plugins/*.jar
+app/runtime/plugins/*.jar
 
-app/src/infrastructure/logging/*
-!app/src/infrastructure/logging/.gitkeep
+app/runtime/logs/*
+!app/runtime/logs/.gitkeep
 
-app/src/infrastructure/database/*
-!app/src/infrastructure/database/.gitkeep
+app/runtime/database/*
+!app/runtime/database/.gitkeep
 
 .azure-setup-tmp/

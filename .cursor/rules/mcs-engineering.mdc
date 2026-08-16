@@ -1,0 +1,18 @@
+---
+description: Engenharia MCS — WSL, 300 linhas, cobertura 100%, commitlint PT-BR
+alwaysApply: true
+---
+
+# Engenharia
+
+- Terminal: **WSL** apenas (nunca CMD/PowerShell nativo)
+- `app/src/**/*.py` e `run.py` ≤ **300** linhas; cobertura **100% branch** nas quatro camadas
+- Sem comentarios no codigo; sem emojis em codigo, logs ou docs
+- Gates: `make app-lint`, `make app-test`, `make app-security`; orquestrador `app/scripts/operations/clean_workspace.py`
+- Commit: `tipo(escopo): assunto PT-BR` + corpo; escopos em `linters/commitlint.config.mjs`
+- SSOT de agentes: `AGENTS.md` + `docs/agent-coverage.md`
+- Deps: `docs/engineering-python-deps.md` + rule `mcs-python-deps`
+- Higiene: `docs/engineering-repo-hygiene.md` + skill `mcs-repo-hygiene`
+- Fechamento: `docs/engineering-surface-sync.md` + skill `mcs-surface-sync`
+- Scaffold: `prompt-model.md`
+- Nao afrouxar QA para passar o hook; corrigir a causa

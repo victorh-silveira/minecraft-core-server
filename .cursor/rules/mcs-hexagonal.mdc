@@ -1,0 +1,15 @@
+---
+description: Hexagonal MCS — ports, adapters, composition root em presentation
+globs: app/src/application/**/*.py,app/src/infrastructure/**/*.py,app/src/presentation/**/*.py
+alwaysApply: true
+---
+
+# Hexagonal
+
+- `application` depende so de `domain`; ports sao `Protocol`
+- Adapters em `infrastructure/adapters`; Settings em `infrastructure/config`
+- Composition root (wiring Settings → adapters → use case) **somente** em `presentation`
+- Use case sem logs e sem `requests`
+- Imports limpos: `from domain...`, `from application...`
+- Gate de dependencia no orquestrador (`clean_workspace` stage lint)
+- Skill: `mcs-hexagonal-tdd`

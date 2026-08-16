@@ -26,7 +26,7 @@ runs:
 
     - name: Bandit e pip-audit
       shell: bash
-      run: python app/scripts/python/clean_workspace.py --stage security
+      run: python app/scripts/operations/clean_workspace.py --stage security
 
     - name: Gitleaks
       shell: bash

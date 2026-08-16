@@ -1,40 +1,57 @@
 # Minecraft Server
 
-Servidor Minecraft **Fabric 1.20.6** com Clean Architecture, entrega local via Docker Compose e producao em **Azure AKS** (IaC Terraform + manifestos Kubernetes).
+[![CI](https://github.com/victorh-silveira/minecraft-core-server/actions/workflows/ci.yml/badge.svg)](https://github.com/victorh-silveira/minecraft-core-server/actions/workflows/ci.yml)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB?logo=python&logoColor=white)](app/pyproject.toml)
+[![Minecraft Fabric](https://img.shields.io/badge/minecraft-Fabric%201.20.6-62B47A?logo=minecraft&logoColor=white)](docs/architecture.md)
+[![Java 21](https://img.shields.io/badge/java-21-ED8B00?logo=openjdk&logoColor=white)](infra/docker/Dockerfile)
+[![Coverage](https://img.shields.io/badge/coverage-100%25%20branch-brightgreen)](docs/engineering-python.md)
+[![Ruff](https://img.shields.io/badge/linter-ruff-D7FF64?logo=ruff&logoColor=black)](docs/engineering-python.md)
+[![mypy strict](https://img.shields.io/badge/typecheck-mypy%20strict-294E80)](docs/engineering-python.md)
+[![Docker](https://img.shields.io/badge/docker-compose-2496ED?logo=docker&logoColor=white)](docs/infra-docker.md)
+[![Kubernetes](https://img.shields.io/badge/k8s-Azure%20AKS-326CE5?logo=kubernetes&logoColor=white)](docs/azure.md)
+[![Terraform](https://img.shields.io/badge/IaC-Terraform-844FBA?logo=terraform&logoColor=white)](docs/azure.md)
+
+Servidor Minecraft **Fabric 1.20.6** com arquitetura hexagonal (DDD + TDD), entrega local via Docker Compose e producao em **Azure AKS** (IaC Terraform + manifestos Kubernetes).
 
 ## Arquitetura em uma linha
 
 | Camada | Tecnologia | Papel |
 |--------|------------|-------|
 | Jogo | itzg/minecraft-server (Java 21) | Processo do servidor Fabric |
-| App | Python `infrastructure.mods` | Sync de mods via manifesto |
+| App | Python hexagonal (`domain` → CLI) | Sync de mods via manifesto |
+| Runtime | `app/runtime/` | Mundo, configs, JARs, logs |
 | Container local | Docker Compose | Desenvolvimento e testes |
-| Orquestracao cloud | AKS 1.34 Free (1x B2ats_v2) | StatefulSet + PVC 8Gi LRS + LoadBalancer |
-| IaC | Terraform `live/prod` | RG, VNet, AKS Free tier, tfstate LRS |
+| Orquestracao cloud | AKS 1.34 Free (1x B2ats_v2) | StatefulSet + PVC + LoadBalancer |
+| IaC | Terraform `live/prod` | RG, VNet, AKS, tfstate |
 | CI/CD | GitHub Actions | Validacao, GitOps de infra, release, deploy |
-| Dados | Azure Disk LRS 8Gi (Retain) | Mundo persistente no PVC |
 
-Diagrama completo: [docs/architecture.md](docs/architecture.md). Deploy Azure: [docs/azure.md](docs/azure.md).
+Codigo da aplicacao: [docs/arquitetura.md](docs/arquitetura.md). Stack Azure: [docs/architecture.md](docs/architecture.md). Deploy: [docs/azure.md](docs/azure.md). Contrato: [prompt-model.md](prompt-model.md). Agentes: [AGENTS.md](AGENTS.md) + [docs/agent-coverage.md](docs/agent-coverage.md).
 
 ## Estrutura do repositorio
 
 ```text
 minecraft-core-server/
-├── README.md
-├── Makefile
-├── .github/                 workflows CI, CD, Destroy e composite actions
+├── run.py                   CLI na raiz
+├── Makefile                 app-*, docker-*, k8s-*
+├── AGENTS.md                entrada para agentes LLM
+├── prompt-model.md
+├── .cursor/
+│   ├── rules/               rules mcs-*.mdc
+│   └── skills/              skills mcs-*/SKILL.md
+├── .vscode/settings.json
+├── .github/                 workflows CI, CD, Destroy
 ├── infra/
-│   ├── docker/              Dockerfile, Compose, .env
-│   ├── kubernetes/          base + overlay prod (Kustomize)
-│   └── terraform/           modules + live/prod (brazilsouth)
+│   ├── docker/
+│   ├── kubernetes/
+│   └── terraform/
 ├── app/
-│   ├── src/                 configs, mods (sync), dados locais (world/logs)
+│   ├── src/                 domain, application, infrastructure, presentation
+│   ├── runtime/             mundo, configs, mods, plugins, logs, database
 │   ├── scripts/bash/        deploy, testes, annotations, CI infra
-│   ├── scripts/python/      clean_workspace (lint/test/security)
-│   ├── tests/unit/          testes do sync de mods
-│   └── tools/               commitlint, releaserc
-├── docs/                    documentacao tecnica (indice em docs/README.md)
-└── linters/                 tflint, tfsec (ver linters/README.md)
+│   ├── scripts/operations/  orquestrador lint/test/security/clean
+│   └── tests/               unit por camada + integration
+├── docs/
+└── linters/                 commitlint, tflint, tfsec, git-hooks
 ```
 
 ## Inicio rapido (Docker local)
@@ -43,9 +60,10 @@ minecraft-core-server/
 Copy-Item infra/docker/.env.example infra/docker/.env
 ```
 
-Referencia minima de variaveis na raiz: `.env.example` (o Compose usa `infra/docker/.env`).
-make dev-deps
-make pre-commit-install
+Referencia de variaveis na raiz: `.env.example` (o Compose usa `infra/docker/.env`).
+
+```bash
+make app-setup
 make docker-sync-mods
 make docker-build-up
 make docker-logs
@@ -78,6 +96,7 @@ kubectl -n minecraft-server-prod get svc mc-server-game \
 
 | Comando | Descricao |
 |---------|-----------|
+| `make app-lint` / `app-test` / `app-security` | Gates de qualidade |
 | `make docker-build-up` | Sync mods, build e sobe servidor local |
 | `make docker-test` | Valida Docker local |
 | `make ci-lint` / `make ci-test` | Espelha gates do CI |
@@ -92,8 +111,15 @@ kubectl -n minecraft-server-prod get svc mc-server-game \
 | Documento | Conteudo |
 |-----------|----------|
 | [docs/README.md](docs/README.md) | Indice completo |
+| [AGENTS.md](AGENTS.md) | Prioridades e leitura por tarefa para agentes |
+| [docs/agent-coverage.md](docs/agent-coverage.md) | Matriz doc + rule + skill |
+| [docs/arquitetura.md](docs/arquitetura.md) | Camadas hexagonais, ports, sync |
+| [docs/structure.md](docs/structure.md) | Arvore e regras de dependencia |
+| [docs/engineering-python.md](docs/engineering-python.md) | Ruff, mypy, testes, Make |
+| [docs/engineering-logging.md](docs/engineering-logging.md) | Eventos de log |
+| [docs/infra-docker.md](docs/infra-docker.md) | Compose e volumes locais |
 | [docs/architecture.md](docs/architecture.md) | Azure, Kubernetes, Minecraft |
-| [docs/annotations.md](docs/annotations.md) | Catalogo `minecraft-server.io/*` e diagramas |
+| [docs/annotations.md](docs/annotations.md) | Catalogo `minecraft-server.io/*` |
 | [docs/azure.md](docs/azure.md) | Terraform, AKS, backup, custos |
 | [docs/devops.md](docs/devops.md) | Docker, CI/CD, principios, roadmap |
 | [docs/operations.md](docs/operations.md) | Operacao, backup, troubleshooting |
@@ -108,7 +134,7 @@ Historico de versoes: [docs/CHANGELOG.md](docs/CHANGELOG.md) (gerado por release
 Padrao de hooks: `Area | Acao` em [`.pre-commit-config.yaml`](.pre-commit-config.yaml).
 
 ```bash
-make pre-commit-install
+make app-setup
 pre-commit run --all-files
 ```
 

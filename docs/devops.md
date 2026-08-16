@@ -15,7 +15,7 @@ Docker local, qualidade de codigo, Terraform, Kubernetes e pipelines GitHub Acti
 | Volumes | world, mods, plugins, logs, database |
 | JVM | `USE_AIKAR_FLAGS`, `SYNC_CHUNK_WRITES` |
 
-Templates em `/templates/` na imagem; bind mounts de `app/src/` prevalecem em runtime local.
+Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem em runtime local.
 
 ## Docker Compose
 
@@ -33,17 +33,18 @@ Templates em `/templates/` na imagem; bind mounts de `app/src/` prevalecem em ru
 
 | Comando | Descricao |
 |---------|-----------|
+| `app-lint` / `app-test` / `app-security` | Gates Python (orquestrador unico) |
 | `docker-build-up` | Sync mods, build, sobe servidor |
 | `docker-test` | `test-docker.sh` |
 | `ci-lint` | pre-commit |
-| `ci-test` | pytest + cobertura 100% |
+| `ci-test` | alias de `app-test` |
 | `ci-validate` | testes + security + test-docker |
 | `ci-fmt` / `ci-validate-infra` / `terraform-plan` | Terraform live/prod |
 | `k8s-apply` | Kustomize prod + annotations |
 | `k8s-annotate` | `atualizar-annotations-k8s.sh` |
 | `k8s-test` | `test-aks.sh` |
-| `pre-commit-install` | hooks + commit-msg |
-| `dev-deps` | cria `.venv` e instala requirements-dev |
+| `app-setup` | deps + hooks + commit-msg |
+| `app-install` | cria `.venv` e instala requirements-dev |
 
 ## Terraform e Kubernetes
 
@@ -75,18 +76,18 @@ Hooks: `Codigo |`, `Infra |`, `Docker |`, `Workflows |`, `Commit |` (ver `.pre-c
 
 ## Quality gate
 
-[`app/scripts/python/clean_workspace.py`](../app/scripts/python/clean_workspace.py)
+[`app/scripts/operations/clean_workspace.py`](../app/scripts/operations/clean_workspace.py)
 
 | Stage | Ferramentas |
 |-------|-------------|
-| lint | Ruff, Vulture, Pylint, limite 300 linhas |
-| test | pytest + coverage 100% em `infrastructure.mods` |
+| lint | Ruff, mypy strict, Vulture, Pylint, limite 300 linhas, imports hexagonais |
+| test | pytest + coverage 100% branch nas quatro camadas |
 | security | Bandit, pip-audit |
-| clean | caches, `.tools`, `__pycache__`, pastas vazias obsoletas |
+| clean | caches, `.tools`, `__pycache__` |
 
 ## Release semantica
 
-[`app/tools/releaserc.mjs`](../app/tools/releaserc.mjs) — gera `docs/CHANGELOG.md` e tag Git na branch `main`.
+[`linters/releaserc.mjs`](../linters/releaserc.mjs) — gera `docs/CHANGELOG.md` e tag Git na branch `main`.
 
 ## CI/CD
 
@@ -162,20 +163,20 @@ Manual, confirmar `DESTROY`. Remove namespace K8s, depois `terraform destroy`. P
 
 Duplicidade conhecida: config do jogo em `.env`/StatefulSet **e** `server.properties` — ver [configuration.md](configuration.md).
 
-### SOLID (`app/src/infrastructure/mods/`)
+### SOLID (sync de mods)
 
-| Principio | Comentario |
-|-----------|------------|
-| S | Funcoes focadas; `sync_mod` coeso |
-| O | Novas sources via registro de resolvers |
-| I | `ModResolver` Protocol em `providers.py` |
-| D | Testes com monkeypatch de paths |
+| Principio | Aplicacao |
+|-----------|-----------|
+| S | Use case, resolvers e store com responsabilidade unica |
+| O | Novas sources via `ModResolver` no composition root |
+| I | Ports em `application/ports` |
+| D | Testes da application usam fakes dos ports |
 
-Cobertura **100%** em `infrastructure.mods` (`make ci-test`).
+Cobertura **100% branch** nas camadas da app (`make app-test`).
 
 ### Commits
 
-Formato `tipo(escopo): assunto` com corpo obrigatorio (`app/tools/commitlint.config.mjs`). Escopos: `docker`, `mods`, `infra`, `scripts`, `config`, `test`, etc.
+Formato `tipo(escopo): assunto` com corpo obrigatorio (`linters/commitlint.config.mjs`). Escopos: `domain`, `application`, `presentation`, `mods`, `runtime`, `docker`, `infra`, `scripts`, `config`, `test`.
 
 ## Roadmap
 
@@ -185,7 +186,7 @@ Historico de releases: [CHANGELOG.md](CHANGELOG.md).
 |------------|------|
 | 1 | Unificar `ONLINE_MODE`, `DIFFICULTY`, `MAX_PLAYERS` entre `.env` e `server.properties` |
 | 2 | Pin da imagem base `itzg/minecraft-server` (tag ou digest fixo) |
-| 3 | Expandir injecao de dependencias em `infrastructure.mods` |
+| 3 | Manter injecao de dependencias nos adapters do sync |
 | 4 | Segredos em Azure Key Vault + CSI / External Secrets |
 | 5 | Profiles Compose `dev` / `staging` |
 | 6 | Metricas Prometheus (avaliar RAM no node unico) |

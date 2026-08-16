@@ -48,43 +48,46 @@ flowchart TB
 ```mermaid
 flowchart LR
   manifest[mods-manifest.json]
-  sync[python -m infrastructure.mods]
+  sync[python run.py]
   compose[Docker Compose mc-server]
-  src[app/src/domain world-data]
+  runtime[app/runtime/world]
   manifest --> sync
   sync --> compose
-  src -->|bind mount /data/world| compose
+  runtime -->|bind mount /data/world| compose
 ```
+
+Codigo hexagonal: [arquitetura.md](arquitetura.md). Volumes locais: [infra-docker.md](infra-docker.md).
 
 ## Camadas do repositorio
 
 | Camada | Pasta / artefato | Responsabilidade |
 |--------|------------------|------------------|
-| Dominio | `app/src/domain/world-data` | Persistencia do mundo (nao versionado no Git) |
-| Aplicacao | `app/src/application/configs` | Politicas (`server.properties`) |
-| Interface | `app/src/interface/mods`, `plugins` | Extensoes; JARs via sync |
-| Infra app | `app/src/infrastructure/mods` | Download Modrinth/CurseForge |
-| Infra app | `app/src/infrastructure/logging`, `database` | Logs e auth SQLite |
+| Dominio Python | `app/src/domain` | Entidades e regras do sync de mods |
+| Aplicacao Python | `app/src/application` | Use case e ports |
+| Infra Python | `app/src/infrastructure` | Adapters HTTP/FS, Settings, log_event |
+| Presentation | `app/src/presentation` | CLI e composition root |
+| Runtime Fabric | `app/runtime/` | Mundo, configs, JARs, logs, database |
 | Entrega local | `infra/docker/` | Dockerfile + Compose |
 | IaC | `infra/terraform/live/prod` | AKS, ACR, rede, identidade backup |
 | Runtime cloud | `infra/kubernetes/` | StatefulSet, servicos, backup, rede |
 
 ### Regra de dependencia (Clean Architecture)
 
+- `domain` e `application` nao importam `infrastructure` nem `presentation`
 - Codigo em `app/src/` nao depende de Terraform nem de YAML do Kubernetes
-- Scripts e Makefile dependem de `src/`, nunca o contrario
+- Scripts e Makefile dependem de `app/src/`, nunca o contrario
 - Manifestos K8s referenciam imagem do ACR e secrets injetados pelo CD
 
 ## Mapeamento de volumes
 
 | Host (local) | Pod AKS | Caminho no container | Conteudo |
 |--------------|---------|----------------------|----------|
-| `app/src/domain/world-data` | subPath `world` | `/data/world` | Chunks, jogadores |
-| `app/src/application/configs/server.properties` | ConfigMap | `/data/server.properties` | Politicas (K8s) |
-| `app/src/interface/mods` | subPath `mods` | `/data/mods` | JARs Fabric |
-| `app/src/interface/plugins` | subPath `plugins` | `/data/plugins` | Plugins |
-| `app/src/infrastructure/logging` | subPath `logs` | `/data/logs` | Logs |
-| `app/src/infrastructure/database` | subPath `database` | `/data/database` | SQLite / auth |
+| `app/runtime/world` | subPath `world` | `/data/world` | Chunks, jogadores |
+| `app/runtime/configs/server.properties` | ConfigMap | `/data/server.properties` | Politicas (K8s) |
+| `app/runtime/mods` | subPath `mods` | `/data/mods` | JARs Fabric |
+| `app/runtime/plugins` | subPath `plugins` | `/data/plugins` | Plugins |
+| `app/runtime/logs` | subPath `logs` | `/data/logs` | Logs |
+| `app/runtime/database` | subPath `database` | `/data/database` | SQLite / auth |
 
 No AKS um unico PVC `mc-data` (32Gi, `mc-standard-ssd`, **Retain**) agrupa os subPaths.
 
@@ -142,11 +145,11 @@ Detalhes: [devops.md](devops.md) e [.github/README.md](../.github/README.md).
 
 ## Sync de mods
 
-Manifesto: `app/src/interface/mods/mods-manifest.json`.
+Manifesto: `app/runtime/mods/mods-manifest.json`.
 
 ```bash
 make docker-sync-mods
-cd app && python -m pytest tests/unit/infrastructure/mods/test_sync.py
+make app-test
 ```
 
 JARs nao entram no Git; CI e desenvolvedor rodam sync antes do build.

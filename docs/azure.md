@@ -165,7 +165,7 @@ Com pod em execucao:
 
 ```bash
 POD=mc-server-0
-kubectl -n minecraft-server-prod cp app/src/domain/world-data/. "${POD}:/data/world/" -c mc-server
+kubectl -n minecraft-server-prod cp app/runtime/world/. "${POD}:/data/world/" -c mc-server
 ```
 
 ## 6. Validacao

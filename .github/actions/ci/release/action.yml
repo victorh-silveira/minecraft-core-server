@@ -35,4 +35,4 @@ runs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        npx --no-install semantic-release --extends ./app/tools/releaserc.mjs
+        npx --no-install semantic-release --extends ./linters/releaserc.mjs

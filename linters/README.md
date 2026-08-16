@@ -9,9 +9,9 @@ Configuracao centralizada de analise estatica para codigo Python, Terraform, Doc
 | [`linters/.terraform-version`](.terraform-version) | Terraform CLI | Versao alinhada entre CI GitHub Actions, local (WSL) e bootstrap em `.tools/` |
 | [`linters/.tflint.hcl`](.tflint.hcl) | [TFLint](https://github.com/terraform-linters/tflint) | Terraform em `infra/terraform/` (preset recommended + ruleset azurerm) |
 | [`linters/.tfsec.yml`](.tfsec.yml) | [tfsec](https://github.com/aquasecurity/tfsec) | Seguranca Terraform; severidade minima MEDIUM; exclude `AZU-0001` |
-| [`app/pyproject.toml`](../app/pyproject.toml) | [Ruff](https://docs.astral.sh/ruff/) | Lint e format Python (`app/src/infrastructure/mods`, scripts, tests) |
+| [`app/pyproject.toml`](../app/pyproject.toml) | [Ruff](https://docs.astral.sh/ruff/) / mypy / coverage | Lint, tipos e testes Python (`app/src`, scripts, tests) |
 | [`.pre-commit-config.yaml`](../.pre-commit-config.yaml) | pre-commit | Hooks locais antes do commit |
-| [`app/tools/commitlint.config.mjs`](../app/tools/commitlint.config.mjs) | commitlint | Mensagens de commit (hook `commit-msg`) |
+| [`linters/commitlint.config.mjs`](commitlint.config.mjs) | commitlint | Mensagens de commit (hook `commit-msg`) |
 
 ## Pre-commit (local)
 
@@ -56,15 +56,15 @@ pre-commit run --all-files
 
 | Area | Hook | O que valida |
 |------|------|--------------|
-| Codigo | Lint Python (Ruff) | `app/src/infrastructure/mods`, `app/tests` — com `--fix` |
+| Codigo | Lint Python (Ruff) | `app/src`, `app/tests` — com `--fix` |
 | Codigo | Formatar Python (Ruff) | Formatacao |
-| Codigo | Validar JSON | `app/src/interface/mods/mods-manifest.json` |
+| Codigo | Validar JSON | `app/runtime/mods/mods-manifest.json` |
 | Infra | Formatar Terraform | `ci-infra-local.sh fmt` (versao em `linters/.terraform-version`, padrao 1.15.4) |
 | Infra | Validar Terraform | `ci-infra-local.sh validate` (tflint, tfsec, `terraform validate` em `live/prod`) |
 | Infra | Validar sintaxe YAML | `infra/kubernetes/`, `.github/workflows/` |
 | Docker | Lint Dockerfile | Hadolint em `infra/docker/Dockerfile` (ignore DL3006) |
 | Workflows | Lint GitHub Actions | actionlint |
-| Arquivo | Newline no fim | Arquivos texto (exceto world-data) |
+| Arquivo | Newline no fim | Arquivos texto (exceto `app/runtime/world`) |
 | Arquivo | Remover espacos no fim | Trailing whitespace |
 | Commit | Validar Conventional Commits | `commit-msg` |
 
@@ -80,10 +80,9 @@ Workflow [`ci.yml`](../.github/workflows/ci.yml):
 Script unificado local (espelha parte do CI):
 
 ```bash
-make ci-pre-push
-make ci-test
-cd app && python scripts/python/clean_workspace.py --stage lint
-cd app && python scripts/python/clean_workspace.py --stage security
+make app-lint
+make app-test
+make app-security
 ```
 
 Infra isolada (`app/scripts/bash/ci-infra-local.sh`): `fmt`, `lint`, `validate`, `all`. Usa `terraform` do PATH no WSL; se ausente, baixa a versao de `linters/.terraform-version` em `.tools/`.
@@ -123,11 +122,11 @@ Config principal: `app/pyproject.toml` (line-length 120, target py313).
 
 ```bash
 cd app
-ruff check src/infrastructure/mods tests scripts/python
-ruff format src/infrastructure/mods tests scripts/python
+ruff check src tests scripts
+ruff format src tests scripts
 ```
 
-Testes com cobertura minima 100% em `infrastructure.mods` (gate do CI).
+Testes com cobertura minima 100% branch nas camadas da app (`make app-test`).
 
 ## kubeconform (Kubernetes)
 
@@ -156,7 +155,7 @@ Valida workflows em `.github/workflows/` (sintaxe, expressoes, versões de actio
 
 | Item | Motivo |
 |------|--------|
-| `app/src/domain/world-data` | Dados de jogo; excluido de hooks de arquivo |
+| `app/runtime/world` | Dados de jogo; excluido de hooks de arquivo |
 | Valores dinamicos de annotations | 14 chaves essenciais; `atualizar-annotations-k8s.sh` em runtime |
 | Conteudo de secrets K8s | Nao versionados |
 
@@ -164,5 +163,5 @@ Documentacao de annotations: [docs/annotations.md](../docs/annotations.md).
 
 ## Referencias
 
+- [docs/engineering-python.md](../docs/engineering-python.md) — qualidade Python
 - [docs/devops.md](../docs/devops.md) — Makefile e pipelines
-- [docs/devops.md](../docs/devops.md) — DRY, SOLID, commits, roadmap

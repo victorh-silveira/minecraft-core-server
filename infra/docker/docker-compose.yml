@@ -71,32 +71,32 @@ services:
 
     volumes:
       - type: bind
-        source: ../../app/src/domain/world-data
+        source: ../../app/runtime/world
         target: /data/world
         bind:
           create_host_path: true
       - type: bind
-        source: ../../app/src/application/configs/server.properties
+        source: ../../app/runtime/configs/server.properties
         target: /data/server.properties
         bind:
           create_host_path: true
       - type: bind
-        source: ../../app/src/interface/mods
+        source: ../../app/runtime/mods
         target: /data/mods
         bind:
           create_host_path: true
       - type: bind
-        source: ../../app/src/interface/plugins
+        source: ../../app/runtime/plugins
         target: /data/plugins
         bind:
           create_host_path: true
       - type: bind
-        source: ../../app/src/infrastructure/logging
+        source: ../../app/runtime/logs
         target: /data/logs
         bind:
           create_host_path: true
       - type: bind
-        source: ../../app/src/infrastructure/database
+        source: ../../app/runtime/database
         target: /data/database
         bind:
           create_host_path: true

@@ -84,6 +84,8 @@ flowchart LR
 3. Release: nova tag quando houver commits releasable.
 4. Deploy: build com cache GHA, rollout AKS, pos-deploy com probe TCP.
 
+Marcador `[skip-cd]` na mensagem do commit: roda so o CI (linter + validacao); pula deploy infra, release, deploy app e pos-deploy. Nao usar `[skip ci]` se quiser que o CI rode.
+
 ### Pull request
 
 Apenas jobs **CI - Linter** e **CI - Validacao** (sem deploy).

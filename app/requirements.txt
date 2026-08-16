@@ -1,2 +1,1 @@
-# ---- HTTP E DOWNLOAD DE MODS ----
-requests>=2.31.0             # Cliente HTTP para API Modrinth e download de mods
+requests>=2.31.0

@@ -18,16 +18,16 @@ LABEL org.opencontainers.image.vendor="minecraft-server"
 LABEL org.opencontainers.image.base.name="${BASE_IMAGE}"
 LABEL org.opencontainers.image.source="https://github.com/victorh-silveira/minecraft-core-server"
 
-USER root
+USER 0
 
-COPY --chown=minecraft:minecraft app/src/application/configs/server.properties /templates/server.properties
-COPY --chown=minecraft:minecraft app/src/interface/mods/mods-manifest.json /templates/mods-manifest.json
+COPY --chown=minecraft:minecraft app/runtime/configs/server.properties /templates/server.properties
+COPY --chown=minecraft:minecraft app/runtime/mods/mods-manifest.json /templates/mods-manifest.json
 
 RUN mkdir -p /templates/mods /templates/plugins /data/world /data/mods /data/plugins /data/logs /data/database \
     && chown -R minecraft:minecraft /templates /data \
     && chmod -R g+rwX /data /templates
 
-USER minecraft
+USER 1000
 
 WORKDIR /data
 
@@ -41,6 +41,6 @@ ENV UID=1000 \
     SYNC_CHUNK_WRITES=true
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
-    CMD mc-health || exit 1
+    CMD ["mc-health"]
 
 VOLUME ["/data/world", "/data/mods", "/data/plugins", "/data/logs", "/data/database"]

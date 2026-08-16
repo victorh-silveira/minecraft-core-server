@@ -1,0 +1,14 @@
+---
+description: Infra MCS — Docker Compose, AKS, Terraform do dominio Fabric
+globs: infra/**/*
+alwaysApply: true
+---
+
+# Infra
+
+- Local: `infra/docker/` (Compose + Dockerfile); env em `infra/docker/.env`
+- Cloud: `infra/kubernetes/` + `infra/terraform/live/prod`
+- Codigo Python nao importa Terraform/YAML K8s
+- Nao copiar WireMock/MariaDB/OTRS
+- Docs: `docs/infra-docker.md`, `docs/architecture.md`, `docs/azure.md`
+- Skills: `mcs-infra-stack`, `mcs-ops-runbook`

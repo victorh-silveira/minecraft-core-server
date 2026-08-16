@@ -75,8 +75,8 @@ Dockerfile
 .dockerignore
 
 # ---- SERVIDOR MINECRAFT: DADOS PERSISTENTES E BINARIOS ----
-src/domain/world-data
-src/infrastructure/logging
-src/infrastructure/database
-src/interface/mods/*.jar
-src/interface/plugins/*.jar
+runtime/world
+runtime/logs
+runtime/database
+runtime/mods/*.jar
+runtime/plugins/*.jar

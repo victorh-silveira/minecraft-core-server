@@ -1,0 +1,13 @@
+---
+description: Runtime Fabric MCS — app/runtime vs app/src; bind mounts
+globs: app/runtime/**,infra/docker/**
+alwaysApply: true
+---
+
+# Runtime data
+
+- Dados do jogo **somente** em `app/runtime/` (world, configs, mods, plugins, logs, database)
+- `app/src/` e codigo Python hexagonal — nunca world-data / JARs / logs de jogo
+- Compose monta `app/runtime/*` → `/data/*`
+- Nao apagar `app/runtime/world` em higiene ou clean
+- Doc: `docs/structure.md`, `docs/infra-docker.md`; skill: `mcs-infra-stack`

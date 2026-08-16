@@ -1,0 +1,56 @@
+export default {
+  extends: ["@commitlint/config-conventional"],
+
+  rules: {
+    "type-enum": [
+      2,
+      "always",
+      [
+        "build",
+        "chore",
+        "ci",
+        "docs",
+        "feat",
+        "fix",
+        "perf",
+        "qa",
+        "refactor",
+        "revert",
+        "style",
+        "test",
+      ],
+    ],
+
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "all",
+        "application",
+        "config",
+        "deps",
+        "docker",
+        "domain",
+        "infra",
+        "llm",
+        "mods",
+        "presentation",
+        "release",
+        "repo",
+        "runtime",
+        "scripts",
+        "test",
+        "tools",
+      ],
+    ],
+
+    "type-case": [2, "always", "lower-case"],
+    "type-empty": [2, "never"],
+    "scope-empty": [2, "never"],
+    "subject-empty": [2, "never"],
+    "subject-case": [0],
+    "body-leading-blank": [2, "always"],
+    "body-empty": [2, "never"],
+    "header-max-length": [2, "always", 100],
+  },
+};

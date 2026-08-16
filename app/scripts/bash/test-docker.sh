@@ -122,13 +122,13 @@ if command -v bash >/dev/null 2>&1; then
 fi
 
 step "Verificando mods sincronizados"
-if [[ -f app/src/interface/mods/mods-manifest.json ]]; then
+if [[ -f app/runtime/mods/mods-manifest.json ]]; then
   pass "mods-manifest.json presente"
-  JAR_COUNT="$(find app/src/interface/mods -maxdepth 1 -name '*.jar' 2>/dev/null | wc -l | tr -d ' ')"
+  JAR_COUNT="$(find app/runtime/mods -maxdepth 1 -name '*.jar' 2>/dev/null | wc -l | tr -d ' ')"
   if [[ "${JAR_COUNT:-0}" -gt 0 ]]; then
-    pass "${JAR_COUNT} jar(s) em app/src/interface/mods"
+    pass "${JAR_COUNT} jar(s) em app/runtime/mods"
   else
-    warn "nenhum jar em app/src/interface/mods (rode: make docker-sync-mods)"
+    warn "nenhum jar em app/runtime/mods (rode: make docker-sync-mods)"
   fi
 else
   fail "mods-manifest.json ausente"

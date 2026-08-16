@@ -1,0 +1,13 @@
+---
+description: Domain puro MCS — sem I/O; validacao no dominio
+globs: app/src/domain/**/*.py
+alwaysApply: true
+---
+
+# Domain
+
+- `domain` nao importa `application`, `infrastructure` nem `presentation`
+- Sem HTTP, filesystem, env ou logging em `domain/`
+- Validacao de entidades/value objects no construtor / factory
+- Services de dominio: naming de JAR, checksum — funcoes puras e testaveis
+- Docs: `docs/arquitetura.md`, `docs/structure.md`

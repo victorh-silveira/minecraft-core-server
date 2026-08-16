@@ -1,0 +1,12 @@
+---
+description: Deps Python MCS — requirements e pyproject alinhados
+globs: app/requirements*.txt,app/pyproject.toml
+alwaysApply: true
+---
+
+# Python deps
+
+- SSOT: `app/requirements.txt`, `app/requirements-dev.txt`, `app/pyproject.toml`
+- Runtime e QA devem permanecer alinhados entre requirements e pyproject
+- Apos mudar deps: `make app-install` + `make app-security`
+- Doc: `docs/engineering-python-deps.md`; skill: `mcs-python-deps`

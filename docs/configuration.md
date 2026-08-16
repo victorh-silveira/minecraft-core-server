@@ -28,6 +28,7 @@ Preencha cada valor no formato `VARIAVEL=valor`. Os templates usam placeholders 
 | Segredos | `RCON_PASSWORD` |
 | Container | `UID`, `GID`, `SKIP_CHOWN`, `DOCKER_PIDS_LIMIT` |
 | Build | `DOCKER_BASE_IMAGE`, `IMAGE_VERSION` |
+| Sync Python | `LOG_LEVEL`, `SYNC_DISABLE_DOTENV`, `MODS_MANIFEST_PATH`, `MODS_DIR`, `SYNC_USER_AGENT` |
 
 Producao AKS nao usa este `.env`; equivalentes estao no StatefulSet e nos Secrets `mc-rcon` / `mc-access`.
 
@@ -46,7 +47,7 @@ Overlay prod: `kubectl apply -k infra/kubernetes/overlays/prod`.
 
 ## `server.properties`
 
-Arquivo: `app/src/application/configs/server.properties`
+Arquivo: `app/runtime/configs/server.properties`
 Montado em `/data/server.properties` (gravavel pela imagem itzg).
 
 | Propriedade | Padrao no arquivo | Producao efetiva |
@@ -81,7 +82,7 @@ Ver [devops.md](devops.md) (roadmap prioridade 1).
 
 ## Manifesto de mods
 
-`app/src/interface/mods/mods-manifest.json`
+`app/runtime/mods/mods-manifest.json`
 
 | Campo | Obrigatorio | Descricao |
 |-------|-------------|-----------|
@@ -94,10 +95,10 @@ Ver [devops.md](devops.md) (roadmap prioridade 1).
 
 ```powershell
 make docker-sync-mods
-cd app && python -m pytest tests/unit/infrastructure/mods/test_sync.py
+make app-test
 ```
 
-JARs em `app/src/interface/mods/*.jar` estao no `.gitignore`.
+JARs em `app/runtime/mods/*.jar` estao no `.gitignore`.
 
 ## Terraform (`terraform.tfvars`)
 

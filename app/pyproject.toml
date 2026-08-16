@@ -1,4 +1,3 @@
-# ---- METADADOS DO PROJETO ----
 [project]
 name = "minecraft-server"
 version = "0.0.0"
@@ -9,11 +8,11 @@ dependencies = [
     "requests>=2.31.0",
 ]
 
-# ---- DEPENDENCIAS OPCIONAIS DE DESENVOLVIMENTO ----
 [project.optional-dependencies]
 dev = [
     "bandit>=1.9.4",
     "coverage>=7.14.0",
+    "mypy>=1.18.0",
     "pip-audit>=2.10.0",
     "pre-commit>=4.6.0",
     "pylint>=3.0.0",
@@ -23,10 +22,10 @@ dev = [
     "vulture>=2.16",
 ]
 
-# ---- RUFF: LINT E FORMATACAO ----
 [tool.ruff]
 line-length = 120
 target-version = "py313"
+src = ["src"]
 exclude = [
     ".git",
     ".ruff_cache",
@@ -35,8 +34,7 @@ exclude = [
     "__pycache__",
     "build",
     "dist",
-    "src/domain/world-data",
-    "src/infrastructure/logging",
+    "runtime",
 ]
 
 [tool.ruff.lint]
@@ -78,16 +76,16 @@ max-statements = 50
 [tool.ruff.lint.isort]
 combine-as-imports = true
 force-wrap-aliases = true
+known-first-party = ["domain", "application", "infrastructure", "presentation"]
 lines-after-imports = 2
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.ruff.lint.per-file-ignores]
-"scripts/python/**/*.py" = ["T201", "S603", "S607", "S101"]
-"**/scripts/python/**/*.py" = ["T201", "S603", "S607", "S101"]
-"src/infrastructure/mods/**/*.py" = ["T201"]
-"**/infrastructure/mods/**/*.py" = ["T201"]
-"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004"]
-"**/tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004"]
+"scripts/**/*.py" = ["T201", "S603", "S607", "S101"]
+"**/scripts/**/*.py" = ["T201", "S603", "S607", "S101"]
+"tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004", "S106", "PLC0415"]
+"**/tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "S101", "PLR2004", "S106", "PLC0415"]
+"run.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -95,24 +93,30 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
-# ---- PYTEST: TESTES UNITARIOS ----
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src", "scripts/python"]
+pythonpath = ["src", "."]
 addopts = "-q --strict-markers"
 
-# ---- BANDIT: ANALISE DE SEGURANCA ----
+[tool.mypy]
+python_version = "3.13"
+strict = true
+mypy_path = "src:."
+explicit_package_bases = true
+files = ["src", "tests"]
+
 [tool.bandit]
 skips = ["B105", "B106", "B404", "B603"]
-exclude_dirs = [".git", ".venv", "tests", "venv", "src/domain/world-data"]
+exclude_dirs = [".git", ".venv", "tests", "venv", "runtime"]
 exclude = ["*/clean_workspace.py"]
 
-# ---- COVERAGE: COBERTURA DE TESTES ----
 [tool.coverage.run]
-source = ["src/infrastructure/mods"]
-omit = [
-    "src/infrastructure/mods/__main__.py",
-    "src/infrastructure/mods/providers.py",
+branch = true
+source = [
+    "src/domain",
+    "src/application",
+    "src/infrastructure",
+    "src/presentation",
 ]
 
 [tool.coverage.report]
@@ -125,8 +129,7 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 
-# ---- VULTURE: DEAD CODE ----
 [tool.vulture]
 min_confidence = 70
-paths = ["src/infrastructure/mods", "scripts/python"]
-exclude = ["scripts/python/clean_workspace.py"]
+paths = ["src"]
+exclude = ["scripts/operations/clean_workspace.py"]

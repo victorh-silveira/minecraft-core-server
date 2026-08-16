@@ -1,5 +1,5 @@
 name: CI - Testes
-description: Testes pytest com cobertura minima de 100% no modulo infrastructure.mods
+description: Testes pytest com cobertura minima de 100% nas camadas da aplicacao
 
 runs:
   using: composite
@@ -22,4 +22,4 @@ runs:
 
     - name: Executar testes
       shell: bash
-      run: python app/scripts/python/clean_workspace.py --stage test --coverage-fail-under 100
+      run: python app/scripts/operations/clean_workspace.py --stage test --coverage-fail-under 100

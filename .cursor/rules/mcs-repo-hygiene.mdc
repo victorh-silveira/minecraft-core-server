@@ -1,0 +1,11 @@
+---
+description: Higienizacao MCS — remover so morto comprovado; preservar runtime
+alwaysApply: true
+---
+
+# Repo hygiene
+
+- Evidencia antes de delete (vulture, coverage, grep sem refs)
+- Nunca apagar `app/runtime/world` nem manifesto/templates versionados como “limpeza”
+- Atualizar `docs/agent-coverage.md` e `AGENTS.md` se remover skill/doc
+- Doc: `docs/engineering-repo-hygiene.md`; skill: `mcs-repo-hygiene`

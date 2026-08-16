@@ -1,0 +1,11 @@
+---
+description: Surface sync MCS — fechar mudanca com docs/rules/skills/gates verdes
+alwaysApply: true
+---
+
+# Surface sync
+
+- Antes do commit final: alinhar docs, rules, skills, AGENTS e matriz
+- Rodar `make app-lint`, `make app-test`, `make app-security` no WSL
+- Escopo commitlint `llm` se a mudanca for so superficie de agentes
+- Doc: `docs/engineering-surface-sync.md`; skill: `mcs-surface-sync`

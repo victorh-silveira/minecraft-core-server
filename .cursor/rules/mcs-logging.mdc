@@ -1,0 +1,15 @@
+---
+description: Logging semantico MCS — log_event, redact, use case sem log
+globs: app/src/infrastructure/logging/**/*.py,app/src/presentation/logging/**/*.py,app/src/presentation/cli/**/*.py
+alwaysApply: true
+---
+
+# Logging
+
+- API: `log_event(logger, level, event, **fields)`
+- Domain e use case **nao** logam
+- Eventos estaveis: `mods.sync.run.started|finished|failed`, `mods.sync.mod.*`
+- Caminho feliz: poucas linhas INFO; detalhe por mod em DEBUG
+- Sem dump de JSON/body HTTP em INFO; URLs com query → `?***`; segredos → `***`
+- Silenciar `urllib3`/`requests` em WARNING+
+- Doc: `docs/engineering-logging.md`; skill: `mcs-logging-audit`

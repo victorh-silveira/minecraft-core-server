@@ -1,0 +1,11 @@
+---
+description: Doutrina LLM MCS — copiloto de engenharia, nao runtime do jogo
+alwaysApply: true
+---
+
+# Doutrina LLM
+
+- LLM e copiloto de engenharia/auditoria; nao e o servidor Fabric nem substituto dos gates
+- Seguir `docs/llm-engineering-doctrine.md` e `AGENTS.md`
+- Nao inventar stack OTRS/WireMock/MariaDB; Docker/AKS existem porque o dominio precisa
+- Apos mudanca material, fechar com skill `mcs-surface-sync`

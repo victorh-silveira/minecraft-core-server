@@ -1,0 +1,14 @@
+---
+description: Sync de mods MCS — manifesto, resolvers, checksum, CLI run.py
+globs: app/src/**/*.py,app/runtime/mods/**
+alwaysApply: true
+---
+
+# Mods sync
+
+- Manifesto: `app/runtime/mods/mods-manifest.json`
+- Entrypoints: `python run.py`, `python -m presentation.cli`, `make docker-sync-mods`
+- Sources: Modrinth (API ou `download_url`) e CurseForge (`download_url` obrigatorio)
+- JAR local com hash valido → skip; hash invalido → redownload; mismatch pos-download → falha
+- JARs nao entram no Git
+- Doc: `docs/arquitetura.md`, `docs/configuration.md`; skill: `mcs-mods-sync`

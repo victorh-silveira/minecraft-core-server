@@ -22,4 +22,4 @@ runs:
 
     - name: Executar lint de codigo
       shell: bash
-      run: python app/scripts/python/clean_workspace.py --stage lint
+      run: python app/scripts/operations/clean_workspace.py --stage lint

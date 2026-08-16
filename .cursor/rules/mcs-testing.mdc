@@ -1,0 +1,15 @@
+---
+description: Testes MCS — TDD por camada, fakes, SYNC_DISABLE_DOTENV, cov 100%
+globs: app/tests/**/*.py
+alwaysApply: true
+---
+
+# Testing
+
+- Unit: `tests/unit/{domain,application,infrastructure,presentation}`
+- Integration: `tests/integration/infrastructure` para transporte HTTP mock
+- Application: preferir fakes dos ports
+- Isolar `.env` com `SYNC_DISABLE_DOTENV=1` (`app/tests/conftest.py`)
+- Cobertura branch 100% em domain/application/infrastructure/presentation
+- Nao omitir CLI/`__main__` da cobertura
+- Skills: `mcs-hexagonal-tdd`, `mcs-precommit`

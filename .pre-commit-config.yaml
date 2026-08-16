@@ -10,12 +10,12 @@ repos:
       - id: ruff
         name: "Codigo | Lint Python (Ruff)"
         args: [--fix, --config, app/pyproject.toml]
-        files: ^app/(src/infrastructure/mods|tests)/
+        files: ^app/(src|tests)/
 
       - id: ruff-format
         name: "Codigo | Formatar Python (Ruff)"
         args: [--config, app/pyproject.toml]
-        files: ^app/(src/infrastructure/mods|tests)/
+        files: ^app/(src|tests)/
 
   - repo: local
     hooks:
@@ -35,7 +35,7 @@ repos:
 
       - id: commitlint
         name: "Commit | Validar Conventional Commits"
-        entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config app/tools/commitlint.config.mjs --edit
+        entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config linters/commitlint.config.mjs --edit
         language: system
         stages: [commit-msg]
 
@@ -68,12 +68,12 @@ repos:
 
       - id: check-json
         name: "Codigo | Validar JSON (manifesto de mods)"
-        files: ^app/src/interface/mods/mods-manifest\.json$
+        files: ^app/runtime/mods/mods-manifest\.json$
 
       - id: end-of-file-fixer
         name: "Arquivo | Garantir newline no fim"
-        exclude: ^app/src/domain/world-data/
+        exclude: ^app/runtime/world/
 
       - id: trailing-whitespace
         name: "Arquivo | Remover espacos no fim da linha"
-        exclude: ^app/src/domain/world-data/
+        exclude: ^app/runtime/world/

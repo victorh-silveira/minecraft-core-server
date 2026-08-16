@@ -100,7 +100,10 @@ jobs:
   deploy-infra:
     name: CD - Deploy Infra
     needs: [linter, validate]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !contains(github.event.head_commit.message, '[skip-cd]')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production-infra
@@ -160,6 +163,7 @@ jobs:
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
+      !contains(github.event.head_commit.message, '[skip-cd]') &&
       needs.linter.result == 'success' &&
       needs.validate.result == 'success' &&
       needs.deploy-infra.result == 'success' &&
@@ -219,6 +223,7 @@ jobs:
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
+      !contains(github.event.head_commit.message, '[skip-cd]') &&
       needs.release.outputs.published == 'true' &&
       (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_cd != 'true')
     runs-on: ubuntu-latest
