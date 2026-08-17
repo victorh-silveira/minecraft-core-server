@@ -11,11 +11,12 @@ fi
 
 COMPOSE_FILE="infra/docker/docker-compose.yml"
 DOCKERFILE="infra/docker/Dockerfile"
+ENV_FILE="infra/docker/.env"
 TOOLS_DIR="${REPO_ROOT}/.tools"
-TRIVY_VERSION="${TRIVY_VERSION:-0.58.2}"
+TRIVY_VERSION="${TRIVY_VERSION:-0.74.0}"
 
 synthetic_env() {
-  cat > /tmp/mcs-docker-gate.env << 'EOF'
+  cat > "${REPO_ROOT}/${ENV_FILE}" << 'EOF'
 MINECRAFT_VERSION=1.20.6
 SERVER_TYPE=FABRIC
 MEMORY_LIMIT=2G
@@ -108,7 +109,7 @@ cmd_validate() {
     exit 1
   fi
   synthetic_env
-  docker compose -f "${COMPOSE_FILE}" --env-file /tmp/mcs-docker-gate.env config --quiet
+  docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" config --quiet
 }
 
 cmd_test() {
@@ -120,7 +121,7 @@ cmd_test() {
   [[ -f "${DOCKERFILE}" ]] || { echo "[FAIL] Dockerfile ausente"; failed=1; }
   [[ -f app/runtime/mods/mods-manifest.json ]] || { echo "[FAIL] manifesto ausente"; failed=1; }
   synthetic_env
-  if docker compose -f "${COMPOSE_FILE}" --env-file /tmp/mcs-docker-gate.env config --quiet; then
+  if docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" config --quiet; then
     echo "[OK] compose config"
   else
     echo "[FAIL] compose config"

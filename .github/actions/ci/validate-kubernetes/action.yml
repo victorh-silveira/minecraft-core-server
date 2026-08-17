@@ -20,6 +20,11 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
+    - name: Instalar Trivy
+      uses: aquasecurity/setup-trivy@v0.2.3
+      with:
+        version: v0.74.0
+
     - name: Kubernetes Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage lint

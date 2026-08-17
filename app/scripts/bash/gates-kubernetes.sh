@@ -14,7 +14,7 @@ K8S_ROOT="infra/kubernetes"
 TOOLS_DIR="${REPO_ROOT}/.tools"
 KUBECONFORM_VERSION="${KUBECONFORM_VERSION:-0.6.7}"
 KUSTOMIZE_VERSION="${KUSTOMIZE_VERSION:-v5.4.3}"
-TRIVY_VERSION="${TRIVY_VERSION:-0.58.2}"
+TRIVY_VERSION="${TRIVY_VERSION:-0.74.0}"
 
 kustomize_bin() {
   if command -v kubectl >/dev/null 2>&1; then
@@ -160,7 +160,7 @@ cmd_test() {
 cmd_security() {
   local trivy rendered
   trivy="$(trivy_bin)"
-  rendered="$(mktemp)"
+  rendered="$(mktemp --suffix=.yaml)"
   echo ">>> trivy config (overlay renderizado)"
   render_overlay > "${rendered}"
   "${trivy}" config --exit-code 1 --severity HIGH,CRITICAL --ignorefile linters/.trivyignore "${rendered}"

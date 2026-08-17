@@ -27,6 +27,11 @@ runs:
         chmod +x /tmp/hadolint
         sudo mv /tmp/hadolint /usr/local/bin/hadolint
 
+    - name: Instalar Trivy
+      uses: aquasecurity/setup-trivy@v0.2.3
+      with:
+        version: v0.74.0
+
     - name: Docker Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area docker --stage lint

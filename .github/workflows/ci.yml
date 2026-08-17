@@ -374,7 +374,7 @@ jobs:
           workflows: ${{ needs.workflows.result }}
           deploy_infra: ${{ needs.deploy-infra.result }}
           release: ${{ needs.release.result }}
-          deploy_app: ${{ needs.deploy_app.result }}
+          deploy_app: ${{ needs.deploy-app.result }}
           post_deploy: ${{ needs.post-deploy.result }}
           release_tag: ${{ needs.release.outputs.tag }}
           release_published: ${{ needs.release.outputs.published }}
