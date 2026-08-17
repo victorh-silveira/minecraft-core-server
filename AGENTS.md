@@ -17,8 +17,8 @@ Ponto de entrada para agentes Cursor/LLM neste repositorio.
 - Dados de jogo: `app/runtime/{world,configs,mods,plugins,logs,database}` — nunca em `app/src/`
 - Entrega local: Docker Compose; producao: Azure AKS + Terraform
 - Entrypoints sync: `python run.py`, `make docker-sync-mods`
-- Gates: `make app-lint`, `make app-test`, `make app-security`
-- Orquestrador: `app/scripts/operations/clean_workspace.py`
+- Gates: `make app-lint`, `make app-validate`, `make app-test`, `make app-security`
+- Orquestrador: `app/scripts/operations/clean_workspace.py` (`--area` / `--stage`)
 - Contrato: [`prompt-model.md`](prompt-model.md)
 
 ## O que o LLM e / nao e

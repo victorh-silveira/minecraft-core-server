@@ -33,10 +33,10 @@ Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem e
 
 | Comando | Descricao |
 |---------|-----------|
-| `app-lint` / `app-test` / `app-security` | Gates Python (orquestrador unico) |
+| `app-lint` / `app-validate` / `app-test` / `app-security` | Matriz QA (orquestrador) |
 | `docker-build-up` | Sync mods, build, sobe servidor |
-| `docker-test` | `test-docker.sh` |
-| `ci-lint` | pre-commit |
+| `docker-test` | `test-docker.sh` (smoke live) |
+| `ci-lint` | pre-commit (matriz) |
 | `ci-test` | alias de `app-test` |
 | `ci-validate` | testes + security + test-docker |
 | `ci-fmt` / `ci-validate-infra` / `terraform-plan` | Terraform live/prod |
@@ -72,7 +72,7 @@ make ci-lint
 
 O Makefile cria `.venv` na raiz e instala `app/requirements-dev.txt` automaticamente nos alvos Python.
 
-Hooks: `Codigo |`, `Infra |`, `Docker |`, `Workflows |`, `Commit |` (ver `.pre-commit-config.yaml`).
+Hooks: `Python |`, `Terraform |`, `Docker |`, `Kubernetes |`, `JSON |`, `Commit |`, `Stack |` (ver `.pre-commit-config.yaml`).
 
 ## Quality gate
 
@@ -97,7 +97,7 @@ Detalhe de secrets: [.github/README.md](../.github/README.md).
 
 | Job | Conteudo |
 |-----|----------|
-| `CI - Linter` | Ruff, Terraform fmt, Hadolint, actionlint, YAML (paralelo) |
+| `CI - Python` ... `CI - Workflows` | Matriz por area (paralelo) |
 | `CI - Validacao` | pytest, Bandit, pip-audit, Gitleaks, Docker, kubeconform, tflint, tfsec |
 | `CD - Deploy Infra` | `terraform apply` condicional + environment `production-infra` |
 | `CI - Release` | sync tags + semantic-release apos gates |
@@ -105,7 +105,7 @@ Detalhe de secrets: [.github/README.md](../.github/README.md).
 | `CD - Pos-deploy` | annotations, `test-aks.sh`, probe TCP 25565 |
 | `CI/CD - Resumo` | tabela de status no GitHub Summary |
 
-PR em `main`: apenas Linter + Validacao.
+PR em `main`: jobs CI por area (Python, Terraform, Docker, Kubernetes, JSON, Workflows).
 
 ### CD manual — `cd.yml`
 

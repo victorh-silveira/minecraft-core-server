@@ -1,5 +1,5 @@
 name: CI - Lint de codigo
-description: Ruff, Vulture, Pylint e limite de linhas (app/)
+description: Python lint via orquestrador
 
 runs:
   using: composite
@@ -20,6 +20,10 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
-    - name: Executar lint de codigo
+    - name: Python Lint
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --stage lint
+      run: python app/scripts/operations/clean_workspace.py --area python --stage lint
+
+    - name: Python Validate
+      shell: bash
+      run: python app/scripts/operations/clean_workspace.py --area python --stage validate

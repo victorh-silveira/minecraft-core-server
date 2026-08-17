@@ -2,9 +2,17 @@ name: Resumo do pipeline
 description: Publica status dos jobs no GitHub Summary
 
 inputs:
-  linter:
+  python:
     required: true
-  validate:
+  terraform:
+    required: true
+  docker:
+    required: true
+  kubernetes:
+    required: true
+  json:
+    required: true
+  workflows:
     required: true
   deploy_infra:
     required: true
@@ -33,8 +41,12 @@ runs:
           echo ""
           echo "| Etapa | Status |"
           echo "|-------|--------|"
-          echo "| Linter | ${{ inputs.linter }} |"
-          echo "| Validacao | ${{ inputs.validate }} |"
+          echo "| Python | ${{ inputs.python }} |"
+          echo "| Terraform | ${{ inputs.terraform }} |"
+          echo "| Docker | ${{ inputs.docker }} |"
+          echo "| Kubernetes | ${{ inputs.kubernetes }} |"
+          echo "| JSON | ${{ inputs.json }} |"
+          echo "| Workflows | ${{ inputs.workflows }} |"
           echo "| Deploy infra | ${{ inputs.deploy_infra }} |"
           echo "| Release | ${{ inputs.release }} |"
           echo "| Deploy app | ${{ inputs.deploy_app }} |"

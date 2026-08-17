@@ -1,5 +1,5 @@
 name: CI - Seguranca
-description: Bandit, pip-audit e Gitleaks
+description: Python security via orquestrador e Gitleaks
 
 runs:
   using: composite
@@ -24,9 +24,9 @@ runs:
         tar -xzf /tmp/gitleaks.tar.gz -C /tmp
         sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
 
-    - name: Bandit e pip-audit
+    - name: Python Seguranca
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --stage security
+      run: python app/scripts/operations/clean_workspace.py --area python --stage security
 
     - name: Gitleaks
       shell: bash

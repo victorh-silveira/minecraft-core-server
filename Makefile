@@ -29,7 +29,7 @@ RESET  := \033[0m
 
 .DEFAULT_GOAL := help
 
-.PHONY: help app-install app-lint app-test app-security app-run app-clean app-setup \
+.PHONY: help app-install app-lint app-validate app-test app-security app-run app-clean app-setup \
 	app-pre-commit app-pre-commit-run pre-commit pre-commit-install \
 	dev-deps clean \
 	ci-fmt ci-lint ci-validate-infra ci-infra ci-pre-push ci-test ci-validate \
@@ -47,23 +47,24 @@ help:
 	@echo -e ""
 	@echo -e "$(YELLOW)Python:$(RESET) WSL + .venv ($(APP_DIR)/requirements*.txt)"
 	@echo -e ""
-	@echo -e "$(YELLOW)App:$(RESET)"
+	@echo -e "$(YELLOW)App / matriz QA:$(RESET)"
 	@echo -e "  $(GREEN)app-run$(RESET)              - Sync de mods (run.py)"
-	@echo -e "  $(GREEN)app-test$(RESET)             - Testes + cobertura 100%% branch"
-	@echo -e "  $(GREEN)app-lint$(RESET)             - Ruff, mypy, vulture, estrutura, imports"
-	@echo -e "  $(GREEN)app-security$(RESET)         - Bandit + pip-audit"
-	@echo -e "  $(GREEN)app-clean$(RESET)            - Limpa caches locais"
+	@echo -e "  $(GREEN)app-lint$(RESET)             - Lint all (Python TF Docker K8s JSON)"
+	@echo -e "  $(GREEN)app-validate$(RESET)         - Validate all"
+	@echo -e "  $(GREEN)app-test$(RESET)             - Testes all (Python cov 100%% + TF/Docker/K8s)"
+	@echo -e "  $(GREEN)app-security$(RESET)         - Seguranca all"
+	@echo -e "  $(GREEN)app-clean$(RESET)            - Limpeza full-stack"
 	@echo -e "  $(GREEN)app-install$(RESET)          - Garante deps no .venv"
 	@echo -e "  $(GREEN)app-setup$(RESET)            - app-install + hooks git"
 	@echo -e "  $(GREEN)app-pre-commit$(RESET)       - Instala hooks (pre-commit + commit-msg)"
-	@echo -e "  $(GREEN)app-pre-commit-run$(RESET)   - pre-commit run --all-files"
+	@echo -e "  $(GREEN)app-pre-commit-run$(RESET)   - pre-commit run --all-files (matriz)"
 	@echo -e ""
 	@echo -e "$(YELLOW)CI / Infra:$(RESET)"
 	@echo -e "  $(GREEN)ci-fmt$(RESET)               - Terraform fmt + Ruff format"
 	@echo -e "  $(GREEN)ci-lint$(RESET)              - pre-commit em tudo"
-	@echo -e "  $(GREEN)ci-pre-push$(RESET)          - fmt + validate infra + app-lint"
+	@echo -e "  $(GREEN)ci-pre-push$(RESET)          - app-lint + app-validate"
 	@echo -e "  $(GREEN)ci-test$(RESET)              - alias de app-test"
-	@echo -e "  $(GREEN)ci-validate$(RESET)          - app-test + app-security + docker-test"
+	@echo -e "  $(GREEN)ci-validate$(RESET)          - app-validate + app-test + app-security"
 	@echo -e "  $(GREEN)terraform-plan$(RESET)       - plan live/prod"
 	@echo -e ""
 	@echo -e "$(YELLOW)Docker:$(RESET)"
@@ -75,7 +76,7 @@ help:
 	@echo -e "  $(GREEN)docker-ps$(RESET)            - Status"
 	@echo -e "  $(GREEN)docker-logs$(RESET)          - Logs (DOCKER_LOGS_TAIL=..., F=1)"
 	@echo -e "  $(GREEN)docker-sh$(RESET)            - Shell no container"
-	@echo -e "  $(GREEN)docker-test$(RESET)          - Valida Compose local"
+	@echo -e "  $(GREEN)docker-test$(RESET)          - Smoke live Compose local"
 	@echo -e "  $(GREEN)docker-clean$(RESET)         - $(RED)DESTRUTIVO$(RESET): down + imagens locais + volumes anonimos"
 	@echo -e "  $(GREEN)docker-nuke$(RESET)          - $(RED)DESTRUTIVO$(RESET): limpeza agressiva Docker"
 	@echo -e ""
@@ -94,16 +95,19 @@ app-install:
 	$(DEV_ENV) python -c "import ruff, pytest, pre_commit, mypy; print('Dependencias Python OK')"
 
 app-lint: app-install
-	$(DEV_ENV) bash -lc "$(OPS) --stage lint"
+	$(DEV_ENV) bash -lc "$(OPS) --area all --stage lint"
+
+app-validate: app-install
+	$(DEV_ENV) bash -lc "$(OPS) --area all --stage validate"
 
 app-test: app-install
-	$(DEV_ENV) bash -lc "$(OPS) --stage test --coverage-fail-under 100"
+	$(DEV_ENV) bash -lc "$(OPS) --area all --stage test --coverage-fail-under 100"
 
 app-security: app-install
-	$(DEV_ENV) $(OPS) --stage security
+	$(DEV_ENV) bash -lc "$(OPS) --area all --stage security"
 
 app-clean: app-install
-	$(DEV_ENV) $(OPS) --stage clean
+	$(DEV_ENV) bash -lc "$(OPS) --stage clean"
 
 app-run: app-install
 	$(DEV_ENV) bash -lc "python run.py"
@@ -131,23 +135,22 @@ ci-fmt: app-install
 	$(CI_INFRA) fmt
 	$(DEV_ENV) python -m ruff format --config $(APP_DIR)/pyproject.toml $(APP_DIR)/src $(APP_DIR)/tests $(APP_DIR)/scripts run.py
 
-ci-lint: app-install
-	$(DEV_ENV) pre-commit run --all-files
+ci-lint: app-pre-commit-run
 
 ci-validate-infra:
 	$(CI_INFRA) validate
 
-ci-infra: ci-fmt ci-validate-infra
+ci-infra: ci-fmt
 	$(CI_INFRA) lint
+	$(CI_INFRA) validate
+	$(CI_INFRA) test
+	$(CI_INFRA) security
 
-ci-pre-push: ci-fmt ci-validate-infra
-	$(CI_INFRA) lint
-	$(MAKE) app-lint
+ci-pre-push: app-lint app-validate
 
 ci-test: app-test
 
-ci-validate: app-test app-security
-	$(RUN_LINUX) bash $(APP_DIR)/scripts/bash/test-docker.sh
+ci-validate: app-validate app-test app-security
 
 terraform-plan:
 	@test -f $(TF_LIVE)/terraform.tfvars || (echo "Crie $(TF_LIVE)/terraform.tfvars a partir do .example" && exit 1)

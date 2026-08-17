@@ -4,76 +4,143 @@ default_language_version:
   python: python3.13
 
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.13
-    hooks:
-      - id: ruff
-        name: "Codigo | Lint Python (Ruff)"
-        args: [--fix, --config, app/pyproject.toml]
-        files: ^app/(src|tests)/
-
-      - id: ruff-format
-        name: "Codigo | Formatar Python (Ruff)"
-        args: [--config, app/pyproject.toml]
-        files: ^app/(src|tests)/
-
   - repo: local
     hooks:
-      - id: terraform-fmt
-        name: "Infra | Formatar Terraform"
-        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/ci-infra-local.sh fmt
+      - id: python-lint
+        name: "Python | Lint"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area python --stage lint
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: python-validate
+        name: "Python | Validate"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area python --stage validate
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: python-test
+        name: "Python | Testes"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area python --stage test --coverage-fail-under 100
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: python-security
+        name: "Python | Seguranca"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area python --stage security
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: terraform-lint
+        name: "Terraform | Lint"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area terraform --stage lint
         language: system
         pass_filenames: false
         always_run: true
 
       - id: terraform-validate
-        name: "Infra | Validar Terraform (tflint, tfsec, validate)"
-        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/ci-infra-local.sh validate
+        name: "Terraform | Validate"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area terraform --stage validate
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: terraform-test
+        name: "Terraform | Testes"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area terraform --stage test
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: terraform-security
+        name: "Terraform | Seguranca"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area terraform --stage security
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: docker-lint
+        name: "Docker | Lint"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area docker --stage lint
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: docker-validate
+        name: "Docker | Validate"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area docker --stage validate
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: docker-test
+        name: "Docker | Testes"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area docker --stage test
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: docker-security
+        name: "Docker | Seguranca"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area docker --stage security
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: kubernetes-lint
+        name: "Kubernetes | Lint"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area kubernetes --stage lint
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: kubernetes-validate
+        name: "Kubernetes | Validate"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area kubernetes --stage validate
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: kubernetes-test
+        name: "Kubernetes | Testes"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area kubernetes --stage test
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: kubernetes-security
+        name: "Kubernetes | Seguranca"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area kubernetes --stage security
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: json-lint
+        name: "JSON | Lint"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area json --stage lint
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: json-validate
+        name: "JSON | Validate"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --area json --stage validate
         language: system
         pass_filenames: false
         always_run: true
 
       - id: commitlint
-        name: "Commit | Validar Conventional Commits"
+        name: "Commit | Lint"
         entry: npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config linters/commitlint.config.mjs --edit
         language: system
         stages: [commit-msg]
 
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
-    hooks:
-      - id: actionlint
-        name: "Workflows | Lint GitHub Actions"
-        files: ^\.github/workflows/
-
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint-docker
-        name: "Docker | Lint Dockerfile"
-        files: ^infra/docker/Dockerfile$
-        args: [--ignore=DL3006]
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-yaml
-        name: "Infra | Validar sintaxe YAML"
-        files: ^(infra/kubernetes/|\.github/workflows/)
-        exclude: |
-          (?x)^(
-            \.github/workflows/templates/|
-            infra/kubernetes/overlays/.*/patches/
-          )
-
-      - id: check-json
-        name: "Codigo | Validar JSON (manifesto de mods)"
-        files: ^app/runtime/mods/mods-manifest\.json$
-
-      - id: end-of-file-fixer
-        name: "Arquivo | Garantir newline no fim"
-        exclude: ^app/runtime/world/
-
-      - id: trailing-whitespace
-        name: "Arquivo | Remover espacos no fim da linha"
-        exclude: ^app/runtime/world/
+      - id: stack-clean
+        name: "Stack | Limpeza"
+        entry: bash app/scripts/bash/run-in-linux-env.sh bash app/scripts/bash/run-in-dev-env.sh python app/scripts/operations/clean_workspace.py --stage clean
+        language: system
+        pass_filenames: false
+        always_run: true

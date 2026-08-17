@@ -51,26 +51,8 @@ permissions:
   contents: read
 
 jobs:
-  linter:
-    name: CI - Linter
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Obter codigo fonte
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Lint codigo
-        uses: ./.github/actions/ci/lint-code
-
-      - name: Lint infra
-        uses: ./.github/actions/ci/lint-infra
-
-  validate:
-    name: CI - Validacao
+  python:
+    name: CI - Python
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -79,27 +61,102 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Testes
+      - name: Python Lint e Validate
+        uses: ./.github/actions/ci/lint-code
+
+      - name: Python Testes
         uses: ./.github/actions/ci/test
 
-      - name: Seguranca
+      - name: Python Seguranca
         uses: ./.github/actions/ci/security
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validar Docker
+  terraform:
+    name: CI - Terraform
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Obter codigo fonte
+        uses: actions/checkout@v4
+
+      - name: Terraform matriz
+        uses: ./.github/actions/ci/validate-terraform
+
+  docker:
+    name: CI - Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Obter codigo fonte
+        uses: actions/checkout@v4
+
+      - name: Docker matriz
         uses: ./.github/actions/ci/validate-docker
 
-      - name: Validar Kubernetes
+  kubernetes:
+    name: CI - Kubernetes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Obter codigo fonte
+        uses: actions/checkout@v4
+
+      - name: Kubernetes matriz
         uses: ./.github/actions/ci/validate-kubernetes
 
-      - name: Validar Terraform
-        uses: ./.github/actions/ci/validate-terraform
+  json:
+    name: CI - JSON
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Obter codigo fonte
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: app/.python-version
+          cache: pip
+          cache-dependency-path: |
+            app/requirements.txt
+            app/requirements-dev.txt
+
+      - name: Instalar dependencias
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r app/requirements.txt -r app/requirements-dev.txt
+
+      - name: JSON Lint
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area json --stage lint
+
+      - name: JSON Validate
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area json --stage validate
+
+  workflows:
+    name: CI - Workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Obter codigo fonte
+        uses: actions/checkout@v4
+
+      - name: Actionlint
+        uses: ./.github/actions/ci/lint-infra
 
   deploy-infra:
     name: CD - Deploy Infra
-    needs: [linter, validate]
+    needs: [python, terraform, docker, kubernetes, json, workflows]
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
@@ -159,13 +216,17 @@ jobs:
 
   release:
     name: CI - Release
-    needs: [linter, validate, deploy-infra]
+    needs: [python, terraform, docker, kubernetes, json, workflows, deploy-infra]
     if: >-
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       !contains(github.event.head_commit.message, '[skip-cd]') &&
-      needs.linter.result == 'success' &&
-      needs.validate.result == 'success' &&
+      needs.python.result == 'success' &&
+      needs.terraform.result == 'success' &&
+      needs.docker.result == 'success' &&
+      needs.kubernetes.result == 'success' &&
+      needs.json.result == 'success' &&
+      needs.workflows.result == 'success' &&
       needs.deploy-infra.result == 'success' &&
       (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_cd != 'true')
     runs-on: ubuntu-latest
@@ -293,7 +354,7 @@ jobs:
 
   pipeline-summary:
     name: CI/CD - Resumo
-    needs: [linter, validate, deploy-infra, release, deploy-app, post-deploy]
+    needs: [python, terraform, docker, kubernetes, json, workflows, deploy-infra, release, deploy-app, post-deploy]
     if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -305,11 +366,15 @@ jobs:
       - name: Resumo do pipeline
         uses: ./.github/actions/shared/pipeline-summary
         with:
-          linter: ${{ needs.linter.result }}
-          validate: ${{ needs.validate.result }}
+          python: ${{ needs.python.result }}
+          terraform: ${{ needs.terraform.result }}
+          docker: ${{ needs.docker.result }}
+          kubernetes: ${{ needs.kubernetes.result }}
+          json: ${{ needs.json.result }}
+          workflows: ${{ needs.workflows.result }}
           deploy_infra: ${{ needs.deploy-infra.result }}
           release: ${{ needs.release.result }}
-          deploy_app: ${{ needs.deploy-app.result }}
+          deploy_app: ${{ needs.deploy_app.result }}
           post_deploy: ${{ needs.post-deploy.result }}
           release_tag: ${{ needs.release.outputs.tag }}
           release_published: ${{ needs.release.outputs.published }}

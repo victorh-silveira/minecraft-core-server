@@ -1,32 +1,35 @@
-name: CI - Validar Terraform
-description: Validacao Terraform com tflint, tfsec e terraform validate
+name: CI - Terraform
+description: Lint Validate Testes Seguranca Terraform via orquestrador
 
 runs:
   using: composite
 
   steps:
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: app/.python-version
+        cache: pip
+        cache-dependency-path: |
+          app/requirements.txt
+          app/requirements-dev.txt
+
+    - name: Instalar dependencias
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r app/requirements.txt -r app/requirements-dev.txt
+
     - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: "1.15.4"
+        terraform_wrapper: false
 
     - name: Configurar TFLint
       uses: terraform-linters/setup-tflint@v4
       with:
         tflint_version: v0.54.0
-
-    - name: Inicializar TFLint
-      shell: bash
-      run: tflint --init --config=$(pwd)/linters/.tflint.hcl
-
-    - name: TFLint
-      shell: bash
-      run: |
-        CONFIG="$(pwd)/linters/.tflint.hcl"
-        for dir in infra/terraform/live/prod; do
-          echo ">>> tflint ${dir}"
-          (cd "${dir}" && tflint --config="${CONFIG}" --minimum-failure-severity=error)
-        done
 
     - name: Instalar tfsec
       shell: bash
@@ -34,15 +37,19 @@ runs:
         curl -fsSL -o /tmp/tfsec https://github.com/aquasecurity/tfsec/releases/download/v1.28.11/tfsec-linux-amd64
         chmod +x /tmp/tfsec
         sudo mv /tmp/tfsec /usr/local/bin/tfsec
-        tfsec --version
 
-    - name: tfsec
+    - name: Terraform Lint
       shell: bash
-      run: tfsec --config-file linters/.tfsec.yml .
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage lint
 
-    - name: Validar Terraform live/prod
+    - name: Terraform Validate
       shell: bash
-      run: |
-        cd infra/terraform/live/prod
-        terraform init -backend=false
-        terraform validate
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage validate
+
+    - name: Terraform Testes
+      shell: bash
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage test
+
+    - name: Terraform Seguranca
+      shell: bash
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage security

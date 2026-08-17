@@ -6,39 +6,44 @@ Pipelines de integracao, entrega e destroy da stack Minecraft Server na Azure.
 
 ```mermaid
 flowchart LR
-  subgraph ci [CI paralelo]
-    L[Linter]
-    V[Validacao]
+  subgraph ci [CI paralelo por area]
+    PY[Python]
+    TF[Terraform]
+    DK[Docker]
+    K8[Kubernetes]
+    JS[JSON]
+    WF[Workflows]
   end
-  L --> I[Deploy Infra]
-  V --> I
-  L --> R[Release]
-  V --> R
-  I --> R
+  PY --> I[Deploy Infra]
+  TF --> I
+  DK --> I
+  K8 --> I
+  JS --> I
+  WF --> I
+  I --> R[Release]
   R -->|nova tag| A[Deploy App]
   A --> P[Pos-deploy]
-  I --> S[Resumo]
-  V --> S
-  L --> S
+  PY --> S[Resumo]
+  I --> S
   R --> S
   A --> S
   P --> S
 ```
 
-| Fase | Job | Boas praticas aplicadas |
-|------|-----|-------------------------|
-| CI | Linter + Validacao em paralelo | Feedback rapido; PR executa so CI |
-| CD infra | Deploy Infra condicional | `paths-filter`, environment `production-infra`, OIDC |
-| Release | Semantic release apos gates | So com linter/validate/infra OK |
-| CD app | Deploy App | Environment `production`, imagem imutavel por tag, cache GHA |
-| Verificacao | Pos-deploy | Saude K8s, TCP 25565, annotations no Summary |
+| Fase | Job | Notas |
+|------|-----|-------|
+| CI | Python / Terraform / Docker / Kubernetes / JSON / Workflows | Mesmo orquestrador do pre-commit |
+| CD infra | Deploy Infra condicional | `paths-filter`, `[skip-cd]`, `[force-infra]` |
+| Release | Semantic release | Apos gates + infra OK |
+| CD app | Deploy App | Environment `production` |
+| Verificacao | Pos-deploy | Saude K8s + TCP |
 
 ## Workflows
 
 | Workflow | Gatilho | Uso |
 |----------|---------|-----|
-| [ci.yml](workflows/ci.yml) | push/PR `main`, manual | CI completo; CD automatico no push `main` |
-| [cd.yml](workflows/cd.yml) | release externa, manual | Re-deploy ou infra sob demanda |
+| [ci.yml](workflows/ci.yml) | push/PR `main`, manual | CI matriz; CD no push `main` |
+| [cd.yml](workflows/cd.yml) | release externa, manual | Re-deploy sob demanda |
 | [destroy.yml](workflows/destroy.yml) | manual | Remocao controlada |
 
 ## Composite actions
@@ -46,12 +51,12 @@ flowchart LR
 ```text
 .github/actions/
 ├── shared/
-│   ├── azure-login/          OIDC ou service principal
-│   ├── aks-context/          kubectl no AKS prod
-│   ├── resolve-whitelist/    UUID offline para modo offline
-│   └── pipeline-summary/     Tabela no GitHub Summary
-├── ci/                       lint, test, security, validate, release
-├── cd/                       deploy-infra, deploy-app, post-deploy
+│   ├── azure-login/
+│   ├── aks-context/
+│   ├── resolve-whitelist/
+│   └── pipeline-summary/
+├── ci/                       lint-code, test, security, validate-*, lint-infra=actionlint
+├── cd/
 └── destroy/azure/
 ```
 
@@ -59,44 +64,33 @@ flowchart LR
 
 | Secret | Uso |
 |--------|-----|
-| `AZURE_CLIENT_ID` | OIDC (recomendado) |
+| `AZURE_CLIENT_ID` | OIDC |
 | `AZURE_TENANT_ID` | Azure / Terraform ARM |
 | `AZURE_SUBSCRIPTION_ID` | Azure / Terraform ARM |
-| `AZURE_CREDENTIALS` | Fallback JSON service principal |
-| `RCON_PASSWORD` | Secret `mc-rcon` no AKS |
-| `MINECRAFT_WHITELIST` | Secret `mc-access` (padrao `AnonymousNoobz` se ausente) |
-| `GITHUB_TOKEN` | Release e Gitleaks (automatico) |
+| `AZURE_CREDENTIALS` | Fallback service principal |
+| `RCON_PASSWORD` | Secret `mc-rcon` |
+| `MINECRAFT_WHITELIST` | Secret `mc-access` |
+| `GITHUB_TOKEN` | Release e Gitleaks |
 
 ## Environments
 
-| Environment | Uso | Protecao recomendada |
-|-------------|-----|----------------------|
-| `production` | Deploy app + pos-deploy | Reviewers |
-| `production-infra` | Terraform apply | Reviewers + confirmar `APPLY_INFRA` |
-| `production-destroy` | Destroy | Reviewers + `DESTROY` |
+| Environment | Uso |
+|-------------|-----|
+| `production` | Deploy app + pos-deploy |
+| `production-infra` | Terraform apply |
+| `production-destroy` | Destroy |
 
 ## Operacao
 
 ### Push em `main`
 
-1. CI paralelo: linter + validacao (testes, seguranca, Docker/K8s/TF).
-2. Infra: apply so se TF mudou, AKS ausente, `[force-infra]` no commit ou input manual `force_infra`.
-3. Release: nova tag quando houver commits releasable.
-4. Deploy: build com cache GHA, rollout AKS, pos-deploy com probe TCP.
-
-Marcador `[skip-cd]` na mensagem do commit: roda so o CI (linter + validacao); pula deploy infra, release, deploy app e pos-deploy. Nao usar `[skip ci]` se quiser que o CI rode.
+1. CI paralelo por area (matriz Lint/Validate/Testes/Seguranca).
+2. Infra: apply se TF mudou, AKS ausente, `[force-infra]` ou `force_infra`.
+3. Release e deploy app se houver tag nova.
+4. Marcador `[skip-cd]`: so CI; sem infra/release/deploy.
 
 ### Pull request
 
-Apenas jobs **CI - Linter** e **CI - Validacao** (sem deploy).
+Somente jobs CI por area (sem CD).
 
-### Manual
-
-- **CI workflow**: `skip_cd=true` roda so qualidade (sem release/deploy).
-- **CD workflow**: modos `deploy-app`, `deploy-infra`, `deploy-app-and-verify`.
-
-### Conectar ao servidor
-
-Annotation `minecraft-server.io/conectividade-endereco` no Service `mc-server-game` (atualizada no pos-deploy).
-
-Documentacao: [docs/devops.md](../docs/devops.md), [docs/azure.md](../docs/azure.md).
+Documentacao: [docs/devops.md](../docs/devops.md), [docs/engineering-python.md](../docs/engineering-python.md), [docs/azure.md](../docs/azure.md).

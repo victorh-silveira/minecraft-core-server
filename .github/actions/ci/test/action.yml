@@ -1,5 +1,5 @@
 name: CI - Testes
-description: Testes pytest com cobertura minima de 100% nas camadas da aplicacao
+description: Python testes via orquestrador
 
 runs:
   using: composite
@@ -20,6 +20,6 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
-    - name: Executar testes
+    - name: Python Testes
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --stage test --coverage-fail-under 100
+      run: python app/scripts/operations/clean_workspace.py --area python --stage test --coverage-fail-under 100

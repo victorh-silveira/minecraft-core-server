@@ -2,19 +2,24 @@
 
 Qualidade, testes e entrypoints da aplicacao.
 
-## Stack
+## Matriz de qualidade
 
-| Gate | Ferramenta |
-|------|------------|
-| Lint / format | Ruff |
-| Tipos | mypy `--strict` |
-| Dead code | vulture |
-| Teste + cobertura | pytest + coverage.py fail-under 100 (branch) |
-| Seguranca | bandit + pip-audit |
-| Hooks | pre-commit + commitlint |
-| Orquestrador | `app/scripts/operations/clean_workspace.py` |
+Orquestrador: [`app/scripts/operations/clean_workspace.py`](../app/scripts/operations/clean_workspace.py)
 
-Configuracao: [`app/pyproject.toml`](../app/pyproject.toml).
+```bash
+python app/scripts/operations/clean_workspace.py --area <area> --stage <stage>
+```
+
+| Area | Lint | Validate | Testes | Seguranca |
+|------|------|----------|--------|-----------|
+| python | Ruff, vulture, pylint dupe, ≤300 linhas, imports | mypy strict | pytest + cov 100% branch | Bandit + pip-audit |
+| terraform | fmt-check + tflint | terraform validate | terraform test (modulo label) | tfsec |
+| docker | Hadolint | compose config | smoke estatico | Trivy config |
+| kubernetes | YAML sintaxe | kustomize + kubeconform | smoke estatico | Trivy config |
+| json | schema do manifesto | parse JSON | — | — |
+| clean | limpeza full-stack (caches, `.tools`, `.terraform`, logs) | | | |
+
+Commitlint: hook `commit-msg`. Actionlint: somente CI (job Workflows).
 
 ## Makefile
 
@@ -23,14 +28,13 @@ Configuracao: [`app/pyproject.toml`](../app/pyproject.toml).
 | `app-setup` | deps + hooks |
 | `app-install` | `.venv` e requirements |
 | `app-run` | sync de mods (`run.py`) |
-| `app-lint` | ruff, mypy, vulture, limite 300 linhas, imports hexagonais |
-| `app-test` | pytest + cobertura 100% |
-| `app-security` | bandit + pip-audit |
-| `app-clean` | caches |
+| `app-lint` | `--area all --stage lint` |
+| `app-validate` | `--area all --stage validate` |
+| `app-test` | `--area all --stage test` |
+| `app-security` | `--area all --stage security` |
+| `app-clean` | limpeza full-stack |
 | `app-pre-commit` | instala hooks |
-| `app-pre-commit-run` | `pre-commit run --all-files` |
-
-Aliases historicos: `ci-test` → `app-test`, `clean` → `app-clean`, `dev-deps` → `app-install`, `docker-sync-mods` → `app-run`, `pre-commit-install` → `app-pre-commit`.
+| `app-pre-commit-run` | matriz completa via pre-commit |
 
 ## Entrypoints
 
@@ -40,9 +44,7 @@ cd app && python -m presentation.cli
 make docker-sync-mods
 ```
 
-`run.py` na raiz adiciona `app/src` ao `sys.path` e chama `presentation.cli.main`.
-
-## Testes
+## Testes Python
 
 | Camada | Onde | Estrategia |
 |--------|------|------------|
@@ -52,8 +54,8 @@ make docker-sync-mods
 | presentation | `tests/unit/presentation/` | CLI, exit code, eventos |
 | integracao | `tests/integration/infrastructure/` | transporte HTTP mock (Modrinth) |
 
-Testes definem `SYNC_DISABLE_DOTENV=1` em `app/tests/conftest.py`.
+`SYNC_DISABLE_DOTENV=1` em `app/tests/conftest.py`.
 
 ## Commits
 
-Formato `tipo(escopo): assunto` com corpo obrigatorio. Config: [`linters/commitlint.config.mjs`](../linters/commitlint.config.mjs). Hook: [`linters/git-hooks/commit-msg`](../linters/git-hooks/commit-msg).
+Formato `tipo(escopo): assunto` com corpo obrigatorio. Config: [`linters/commitlint.config.mjs`](../linters/commitlint.config.mjs).
