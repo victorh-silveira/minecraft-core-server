@@ -40,6 +40,6 @@ Rules/skills vivem em [`.cursor/`](../.cursor/) e sao **versionadas** no git.
 
 ## Enforcement
 
-- Gates: `make app-lint`, `make app-validate`, `make app-test`, `make app-security`
+- Gates: `make app-lint`, `make app-security`, `make app-test`, `make app-validate`, `make app-build`
 - Orquestrador: `app/scripts/operations/clean_workspace.py`
 - Commitlint: `linters/commitlint.config.mjs` (escopo `llm` para superficie de agentes)

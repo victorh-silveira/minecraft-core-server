@@ -55,3 +55,58 @@ def stage_lint() -> None:
             print(f"[ERRO] mods[{index}].source invalido: {entry['source']}")
             sys.exit(1)
     print("[OK] Manifesto de mods passou no lint estrutural.")
+
+
+def _mods() -> list[dict[str, object]]:
+    stage_validate()
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    mods = data["mods"]
+    if not isinstance(mods, list):
+        print("[ERRO] mods deve ser lista")
+        sys.exit(1)
+    return [entry for entry in mods if isinstance(entry, dict)]
+
+
+def stage_security() -> None:
+    print("\n>>> Executando: JSON seguranca (https e sha256)")
+    for index, entry in enumerate(_mods()):
+        url = entry.get("download_url")
+        if isinstance(url, str) and url and not url.startswith("https://"):
+            print(f"[ERRO] mods[{index}].download_url deve ser https")
+            sys.exit(1)
+        sha_raw = entry.get("sha256")
+        if sha_raw is None or sha_raw == "":
+            continue
+        if (
+            not isinstance(sha_raw, str)
+            or len(sha_raw) != 64
+            or any(ch not in "0123456789abcdefABCDEF" for ch in sha_raw)
+        ):
+            print(f"[ERRO] mods[{index}].sha256 invalido")
+            sys.exit(1)
+    print("[OK] manifesto sem URL insegura e com sha256 valido quando presente.")
+
+
+def stage_test() -> None:
+    print("\n>>> Executando: JSON testes (ids unicos)")
+    seen: set[str] = set()
+    for index, entry in enumerate(_mods()):
+        mod_id = entry.get("id")
+        if not isinstance(mod_id, str) or not mod_id:
+            print(f"[ERRO] mods[{index}].id ausente")
+            sys.exit(1)
+        if mod_id in seen:
+            print(f"[ERRO] id duplicado: {mod_id}")
+            sys.exit(1)
+        seen.add(mod_id)
+    print("[OK] ids de mods unicos.")
+
+
+def stage_build() -> None:
+    print("\n>>> Executando: JSON build (sha256 obrigatorio)")
+    for index, entry in enumerate(_mods()):
+        sha_raw = entry.get("sha256")
+        if not isinstance(sha_raw, str) or len(sha_raw) != 64:
+            print(f"[ERRO] mods[{index}] sem sha256 de 64 hex (build)")
+            sys.exit(1)
+    print("[OK] manifesto pronto para sync (hash em todos os mods).")

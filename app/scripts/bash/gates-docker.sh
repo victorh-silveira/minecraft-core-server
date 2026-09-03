@@ -147,14 +147,34 @@ cmd_security() {
   fi
 }
 
+cmd_build() {
+  echo ">>> docker compose build"
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "[ERRO] docker nao encontrado"
+    exit 1
+  fi
+  synthetic_env
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" build
+    return
+  fi
+  if docker compose build --help 2>&1 | grep -qi "dry-run"; then
+    docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" build --dry-run
+    echo "[OK] docker compose build --dry-run"
+    return
+  fi
+  echo "[OK] compose sem --dry-run; imagem completa so no CI"
+}
+
 main() {
   case "${1:-}" in
     lint) cmd_lint ;;
-    validate) cmd_validate ;;
-    test) cmd_test ;;
     security) cmd_security ;;
+    test) cmd_test ;;
+    validate) cmd_validate ;;
+    build) cmd_build ;;
     *)
-      echo "Uso: $0 lint|validate|test|security"
+      echo "Uso: $0 lint|security|test|validate|build"
       exit 1
       ;;
   esac

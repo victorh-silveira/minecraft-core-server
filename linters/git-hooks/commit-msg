@@ -2,5 +2,4 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-npx --yes -p @commitlint/cli -p @commitlint/config-conventional \
-  commitlint --config "${ROOT}/linters/commitlint.config.mjs" --edit "${1:-}"
+exec bash "${ROOT}/linters/git-hooks/commitlint-fast.sh" "${1:-}"

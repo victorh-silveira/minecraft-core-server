@@ -6,9 +6,9 @@ alwaysApply: false
 
 # Senior CI/CD
 
-- QA (lint/validate/test/security) sempre; `[skip-cd]` so pula deploy/infra
+- QA crash-first: lint → seguranca → testes → validate → build; `[skip-cd]` so pula deploy/infra
 - OIDC `id-token: write`; sem client secret de longa duracao
-- Cache por hash de lock/requirements; matriz paralela quando fizer sentido
+- Cache por hash de lock/requirements; jobs por area em paralelo, stages em sequencia
 - Imagens por SHA curto; nao promover `latest` a prod
-- Gates: Ruff → mypy → pytest cov-branch 100% → Bandit → pip-audit → Hadolint → tflint/tfsec → kubeconform → Trivy
+- Gates: Ruff → Bandit/pip-audit → pytest cov-branch 100% → mypy → compileall; Hadolint/Trivy; tflint/tfsec; kubeconform; actionlint
 - Doc: `docs/engineering-senior-bar.md`; skill: `mcs-senior-cloud-ops` + `mcs-precommit`

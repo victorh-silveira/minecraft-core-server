@@ -167,14 +167,21 @@ cmd_security() {
   rm -f "${rendered}"
 }
 
+cmd_build() {
+  echo ">>> kustomize build"
+  render_overlay >/dev/null
+  echo "[OK] overlay prod renderizado"
+}
+
 main() {
   case "${1:-}" in
     lint) cmd_lint ;;
-    validate) cmd_validate ;;
-    test) cmd_test ;;
     security) cmd_security ;;
+    test) cmd_test ;;
+    validate) cmd_validate ;;
+    build) cmd_build ;;
     *)
-      echo "Uso: $0 lint|validate|test|security"
+      echo "Uso: $0 lint|security|test|validate|build"
       exit 1
       ;;
   esac

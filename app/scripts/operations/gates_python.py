@@ -1,5 +1,6 @@
 import ast
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -135,3 +136,24 @@ def stage_security() -> None:
         "Pip-audit - vulnerabilidades em dependencias",
         cwd=REPO_ROOT,
     )
+    gitleaks = shutil.which("gitleaks")
+    if gitleaks is not None:
+        print(f"\n>>> Executando: Gitleaks\nComando: {gitleaks} detect --source . --verbose --redact")
+        subprocess.run(
+            [gitleaks, "detect", "--source", ".", "--verbose", "--redact"],
+            check=True,
+            text=True,
+            cwd=REPO_ROOT,
+        )
+
+
+def stage_build() -> None:
+    targets = [str(SRC_ROOT), str(APP_ROOT / "scripts"), str(REPO_ROOT / "run.py")]
+    print("\n>>> Executando: compileall (build Python)")
+    subprocess.run(
+        [sys.executable, "-m", "compileall", "-q", *targets],
+        check=True,
+        text=True,
+        cwd=REPO_ROOT,
+    )
+    print("[OK] bytecode Python gerado.")

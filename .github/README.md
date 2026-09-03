@@ -8,18 +8,18 @@ Pipelines de integracao, entrega e destroy da stack Minecraft Server na Azure.
 flowchart LR
   subgraph ci [CI paralelo por area]
     PY[Python]
-    TF[Terraform]
     DK[Docker]
     K8[Kubernetes]
-    JS[JSON]
-    WF[Workflows]
+    TF[Terraform]
+    GH[GitHub]
+    SH[Scripts]
   end
   PY --> I[Deploy Infra]
-  TF --> I
   DK --> I
   K8 --> I
-  JS --> I
-  WF --> I
+  TF --> I
+  GH --> I
+  SH --> I
   I --> R[Release]
   R -->|nova tag| A[Deploy App]
   A --> P[Pos-deploy]
@@ -32,7 +32,7 @@ flowchart LR
 
 | Fase | Job | Notas |
 |------|-----|-------|
-| CI | Python / Terraform / Docker / Kubernetes / JSON / Workflows | Mesmo orquestrador do pre-commit |
+| CI | Python / Docker / Kubernetes / Terraform / GitHub / Scripts | Mesmo orquestrador e nomes do pre-commit |
 | CD infra | Deploy Infra condicional | `paths-filter`, `[skip-cd]`, `[force-infra]` |
 | Release | Semantic release | Apos gates + infra OK |
 | CD app | Deploy App | Environment `production` |
@@ -55,7 +55,7 @@ flowchart LR
 │   ├── aks-context/
 │   ├── resolve-whitelist/
 │   └── pipeline-summary/
-├── ci/                       lint-code, test, security, validate-*, lint-infra=actionlint
+├── ci/                       setup-python, validate-docker/k8s/terraform/github/scripts
 ├── cd/
 └── destroy/azure/
 ```
@@ -83,7 +83,7 @@ flowchart LR
 
 ### Push em `main`
 
-1. CI paralelo por area (matriz Lint/Validate/Testes/Seguranca).
+1. CI paralelo por area; em cada job stages crash-first: Lint, Seguranca, Testes, Validate, Build.
 2. Infra: apply se TF mudou, AKS ausente, `[force-infra]` ou `force_infra`.
 3. Release e deploy app se houver tag nova.
 4. Marcador `[skip-cd]`: so CI; sem infra/release/deploy.

@@ -1,5 +1,5 @@
 name: CI - Lint de codigo
-description: Python lint via orquestrador
+description: Setup Python e Python | Lint (crash-first)
 
 runs:
   using: composite
@@ -20,10 +20,6 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
-    - name: Python Lint
+    - name: Python | Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area python --stage lint
-
-    - name: Python Validate
-      shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area python --stage validate

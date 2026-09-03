@@ -157,21 +157,34 @@ cmd_security() {
   "${tfsec}" --config-file linters/.tfsec.yml .
 }
 
+cmd_build() {
+  local tf
+  tf="$(terraform_bin)"
+  echo ">>> terraform init (build providers)"
+  (cd infra/terraform/live/prod && "${tf}" init -backend=false -input=false)
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    git checkout -- infra/terraform/live/prod/.terraform.lock.hcl 2>/dev/null || true
+  fi
+  echo "[OK] terraform init"
+}
+
 main() {
   case "${1:-}" in
     fmt) cmd_fmt ;;
     lint) cmd_lint ;;
-    validate) cmd_validate ;;
-    test) cmd_test ;;
     security) cmd_security ;;
+    test) cmd_test ;;
+    validate) cmd_validate ;;
+    build) cmd_build ;;
     all)
       cmd_lint
-      cmd_validate
-      cmd_test
       cmd_security
+      cmd_test
+      cmd_validate
+      cmd_build
       ;;
     *)
-      echo "Uso: $0 fmt|lint|validate|test|security|all"
+      echo "Uso: $0 fmt|lint|security|test|validate|build|all"
       exit 1
       ;;
   esac

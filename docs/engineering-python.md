@@ -10,16 +10,17 @@ Orquestrador: [`app/scripts/operations/clean_workspace.py`](../app/scripts/opera
 python app/scripts/operations/clean_workspace.py --area <area> --stage <stage>
 ```
 
-| Area | Lint | Validate | Testes | Seguranca |
-|------|------|----------|--------|-----------|
-| python | Ruff, vulture, pylint dupe, ≤300 linhas, imports | mypy strict | pytest + cov 100% branch | Bandit + pip-audit |
-| terraform | fmt-check + tflint | terraform validate | terraform test (modulo label) | tfsec |
-| docker | Hadolint | compose config | smoke estatico | Trivy config |
-| kubernetes | YAML sintaxe | kustomize + kubeconform | smoke estatico | Trivy config |
-| json | schema do manifesto | parse JSON | — | — |
-| clean | limpeza full-stack (caches, `.tools`, `.terraform`, logs) | | | |
+| Area | Lint | Seguranca | Testes | Validate | Build |
+|------|------|-----------|--------|----------|-------|
+| python | Ruff, vulture, hexagonal, manifesto | Bandit, pip-audit, hash/https | pytest + ids | mypy + parse JSON | compileall + sha |
+| docker | Hadolint | Trivy config | smoke estatico | compose config | compose build (imagem no CI) |
+| kubernetes | YAML sintaxe | Trivy config | smoke estatico | kustomize + kubeconform | kustomize build |
+| terraform | fmt-check + tflint | tfsec | terraform test (modulo label) | terraform validate | terraform init |
+| github | parse workflows/hooks | sem credencial estatica | jobs da matriz CI | actionlint | actions locais existem |
+| scripts | bash -n | sem credencial em .sh | shellcheck | Makefile dry-run | shebang bash |
+| clean | limpeza full-stack (caches, `.tools`, `.terraform`, logs) | | | | |
 
-Commitlint: hook `commit-msg`. Actionlint: somente CI (job Workflows).
+Commitlint: primeiro no pre-commit (`Commit | Lint`) e no hook `commit-msg`. Actionlint: stage validate da area github. Manifesto JSON entra na area python.
 
 ## Makefile
 
@@ -29,9 +30,10 @@ Commitlint: hook `commit-msg`. Actionlint: somente CI (job Workflows).
 | `app-install` | `.venv` e requirements |
 | `app-run` | sync de mods (`run.py`) |
 | `app-lint` | `--area all --stage lint` |
-| `app-validate` | `--area all --stage validate` |
-| `app-test` | `--area all --stage test` |
 | `app-security` | `--area all --stage security` |
+| `app-test` | `--area all --stage test` |
+| `app-validate` | `--area all --stage validate` |
+| `app-build` | `--area all --stage build` |
 | `app-clean` | limpeza full-stack |
 | `app-pre-commit` | instala hooks |
 | `app-pre-commit-run` | matriz completa via pre-commit |

@@ -29,7 +29,7 @@ RESET  := \033[0m
 
 .DEFAULT_GOAL := help
 
-.PHONY: help app-install app-lint app-validate app-test app-security app-run app-clean app-setup \
+.PHONY: help app-install app-lint app-validate app-test app-security app-build app-run app-clean app-setup \
 	app-pre-commit app-pre-commit-run pre-commit pre-commit-install \
 	dev-deps clean \
 	ci-fmt ci-lint ci-validate-infra ci-infra ci-pre-push ci-test ci-validate \
@@ -50,14 +50,15 @@ help:
 	@echo -e "$(YELLOW)App:$(RESET)"
 	@echo -e "  $(GREEN)app-clean$(RESET)            - Limpa caches, artefactos e logs locais"
 	@echo -e "  $(GREEN)app-install$(RESET)          - Instala dependencias no .venv"
-	@echo -e "  $(GREEN)app-lint$(RESET)             - Lint da matriz (Python, Terraform, Docker, K8s, JSON)"
+	@echo -e "  $(GREEN)app-lint$(RESET)             - Lint crash-first (Python, Docker, K8s, Terraform, GitHub, Scripts)"
 	@echo -e "  $(GREEN)app-pre-commit$(RESET)       - Instala e valida githooks pre-commit"
 	@echo -e "  $(GREEN)app-pre-commit-run$(RESET)   - Executa pre-commit em todos os arquivos"
 	@echo -e "  $(GREEN)app-run$(RESET)              - Sync de mods via manifesto (run.py)"
-	@echo -e "  $(GREEN)app-security$(RESET)         - Auditoria de seguranca (Bandit, tfsec, Trivy)"
+	@echo -e "  $(GREEN)app-security$(RESET)         - Seguranca crash-first da matriz"
 	@echo -e "  $(GREEN)app-setup$(RESET)            - app-install + hooks git"
-	@echo -e "  $(GREEN)app-test$(RESET)             - Testes automatizados + cobertura 100%%"
-	@echo -e "  $(GREEN)app-validate$(RESET)         - Validate da matriz (mypy, compose, kubeconform, TF)"
+	@echo -e "  $(GREEN)app-test$(RESET)             - Testes crash-first da matriz + cobertura 100%%"
+	@echo -e "  $(GREEN)app-validate$(RESET)         - Validate crash-first da matriz"
+	@echo -e "  $(GREEN)app-build$(RESET)            - Build crash-first da matriz"
 	@echo -e ""
 	@echo -e "$(YELLOW)Docker:$(RESET)"
 	@echo -e "  $(GREEN)docker-clean$(RESET)         - $(RED)DESTRUTIVO$(RESET): remove containers, redes e volumes do projeto"
@@ -97,6 +98,9 @@ app-test: app-install
 app-security: app-install
 	$(DEV_ENV) bash -lc "$(OPS) --area all --stage security"
 
+app-build: app-install
+	$(DEV_ENV) bash -lc "$(OPS) --area all --stage build"
+
 app-clean: app-install
 	$(DEV_ENV) bash -lc "$(OPS) --stage clean"
 
@@ -106,7 +110,7 @@ app-run: app-install
 app-pre-commit: app-install
 	$(DEV_ENV) pre-commit install
 	$(DEV_ENV) pre-commit install --hook-type commit-msg
-	@chmod +x linters/git-hooks/commit-msg 2>/dev/null || true
+	@chmod +x linters/git-hooks/commit-msg linters/git-hooks/commitlint-fast.sh 2>/dev/null || true
 
 app-pre-commit-run: app-install
 	$(DEV_ENV) pre-commit run --all-files -c .pre-commit-config.yaml
@@ -133,11 +137,12 @@ ci-validate-infra:
 
 ci-infra: ci-fmt
 	$(CI_INFRA) lint
-	$(CI_INFRA) validate
-	$(CI_INFRA) test
 	$(CI_INFRA) security
+	$(CI_INFRA) test
+	$(CI_INFRA) validate
+	$(CI_INFRA) build
 
-ci-pre-push: app-lint app-validate
+ci-pre-push: app-lint app-security app-test app-validate app-build
 
 ci-test: app-test
 

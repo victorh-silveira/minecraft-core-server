@@ -1,5 +1,5 @@
 name: CI - Kubernetes
-description: Lint Validate Testes Seguranca Kubernetes via orquestrador
+description: Matriz crash-first Kubernetes via orquestrador
 
 runs:
   using: composite
@@ -25,18 +25,22 @@ runs:
       with:
         version: v0.74.0
 
-    - name: Kubernetes Lint
+    - name: Kubernetes | Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage lint
 
-    - name: Kubernetes Validate
+    - name: Kubernetes | Seguranca
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage validate
+      run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage security
 
-    - name: Kubernetes Testes
+    - name: Kubernetes | Testes
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage test
 
-    - name: Kubernetes Seguranca
+    - name: Kubernetes | Validate
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage security
+      run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage validate
+
+    - name: Kubernetes | Build
+      shell: bash
+      run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage build

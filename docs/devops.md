@@ -72,18 +72,20 @@ make ci-lint
 
 O Makefile cria `.venv` na raiz e instala `app/requirements-dev.txt` automaticamente nos alvos Python.
 
-Hooks: `Python |`, `Terraform |`, `Docker |`, `Kubernetes |`, `JSON |`, `Commit |`, `Stack |` (ver `.pre-commit-config.yaml`).
+Hooks: `Commit | Lint` primeiro, depois `Python |` / `Docker |` / `Kubernetes |` / `Terraform |` / `GitHub |` / `Scripts |` e `Stack | Limpeza`.
 
 ## Quality gate
 
 [`app/scripts/operations/clean_workspace.py`](../app/scripts/operations/clean_workspace.py)
 
-| Area | Lint / Validate / Test / Security |
-|------|-----------------------------------|
-| Python | Ruff, mypy, pytest cov 100%, Bandit, pip-audit |
-| Docker | Hadolint; `trivy config`; `trivy image` se `TRIVY_IMAGE` setado (CVE de imagem bloqueante no CD `deploy-app`) |
-| Kubernetes | YAML + kubeconform no overlay prod; Trivy config |
-| Terraform | fmt, tflint, tfsec, validate |
+| Area | Lint / Seguranca / Testes / Validate / Build |
+|------|-----------------------------------------------|
+| Python | Ruff + manifesto JSON; Bandit/pip-audit; pytest cov 100%; mypy; compileall |
+| Docker | Hadolint; Trivy config; smoke; compose config; compose build no CI |
+| Kubernetes | YAML; Trivy; smoke; kubeconform; kustomize build |
+| Terraform | fmt/tflint; tfsec; terraform test; validate; init |
+| GitHub | parse; sem credencial estatica; jobs CI; actionlint; actions locais |
+| Scripts | bash -n; shellcheck; Makefile; shebang |
 
 Detalhe da barra senior: [engineering-senior-bar.md](engineering-senior-bar.md).
 
@@ -106,15 +108,14 @@ Detalhe de secrets: [.github/README.md](../.github/README.md).
 
 | Job | Conteudo |
 |-----|----------|
-| `CI - Python` ... `CI - Workflows` | Matriz por area (paralelo) |
-| `CI - Validacao` | pytest, Bandit, pip-audit, Gitleaks, Docker, kubeconform, tflint, tfsec |
+| `CI - Python` ... `CI - Scripts` | Matriz crash-first por area (paralelo entre jobs) |
 | `CD - Deploy Infra` | `terraform apply` condicional + environment `production-infra` |
 | `CI - Release` | sync tags + semantic-release apos gates |
 | `CD - Deploy App` | build/push GHCR, Trivy image, rollout AKS por digest, environment `production` |
 | `CD - Pos-deploy` | annotations, `test-aks.sh`, probe TCP 25565 |
 | `CI/CD - Resumo` | tabela de status no GitHub Summary |
 
-PR em `main`: jobs CI por area (Python, Terraform, Docker, Kubernetes, JSON, Workflows).
+PR em `main`: jobs CI por area (Python, Docker, Kubernetes, Terraform, GitHub, Scripts).
 
 ### CD manual — `cd.yml`
 

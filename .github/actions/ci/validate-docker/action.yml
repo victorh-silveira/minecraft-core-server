@@ -1,5 +1,5 @@
 name: CI - Docker
-description: Lint Validate Testes Seguranca Docker via orquestrador
+description: Matriz crash-first Docker via orquestrador
 
 runs:
   using: composite
@@ -32,18 +32,22 @@ runs:
       with:
         version: v0.74.0
 
-    - name: Docker Lint
+    - name: Docker | Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area docker --stage lint
 
-    - name: Docker Validate
+    - name: Docker | Seguranca
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area docker --stage validate
+      run: python app/scripts/operations/clean_workspace.py --area docker --stage security
 
-    - name: Docker Testes
+    - name: Docker | Testes
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area docker --stage test
 
-    - name: Docker Seguranca
+    - name: Docker | Validate
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area docker --stage security
+      run: python app/scripts/operations/clean_workspace.py --area docker --stage validate
+
+    - name: Docker | Build
+      shell: bash
+      run: python app/scripts/operations/clean_workspace.py --area docker --stage build

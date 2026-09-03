@@ -17,7 +17,7 @@ Ponto de entrada para agentes Cursor/LLM neste repositorio.
 - Dados de jogo: `app/runtime/{world,configs,mods,plugins,logs,database}` — nunca em `app/src/`
 - Entrega local: Docker Compose; producao: Azure AKS + Terraform
 - Entrypoints sync: `python run.py`, `make docker-sync-mods`
-- Gates: `make app-lint`, `make app-validate`, `make app-test`, `make app-security`
+- Gates: `make app-lint`, `make app-security`, `make app-test`, `make app-validate`, `make app-build`
 - Orquestrador: `app/scripts/operations/clean_workspace.py` (`--area` / `--stage`)
 - Contrato: [`prompt-model.md`](prompt-model.md)
 
@@ -53,14 +53,16 @@ Formato: `tipo(escopo): assunto em PT-BR` + corpo obrigatorio.
 
 ## Pre-commit / Make
 
-`.pre-commit-config.yaml` + `clean_workspace.py` stages: lint, test (cov 100%), security, clean; commit-msg: commitlint.
+`.pre-commit-config.yaml` + `clean_workspace.py` stages crash-first: lint, security, test, validate, build; `Commit | Lint` primeiro; commit-msg: commitlint.
 
 | Alvo | Efeito |
 |------|--------|
 | `make app-setup` | venv + hooks |
-| `make app-lint` | ruff, mypy, vulture, estrutura, imports |
-| `make app-test` | pytest + cobertura 100% branch |
-| `make app-security` | bandit + pip-audit |
+| `make app-lint` | lint crash-first de todas as areas |
+| `make app-security` | seguranca crash-first |
+| `make app-test` | testes + cobertura 100% branch |
+| `make app-validate` | validate crash-first |
+| `make app-build` | build crash-first |
 | `make app-run` | sync de mods |
 | `make app-pre-commit-run` | pre-commit em todos os arquivos |
 

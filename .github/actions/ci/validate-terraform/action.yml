@@ -1,5 +1,5 @@
 name: CI - Terraform
-description: Lint Validate Testes Seguranca Terraform via orquestrador
+description: Matriz crash-first Terraform via orquestrador
 
 runs:
   using: composite
@@ -38,18 +38,22 @@ runs:
         chmod +x /tmp/tfsec
         sudo mv /tmp/tfsec /usr/local/bin/tfsec
 
-    - name: Terraform Lint
+    - name: Terraform | Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area terraform --stage lint
 
-    - name: Terraform Validate
+    - name: Terraform | Seguranca
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area terraform --stage validate
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage security
 
-    - name: Terraform Testes
+    - name: Terraform | Testes
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area terraform --stage test
 
-    - name: Terraform Seguranca
+    - name: Terraform | Validate
       shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area terraform --stage security
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage validate
+
+    - name: Terraform | Build
+      shell: bash
+      run: python app/scripts/operations/clean_workspace.py --area terraform --stage build

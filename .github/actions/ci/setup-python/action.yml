@@ -1,5 +1,5 @@
-name: CI - Testes
-description: Python | Testes via orquestrador
+name: CI - Setup Python
+description: Python 3.13 e dependencias de QA
 
 runs:
   using: composite
@@ -19,7 +19,3 @@ runs:
       run: |
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
-
-    - name: Python | Testes
-      shell: bash
-      run: python app/scripts/operations/clean_workspace.py --area python --stage test --coverage-fail-under 100

@@ -1,5 +1,6 @@
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 
@@ -11,37 +12,46 @@ import gates_python
 from gates_common import run_bash_gate
 
 
-AREAS = ("python", "terraform", "docker", "kubernetes", "json", "all")
-STAGES = ("lint", "validate", "test", "security", "clean")
+AREAS = ("python", "docker", "kubernetes", "terraform", "github", "scripts", "all")
+AREA_ORDER = ("python", "docker", "kubernetes", "terraform", "github", "scripts")
+STAGES = ("lint", "security", "test", "validate", "build", "clean")
+STAGE_ORDER = ("lint", "security", "test", "validate", "build")
 BASH_AREAS = {
     "terraform": "gates-terraform.sh",
     "docker": "gates-docker.sh",
     "kubernetes": "gates-kubernetes.sh",
+    "github": "gates-github.sh",
+    "scripts": "gates-scripts.sh",
 }
+
+
+def _python(stage: str, coverage_fail_under: int) -> None:
+    json_handlers: dict[str, Callable[[], None]] = {
+        "lint": gates_json.stage_lint,
+        "security": gates_json.stage_security,
+        "test": gates_json.stage_test,
+        "validate": gates_json.stage_validate,
+        "build": gates_json.stage_build,
+    }
+    python_handlers: dict[str, Callable[[], None]] = {
+        "lint": gates_python.stage_lint,
+        "security": gates_python.stage_security,
+        "test": lambda: gates_python.stage_test(coverage_fail_under),
+        "validate": gates_python.stage_validate,
+        "build": gates_python.stage_build,
+    }
+    json_handler = json_handlers.get(stage)
+    python_handler = python_handlers.get(stage)
+    if json_handler is None or python_handler is None:
+        print(f"[ERRO] Stage {stage} nao suportado para python")
+        sys.exit(1)
+    json_handler()
+    python_handler()
 
 
 def _dispatch_area(area: str, stage: str, coverage_fail_under: int) -> None:
     if area == "python":
-        if stage == "lint":
-            gates_python.stage_lint()
-        elif stage == "validate":
-            gates_python.stage_validate()
-        elif stage == "test":
-            gates_python.stage_test(coverage_fail_under)
-        elif stage == "security":
-            gates_python.stage_security()
-        else:
-            print(f"[ERRO] Stage {stage} nao suportado para python")
-            sys.exit(1)
-        return
-    if area == "json":
-        if stage == "lint":
-            gates_json.stage_lint()
-        elif stage == "validate":
-            gates_json.stage_validate()
-        else:
-            print(f"[ERRO] Stage {stage} nao suportado para json")
-            sys.exit(1)
+        _python(stage, coverage_fail_under)
         return
     script = BASH_AREAS.get(area)
     if script is None:
@@ -61,19 +71,8 @@ def main() -> None:
         gates_clean.stage_clean()
         print("\n[SUCESSO] Estagio concluido com sucesso.")
         return
-    areas: tuple[str, ...]
-    if args.area == "all":
-        if stage in {"lint", "validate"}:
-            areas = ("python", "terraform", "docker", "kubernetes", "json")
-        elif stage in {"test", "security"}:
-            areas = ("python", "terraform", "docker", "kubernetes")
-        else:
-            areas = ()
-    else:
-        areas = (args.area,)
+    areas = AREA_ORDER if args.area == "all" and stage in STAGE_ORDER else ((args.area,) if args.area != "all" else ())
     for area in areas:
-        if area == "json" and stage not in {"lint", "validate"}:
-            continue
         print(f"\n========== {area} | {stage} ==========")
         _dispatch_area(area, stage, args.coverage_fail_under)
     print("\n[SUCESSO] Estagio concluido com sucesso.")

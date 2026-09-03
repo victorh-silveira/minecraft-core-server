@@ -74,7 +74,7 @@ Agentes: `.cursor/agents/mcs-senior-*.md`. Skills: `mcs-senior-software`, `mcs-s
 
 ## Cloud Ops — CI/CD e QA
 
-- Matriz QA obrigatoria; `[skip-cd]` pula **somente** deploy/infra, nunca lint/test/security de branch protection.
+- Matriz QA crash-first (lint → seguranca → testes → validate → build); `[skip-cd]` pula **somente** deploy/infra, nunca lint/test/security de branch protection.
 - OIDC (`id-token: write`); imagens imutaveis por SHA curto; sem promover `latest` a prod.
 - Ruff primeiro (fail fast); mypy strict; pytest `--cov-branch` 100%; Bandit; pip-audit; Hadolint; tflint/tfsec; kubeconform no `kustomize build`; Trivy bloqueia CRITICAL/HIGH com fix disponivel.
 - Observabilidade alvo: OpenTelemetry nos adapters HTTP de mods + alertas 5xx/upstream; introduzir sem quebrar hexagonal (instrumentacao na infrastructure/presentation).

@@ -74,15 +74,17 @@ Workflow [`ci.yml`](../.github/workflows/ci.yml):
 
 | Job | Ferramentas |
 |-----|-------------|
-| CI - Linter | Ruff/Vulture/Pylint via `lint-code`; Terraform fmt, Hadolint, actionlint, YAML via `lint-infra` |
-| CI - Validacao | pytest + coverage 100%; Bandit, pip-audit, Gitleaks; `docker compose config`; kubeconform overlay prod; tflint, tfsec, `terraform validate` |
+| CI - Python | Lint, Seguranca, Testes, Validate, Build (inclui manifesto JSON) |
+| CI - Docker / Kubernetes / Terraform / GitHub / Scripts | mesma ordem de stages |
 
-Script unificado local (espelha parte do CI):
+Script unificado local (espelha o CI):
 
 ```bash
 make app-lint
-make app-test
 make app-security
+make app-test
+make app-validate
+make app-build
 ```
 
 Infra isolada (`app/scripts/bash/ci-infra-local.sh`): `fmt`, `lint`, `validate`, `all`. Usa `terraform` do PATH no WSL; se ausente, baixa a versao de `linters/.terraform-version` em `.tools/`.

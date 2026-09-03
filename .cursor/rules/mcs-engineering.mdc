@@ -8,7 +8,7 @@ alwaysApply: true
 - Terminal: **WSL** apenas (nunca CMD/PowerShell nativo)
 - `app/src/**/*.py` e `run.py` ≤ **300** linhas; cobertura **100% branch** nas quatro camadas
 - Sem comentarios no codigo; sem emojis em codigo, logs ou docs
-- Gates: `make app-lint`, `make app-validate`, `make app-test`, `make app-security`; orquestrador `app/scripts/operations/clean_workspace.py`
+- Gates crash-first: `make app-lint`, `make app-security`, `make app-test`, `make app-validate`, `make app-build`; orquestrador `app/scripts/operations/clean_workspace.py`
 - Commit: `tipo(escopo): assunto PT-BR` + corpo; escopos em `linters/commitlint.config.mjs`
 - SSOT de agentes: `AGENTS.md` + `docs/agent-coverage.md`
 - Deps: `docs/engineering-python-deps.md` + rule `mcs-python-deps`
