@@ -20,6 +20,10 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
+    - name: Marcar inicio da matriz
+      shell: bash
+      run: echo "SUMMARY_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
     - name: Instalar Hadolint
       shell: bash
       run: |
@@ -51,3 +55,15 @@ runs:
     - name: Docker | Build
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area docker --stage build
+
+    - name: Publicar resumo
+      if: always()
+      uses: ./.github/actions/shared/area-summary
+      with:
+        title: CI - Docker
+        area: docker
+        details: |-
+          - Hadolint no Dockerfile
+          - Trivy config em `infra/docker`
+          - Compose config + smoke estatico
+          - Build da imagem (CI completo)

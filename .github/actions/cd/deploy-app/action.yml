@@ -160,7 +160,7 @@ runs:
           echo "| Campo | Valor |"
           echo "|-------|-------|"
           echo "| Nome | minecraft-core-server/infra/docker |"
-          echo "| Status | concluido |"
+          echo "| Status | ${{ job.status }} |"
           echo "| Duracao | ${DURATION}s |"
           echo "| Imagem | \`${IMAGE}\` |"
           if [ -n "${DIGEST}" ]; then

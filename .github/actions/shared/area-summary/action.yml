@@ -1,0 +1,62 @@
+name: Resumo da area
+description: Publica resumo da matriz crash-first no GitHub Summary
+
+inputs:
+  title:
+    description: Titulo do resumo (ex. CI - Docker)
+    required: true
+  area:
+    description: Area do orquestrador (python, docker, ...)
+    required: true
+  stages:
+    description: Stages executados (ordem crash-first)
+    required: false
+    default: "Lint, Seguranca, Testes, Validate, Build"
+  details:
+    description: Linhas extras de detalhe (markdown)
+    required: false
+    default: ""
+
+runs:
+  using: composite
+
+  steps:
+    - name: Publicar resumo
+      if: always()
+      shell: bash
+      run: |
+        END=$(date +%s)
+        START="${SUMMARY_STARTED_AT:-$END}"
+        DURATION=$((END - START))
+        STATUS="${{ job.status }}"
+        {
+          echo "## Resumo - ${{ inputs.title }}"
+          echo ""
+          echo "| Campo | Valor |"
+          echo "|-------|-------|"
+          echo "| Area | \`${{ inputs.area }}\` |"
+          echo "| Status | ${STATUS} |"
+          echo "| Duracao | ${DURATION}s |"
+          echo "| Stages | ${{ inputs.stages }} |"
+          echo "| Orquestrador | \`clean_workspace.py --area ${{ inputs.area }}\` |"
+          echo ""
+          echo "### Matriz crash-first"
+          echo ""
+          echo "1. Lint"
+          echo "2. Seguranca"
+          echo "3. Testes"
+          echo "4. Validate"
+          echo "5. Build"
+          echo ""
+          if [ -n "${{ inputs.details }}" ]; then
+            echo "### Detalhes"
+            echo ""
+            printf '%s\n' "${{ inputs.details }}"
+            echo ""
+          fi
+          if [ "${STATUS}" = "success" ]; then
+            echo "Area \`${{ inputs.area }}\` concluida com sucesso."
+          else
+            echo "Area \`${{ inputs.area }}\` interrompida ou com falha (crash-first)."
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"

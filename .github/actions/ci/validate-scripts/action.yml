@@ -20,6 +20,10 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
+    - name: Marcar inicio da matriz
+      shell: bash
+      run: echo "SUMMARY_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
     - name: Scripts | Lint
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area scripts --stage lint
@@ -39,3 +43,15 @@ runs:
     - name: Scripts | Build
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area scripts --stage build
+
+    - name: Publicar resumo
+      if: always()
+      uses: ./.github/actions/shared/area-summary
+      with:
+        title: CI - Scripts
+        area: scripts
+        details: |-
+          - `bash -n` em `app/scripts` e git-hooks
+          - Sem credencial estatica nos `.sh`
+          - shellcheck
+          - Makefile dry-run + shebang bash
