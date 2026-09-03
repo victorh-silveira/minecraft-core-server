@@ -18,9 +18,13 @@ Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelis
 1. `Copy-Item infra/docker/.env.example infra/docker/.env`
 2. `MINECRAFT_WHITELIST=AnonymousNoobz` (ou varios nicks separados por virgula)
 3. `ONLINE_MODE=false`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
-4. `make docker-up`
+4. `make docker-up` (converte nicks para UUID offline automaticamente)
 
-RCON: `127.0.0.1:25575` no host (Compose publica RCON só em localhost).
+Nao use `ci-test-player` no `.env` local: e placeholder de CI e falha no PlayerDB.
+
+RCON: `127.0.0.1:25575` no host (Compose publica RCON so em localhost).
+
+Jogo na LAN: `make docker-up` cria portproxy Windows `0.0.0.0:25565 -> 127.0.0.1:25565` (UAC) e regra de Firewall. Smoke valida `127.0.0.1` e `192.168.0.50` (`SMOKE_LAN_HOST`).
 
 ## AKS e GitHub Actions
 

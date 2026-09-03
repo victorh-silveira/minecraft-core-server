@@ -16,6 +16,10 @@ TOOLS_DIR="${REPO_ROOT}/.tools"
 TRIVY_VERSION="${TRIVY_VERSION:-0.74.0}"
 
 synthetic_env() {
+  if [[ -f "${REPO_ROOT}/${ENV_FILE}" ]]; then
+    echo ">>> reutilizando ${ENV_FILE} existente"
+    return 0
+  fi
   cat > "${REPO_ROOT}/${ENV_FILE}" << 'EOF'
 MINECRAFT_VERSION=1.20.6
 SERVER_TYPE=FABRIC
@@ -26,7 +30,7 @@ RCON_PORT=25575
 ONLINE_MODE=false
 WHITE_LIST=true
 ENFORCE_WHITELIST=true
-MINECRAFT_WHITELIST=ci-test-player
+MINECRAFT_WHITELIST=AnonymousNoobz
 DIFFICULTY=hard
 MAX_PLAYERS=20
 RCON_PASSWORD=ci-test-password

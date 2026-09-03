@@ -36,7 +36,7 @@ RESET  := \033[0m
 	terraform-plan \
 	docker-env-check docker-sync-mods docker-build docker-up \
 	docker-down docker-restart docker-logs docker-ps docker-sh docker-clean \
-	docker-smoke docker-test \
+	docker-rebuild docker-smoke docker-test \
 	k8s-deploy k8s-apply k8s-annotate k8s-test
 
 help:
@@ -64,9 +64,10 @@ help:
 	@echo -e "  $(GREEN)docker-down$(RESET)          - Para os containers (preserva bind mounts)"
 	@echo -e "  $(GREEN)docker-logs$(RESET)          - Exibe logs (DOCKER_LOGS_TAIL=..., F=1)"
 	@echo -e "  $(GREEN)docker-ps$(RESET)            - Exibe o status atual dos containers"
+	@echo -e "  $(GREEN)docker-rebuild$(RESET)       - Rebuild sem cache, recreate (preserva mundo/dados)"
 	@echo -e "  $(GREEN)docker-restart$(RESET)       - Reinicia o servico (preserva dados)"
 	@echo -e "  $(GREEN)docker-sh$(RESET)            - Shell no container mc-server"
-	@echo -e "  $(GREEN)docker-smoke$(RESET)         - Smoke checks e verificacao de saude da stack"
+	@echo -e "  $(GREEN)docker-smoke$(RESET)         - Smoke em 127.0.0.1 e 192.168.0.50 (SMOKE_LAN_HOST)"
 	@echo -e "  $(GREEN)docker-sync-mods$(RESET)     - Baixa JARs via manifesto"
 	@echo -e "  $(GREEN)docker-up$(RESET)            - Sync mods, build e sobe o servidor Fabric"
 	@echo -e ""
@@ -162,7 +163,13 @@ docker-up: docker-env-check docker-sync-mods
 	@echo -e "$(BLUE)========================================================================$(RESET)"
 	@echo -e "$(GREEN)  docker-up · mc-server (sync mods + build + up)$(RESET)"
 	@echo -e "$(BLUE)========================================================================$(RESET)"
-	$(RUN_LINUX) $(COMPOSE) $(COMPOSE_FLAGS) up -d --build --force-recreate $(SERVICE)
+	$(RUN_LINUX) bash $(APP_DIR)/scripts/bash/docker-compose-up.sh
+
+docker-rebuild: docker-env-check docker-sync-mods
+	@echo -e "$(BLUE)========================================================================$(RESET)"
+	@echo -e "$(GREEN)  docker-rebuild · mc-server (no-cache + recreate)$(RESET)"
+	@echo -e "$(BLUE)========================================================================$(RESET)"
+	$(RUN_LINUX) bash -lc "DOCKER_REBUILD=1 bash $(APP_DIR)/scripts/bash/docker-compose-up.sh"
 
 docker-down: docker-env-check
 	@echo -e "$(BLUE)========================================================================$(RESET)"
