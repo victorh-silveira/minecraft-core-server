@@ -52,10 +52,6 @@ runs:
       shell: bash
       run: bash app/scripts/bash/ensure-tfstate-backend.sh
 
-    - name: Marcar inicio do apply
-      shell: bash
-      run: echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
-
     - name: Aplicar Terraform
       shell: bash
       env:
@@ -68,36 +64,3 @@ runs:
         cd infra/terraform/live/prod
         terraform init -input=false
         terraform apply -auto-approve -input=false
-
-    - name: Publicar resumo do deploy
-      if: always()
-      shell: bash
-      run: |
-        END=$(date +%s)
-        START="${BUILD_STARTED_AT:-$END}"
-        DURATION=$((END - START))
-        STATUS="${{ job.status }}"
-        {
-          echo "## Resumo - Deploy da infraestrutura"
-          echo ""
-          echo "| Campo | Valor |"
-          echo "|-------|-------|"
-          echo "| Stack | \`infra/terraform/live/prod\` |"
-          echo "| Status | ${STATUS} |"
-          echo "| Duracao | ${DURATION}s |"
-          echo "| Confirmacao | \`APPLY_INFRA\` |"
-          echo "| Auth | OIDC (ARM_USE_OIDC) |"
-          echo ""
-          echo "### Etapas"
-          echo ""
-          echo "1. Validar confirmacao"
-          echo "2. Autenticar Azure (OIDC)"
-          echo "3. Provisionar backend tfstate"
-          echo "4. \`terraform init\` + \`terraform apply\`"
-          echo ""
-          if [ "${STATUS}" = "success" ]; then
-            echo "Apply Terraform concluido em \`live/prod\`."
-          else
-            echo "Deploy de infraestrutura interrompido ou com falha."
-          fi
-        } >> "$GITHUB_STEP_SUMMARY"

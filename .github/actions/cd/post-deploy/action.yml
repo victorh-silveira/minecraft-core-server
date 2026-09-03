@@ -15,10 +15,6 @@ runs:
   using: composite
 
   steps:
-    - name: Marcar inicio do pos-deploy
-      shell: bash
-      run: echo "BUILD_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
-
     - name: Atualizar annotations de conectividade e saude
       shell: bash
       env:
@@ -38,7 +34,6 @@ runs:
       run: bash app/scripts/bash/test-aks.sh
 
     - name: Verificar endpoint externo
-      id: endpoint
       shell: bash
       run: |
         GAME_IP=$(kubectl -n ${{ inputs.namespace }} get svc mc-server-game -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
@@ -51,55 +46,15 @@ runs:
         fi
         if echo "$GAME_IP" | grep -q '[a-zA-Z]'; then
           echo "Conecte no Minecraft: ${GAME_IP}"
-          echo "endpoint=${GAME_IP}" >> "$GITHUB_OUTPUT"
         else
           echo "Conecte no Minecraft: ${GAME_IP}:${{ inputs.game_port }}"
-          echo "endpoint=${GAME_IP}:${{ inputs.game_port }}" >> "$GITHUB_OUTPUT"
         fi
         for attempt in $(seq 1 30); do
           if timeout 3 bash -c "echo > /dev/tcp/${GAME_IP}/${{ inputs.game_port }}" 2>/dev/null; then
             echo "Porta ${{ inputs.game_port }} acessivel em ${GAME_IP}"
-            echo "reachable=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           sleep 10
         done
         echo "Porta ${{ inputs.game_port }} nao respondeu em ${GAME_IP}"
-        echo "reachable=false" >> "$GITHUB_OUTPUT"
         exit 1
-
-    - name: Publicar resumo do pos-deploy
-      if: always()
-      shell: bash
-      run: |
-        END=$(date +%s)
-        START="${BUILD_STARTED_AT:-$END}"
-        DURATION=$((END - START))
-        STATUS="${{ job.status }}"
-        ENDPOINT="${{ steps.endpoint.outputs.endpoint }}"
-        {
-          echo "## Resumo - Pos-deploy"
-          echo ""
-          echo "| Campo | Valor |"
-          echo "|-------|-------|"
-          echo "| Namespace | \`${{ inputs.namespace }}\` |"
-          echo "| Status | ${STATUS} |"
-          echo "| Duracao | ${DURATION}s |"
-          echo "| Porta | \`${{ inputs.game_port }}\` |"
-          if [ -n "${ENDPOINT}" ]; then
-            echo "| Endpoint | \`${ENDPOINT}\` |"
-          fi
-          echo ""
-          echo "### Etapas"
-          echo ""
-          echo "1. Annotations de conectividade/saude"
-          echo "2. Publicar annotations no Summary"
-          echo "3. \`test-aks.sh\`"
-          echo "4. Probe TCP externa na porta do jogo"
-          echo ""
-          if [ "${STATUS}" = "success" ]; then
-            echo "Pos-deploy concluido; endpoint externo respondendo."
-          else
-            echo "Pos-deploy interrompido ou com falha (LB/TCP/annotations)."
-          fi
-        } >> "$GITHUB_STEP_SUMMARY"

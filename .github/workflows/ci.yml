@@ -66,10 +66,6 @@ jobs:
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
 
-      - name: Marcar inicio da matriz
-        shell: bash
-        run: echo "SUMMARY_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
-
       - name: Instalar Gitleaks
         shell: bash
         run: |
@@ -97,18 +93,6 @@ jobs:
       - name: Python | Build
         shell: bash
         run: python app/scripts/operations/clean_workspace.py --area python --stage build
-
-      - name: Publicar resumo
-        if: always()
-        uses: ./.github/actions/shared/area-summary
-        with:
-          title: CI - Python
-          area: python
-          details: |-
-            - Manifesto JSON + Ruff/vulture/hexagonal
-            - Bandit, pip-audit, Gitleaks
-            - pytest cobertura 100% branch
-            - mypy strict + compileall
 
   docker:
     name: CI - Docker

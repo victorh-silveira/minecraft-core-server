@@ -54,7 +54,6 @@ flowchart LR
 │   ├── azure-login/
 │   ├── aks-context/
 │   ├── resolve-whitelist/
-│   ├── area-summary/
 │   └── pipeline-summary/
 ├── ci/                       setup-python, validate-docker/k8s/terraform/github/scripts
 ├── cd/

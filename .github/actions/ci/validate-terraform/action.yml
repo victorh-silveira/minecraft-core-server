@@ -20,10 +20,6 @@ runs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
 
-    - name: Marcar inicio da matriz
-      shell: bash
-      run: echo "SUMMARY_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
-
     - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3
       with:
@@ -61,15 +57,3 @@ runs:
     - name: Terraform | Build
       shell: bash
       run: python app/scripts/operations/clean_workspace.py --area terraform --stage build
-
-    - name: Publicar resumo
-      if: always()
-      uses: ./.github/actions/shared/area-summary
-      with:
-        title: CI - Terraform
-        area: terraform
-        details: |-
-          - fmt-check + tflint em `live/prod`
-          - tfsec
-          - terraform test (modulo label)
-          - validate + init (providers)
