@@ -20,7 +20,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     os_disk_size_gb              = var.os_disk_size_gb
     only_critical_addons_enabled = false
     temporary_name_for_rotation  = "defaulttmp"
-    enable_auto_scaling          = var.enable_auto_scaling
+    auto_scaling_enabled         = var.enable_auto_scaling
     min_count                    = var.enable_auto_scaling ? 1 : null
     max_count                    = var.enable_auto_scaling ? max(var.node_count, 2) : null
     node_count                   = var.enable_auto_scaling ? null : var.node_count
