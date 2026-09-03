@@ -64,8 +64,7 @@ Referencia de variaveis na raiz: `.env.example` (o Compose usa `infra/docker/.en
 
 ```bash
 make app-setup
-make docker-sync-mods
-make docker-build-up
+make docker-up
 make docker-logs
 ```
 
@@ -97,8 +96,8 @@ kubectl -n minecraft-server-prod get svc mc-server-game \
 | Comando | Descricao |
 |---------|-----------|
 | `make app-lint` / `app-test` / `app-security` | Gates de qualidade |
-| `make docker-build-up` | Sync mods, build e sobe servidor local |
-| `make docker-test` | Valida Docker local |
+| `make docker-up` | Sync mods, build e sobe servidor local |
+| `make docker-smoke` | Valida Docker local |
 | `make ci-lint` / `make ci-test` | Espelha gates do CI |
 | `make k8s-deploy` | Deploy manual completo no AKS |
 | `make k8s-apply` | Aplica overlay prod no cluster |

@@ -29,10 +29,9 @@ Templates copiados na imagem: `server.properties` e `mods-manifest.json`. Bind m
 
 ```bash
 Copy-Item infra/docker/.env.example infra/docker/.env
-make docker-sync-mods
-make docker-build-up
+make docker-up
 make docker-logs
-make docker-test
+make docker-smoke
 ```
 
 Sync de mods: `python run.py` (Makefile `docker-sync-mods`). JARs nao entram no Git.

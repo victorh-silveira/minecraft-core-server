@@ -9,7 +9,7 @@ Guia operacional para Docker local e Azure AKS. Arquitetura: [architecture.md](a
 | 1 | `Copy-Item infra/docker/.env.example infra/docker/.env` e preencher valores reais |
 | 2 | `make app-setup` |
 | 3 | `make docker-sync-mods` |
-| 4 | `make docker-build-up` |
+| 4 | `make docker-up` |
 | 5 | `make docker-logs` — aguardar mensagem de servidor pronto |
 | 6 | Conectar clientes em `host:GAME_PORT` (padrao 25565) |
 | 7 | Configurar firewall RCON (secao abaixo) |
@@ -37,7 +37,7 @@ make docker-sh
 1. Criar branch: `feature/atualizar-mods`
 2. Editar `app/runtime/mods/mods-manifest.json`
 3. `make docker-sync-mods`
-4. Testar localmente: `make docker-build-up`
+4. Testar localmente: `make docker-up`
 5. Validar servidor in-game e logs
 6. Merge apos estabilidade
 
@@ -158,7 +158,7 @@ Se aparecer `Permission denied` nos logs:
 | Comando | Efeito |
 |---------|--------|
 | `make docker-down` | Para e remove containers/rede |
-| `make docker-clean` | + remove imagens locais e volumes anonimos |
+| `make docker-clean` | Remove containers, redes e volumes do projeto |
 
 `docker-clean` **nao** apaga `app/runtime/world` (bind mount, nao volume nomeado).
 

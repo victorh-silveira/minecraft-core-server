@@ -18,7 +18,7 @@ Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelis
 1. `Copy-Item infra/docker/.env.example infra/docker/.env`
 2. `MINECRAFT_WHITELIST=AnonymousNoobz` (ou varios nicks separados por virgula)
 3. `ONLINE_MODE=false`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
-4. `make docker-build-up`
+4. `make docker-up`
 
 RCON: `127.0.0.1:25575` no host (Compose publica RCON só em localhost).
 

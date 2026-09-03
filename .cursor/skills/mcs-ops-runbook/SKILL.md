@@ -10,7 +10,7 @@ description: >-
 
 ## Local
 
-- Subir: `make app-setup` → `make docker-sync-mods` → `make docker-build-up`
+- Subir: `make app-setup` → `make docker-up`
 - Logs: `make docker-logs`; shell: `make docker-sh`
 - Backup mundo: `app/runtime/world` com servidor parado
 

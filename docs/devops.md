@@ -34,11 +34,11 @@ Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem e
 | Comando | Descricao |
 |---------|-----------|
 | `app-lint` / `app-validate` / `app-test` / `app-security` | Matriz QA (orquestrador) |
-| `docker-build-up` | Sync mods, build, sobe servidor |
-| `docker-test` | `test-docker.sh` (smoke live) |
+| `docker-up` | Sync mods, build, sobe servidor |
+| `docker-smoke` | `test-docker.sh` (smoke live) |
 | `ci-lint` | pre-commit (matriz) |
 | `ci-test` | alias de `app-test` |
-| `ci-validate` | testes + security + test-docker |
+| `ci-validate` | testes + security + docker-smoke |
 | `ci-fmt` / `ci-validate-infra` / `terraform-plan` | Terraform live/prod |
 | `k8s-apply` | Kustomize prod + annotations |
 | `k8s-annotate` | `atualizar-annotations-k8s.sh` |
@@ -197,5 +197,5 @@ Historico de releases: [CHANGELOG.md](CHANGELOG.md).
 
 1. Branch `feature/atualizar-mods`
 2. Editar `mods-manifest.json` + `make docker-sync-mods`
-3. Testar local (`make docker-test`) e AKS (`make k8s-test`)
+3. Testar local (`make docker-smoke`) e AKS (`make k8s-test`)
 4. Merge apos validacao in-game
