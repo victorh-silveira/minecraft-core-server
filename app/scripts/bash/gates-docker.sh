@@ -37,7 +37,6 @@ RCON_PASSWORD=ci-test-password
 UID=1000
 GID=1000
 SKIP_CHOWN=false
-DOCKER_BASE_IMAGE=itzg/minecraft-server:java21
 IMAGE_VERSION=0.1.0
 DOCKER_PIDS_LIMIT=512
 EOF
@@ -48,7 +47,7 @@ hadolint_bin() {
     command -v hadolint
     return
   fi
-  if docker image inspect hadolint/hadolint:latest >/dev/null 2>&1 || docker pull hadolint/hadolint:latest >/dev/null 2>&1; then
+  if docker image inspect hadolint/hadolint:2.12.0 >/dev/null 2>&1 || docker pull hadolint/hadolint:2.12.0 >/dev/null 2>&1; then
     echo "docker"
     return
   fi
@@ -63,9 +62,9 @@ run_hadolint() {
     exit 1
   fi
   if [[ "${bin}" == "docker" ]]; then
-    docker run --rm -i hadolint/hadolint:latest hadolint --ignore DL3006 - < "${DOCKERFILE}"
+    docker run --rm -i hadolint/hadolint:2.12.0 hadolint - < "${DOCKERFILE}"
   else
-    "${bin}" --ignore=DL3006 "${DOCKERFILE}"
+    "${bin}" "${DOCKERFILE}"
   fi
 }
 
@@ -142,6 +141,10 @@ cmd_security() {
   trivy="$(trivy_bin)"
   echo ">>> trivy config infra/docker"
   "${trivy}" config --exit-code 1 --severity HIGH,CRITICAL --ignorefile linters/.trivyignore infra/docker
+  if [[ -n "${TRIVY_IMAGE:-}" ]]; then
+    echo ">>> trivy image ${TRIVY_IMAGE}"
+    "${trivy}" image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed "${TRIVY_IMAGE}"
+  fi
 }
 
 main() {

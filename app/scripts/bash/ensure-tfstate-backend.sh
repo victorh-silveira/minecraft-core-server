@@ -38,11 +38,20 @@ else
   echo "Storage account ja existe."
 fi
 
-echo ">>> Garantindo containers de blob..."
+echo ">>> Habilitando versionamento e soft-delete de blob..."
+az storage account blob-service-properties update \
+  --account-name "${SA_NAME}" \
+  --resource-group "${RG_NAME}" \
+  --enable-versioning true \
+  --enable-delete-retention true \
+  --delete-retention-days 14 \
+  --output none
+
+echo ">>> Garantindo container ${TFSTATE_CONTAINER}..."
 az storage container create \
   --name "${TFSTATE_CONTAINER}" \
   --account-name "${SA_NAME}" \
   --auth-mode login \
-  --output none 2>/dev/null || true
+  --output none
 
-echo "[SUCESSO] Backend Terraform pronto (${SA_NAME}/${TFSTATE_CONTAINER})."
+echo "[SUCESSO] Backend Terraform pronto (${SA_NAME}/${TFSTATE_CONTAINER}) com versioning e soft-delete."

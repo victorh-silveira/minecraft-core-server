@@ -172,12 +172,12 @@ Guia completo: [azure.md](azure.md)
 
 | # | Acao |
 |---|------|
-| 1 | `infra/terraform/live/prod` — aplicar RG, VNet, ACR, AKS e storage |
+| 1 | `infra/terraform/live/prod` — aplicar VNet + AKS (OIDC) |
 | 2 | `az aks get-credentials` — configurar kubectl |
-| 3 | Build e push da imagem para ACR |
-| 4 | GitHub Secrets `RCON_PASSWORD` e `MINECRAFT_WHITELIST` |
+| 3 | Build e push da imagem para **GHCR** |
+| 4 | GitHub Secrets `AZURE_CLIENT_ID`, `RCON_PASSWORD`, `MINECRAFT_WHITELIST` |
 | 5 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
-| 6 | Workflow **CD** na release ou `kubectl apply` + imagem no ACR |
+| 6 | Workflow **CD** na release (digest + Trivy) ou `IMAGE_DIGEST=sha256:... make k8s-deploy` |
 | 7 | Migrar mundo: `kubectl cp` de `app/runtime/world` |
 | 8 | `bash app/scripts/bash/test-aks.sh` |
 | 9 | `make k8s-annotate` e ler `conectividade-endereco` no Service `mc-server-game` |
@@ -198,19 +198,7 @@ O CD e o pos-deploy executam `atualizar-annotations-k8s.sh` apos o rollout.
 
 ### Backup do mundo (PVC)
 
-Backup automatico (CronJob `mc-world-backup`, diario as 03:00 America/Sao_Paulo):
-
-- Compacta `/data/world` no pod `mc-server-0` e envia para o blob `world-backups` em `stminecraftserverprod001`
-- Autenticacao via Workload Identity (`id-mc-world-backup-prod`); requer `terraform apply` em `infra/terraform/live/prod` antes do primeiro deploy
-- Custo marginal: armazenamento LRS dos arquivos `.tar.gz` (centavos por GB/mes)
-
-Verificar ultimo job:
-
-```bash
-kubectl -n minecraft-server-prod get cronjob mc-world-backup
-kubectl -n minecraft-server-prod get jobs -l app.kubernetes.io/name=mc-world-backup --sort-by=.metadata.creationTimestamp
-az storage blob list --account-name stminecraftserverprod001 --container-name world-backups --auth-mode login -o table
-```
+Backup automatico via CronJob esta **desativado** no Free tier (sem `mc-world-backup`, sem blob `world-backups`). Ver [azure.md](azure.md) e [architecture.md](architecture.md).
 
 Backup manual (com pod em execucao):
 
@@ -220,7 +208,7 @@ kubectl -n minecraft-server-prod exec "$POD" -- tar czf /tmp/world-backup.tgz -C
 kubectl -n minecraft-server-prod cp "${POD}:/tmp/world-backup.tgz" "./backup-world-$(date +%Y%m%d).tgz"
 ```
 
-Storage de backup e tfstate: `stminecraftserverprod001` (containers `world-backups` e `tfstate`).
+Storage do state Terraform: `stminecraftserverprod001` (container `tfstate`).
 
 ### Disco persistente (Retain)
 

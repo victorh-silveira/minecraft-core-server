@@ -11,18 +11,13 @@ inputs:
     default: victorh-silveira/minecraft-core-server
   azure_client_id:
     description: ID do cliente do app registration Azure (OIDC)
-    required: false
-    default: ""
+    required: true
   azure_tenant_id:
     description: ID do locatario Azure
     required: true
   azure_subscription_id:
     description: ID da assinatura Azure
     required: true
-  azure_credentials:
-    description: JSON do service principal (fallback se OIDC nao configurado)
-    required: false
-    default: ""
   rcon_password:
     description: Senha RCON (GitHub Secret RCON_PASSWORD)
     required: true
@@ -48,7 +43,6 @@ runs:
         azure_client_id: ${{ inputs.azure_client_id }}
         azure_tenant_id: ${{ inputs.azure_tenant_id }}
         azure_subscription_id: ${{ inputs.azure_subscription_id }}
-        azure_credentials: ${{ inputs.azure_credentials }}
 
     - name: Credenciais AKS
       uses: ./.github/actions/shared/aks-context
@@ -56,13 +50,13 @@ runs:
         resource-group: ${{ inputs.resource_group }}
         cluster-name: ${{ inputs.aks_cluster_name }}
 
-    - name: Definir imagem
+    - name: Definir tag humana
       id: image
       shell: bash
       run: |
-        IMAGE="ghcr.io/${{ inputs.image_repository }}:${{ inputs.image_tag }}"
-        echo "ref=${IMAGE}" >> "$GITHUB_OUTPUT"
-        echo "Imagem: ${IMAGE}"
+        TAG_REF="ghcr.io/${{ inputs.image_repository }}:${{ inputs.image_tag }}"
+        echo "tag_ref=${TAG_REF}" >> "$GITHUB_OUTPUT"
+        echo "Tag: ${TAG_REF}"
 
     - name: Login no GHCR
       uses: docker/login-action@v3
@@ -87,9 +81,34 @@ runs:
         context: .
         file: infra/docker/Dockerfile
         push: true
-        tags: ${{ steps.image.outputs.ref }}
+        tags: ${{ steps.image.outputs.tag_ref }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+    - name: Pin por digest
+      id: pinned
+      shell: bash
+      run: |
+        DIGEST="${{ steps.docker-build.outputs.digest }}"
+        if [ -z "${DIGEST}" ]; then
+          echo "[ERRO] digest da imagem ausente apos o push"
+          exit 1
+        fi
+        IMAGE="ghcr.io/${{ inputs.image_repository }}@${DIGEST}"
+        echo "ref=${IMAGE}" >> "$GITHUB_OUTPUT"
+        echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+        echo "Imagem pinada: ${IMAGE}"
+
+    - name: Setup Trivy
+      uses: aquasecurity/setup-trivy@v0.2.6
+      with:
+        version: v0.74.0
+
+    - name: Trivy image
+      shell: bash
+      run: |
+        trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed \
+          "${{ steps.pinned.outputs.ref }}"
 
     - name: Aplicar namespace
       shell: bash
@@ -112,7 +131,7 @@ runs:
     - name: Aplicar manifests Kubernetes
       shell: bash
       run: |
-        IMAGE="${{ steps.image.outputs.ref }}"
+        IMAGE="${{ steps.pinned.outputs.ref }}"
         PLACEHOLDER="ghcr.io/victorh-silveira/minecraft-core-server:placeholder"
         MANIFEST=$(kubectl kustomize infra/kubernetes/overlays/prod \
           | sed "s|${PLACEHOLDER}|${IMAGE}|g")
@@ -127,8 +146,8 @@ runs:
         END=$(date +%s)
         START="${BUILD_STARTED_AT:-$END}"
         DURATION=$((END - START))
-        IMAGE="${{ steps.image.outputs.ref }}"
-        DIGEST="${{ steps.docker-build.outputs.digest }}"
+        IMAGE="${{ steps.pinned.outputs.ref }}"
+        DIGEST="${{ steps.pinned.outputs.digest }}"
         {
           echo "## Resumo - Deploy da aplicacao"
           echo ""

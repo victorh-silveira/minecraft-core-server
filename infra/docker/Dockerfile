@@ -1,10 +1,8 @@
 # syntax=docker/dockerfile:1.7
 
-ARG BASE_IMAGE=itzg/minecraft-server:java21
+FROM itzg/minecraft-server:java21@sha256:6691a620cb88ae666c9fd2a4211c3c0ae611943ca8bd23e4cebd785921032ec4
 
-FROM ${BASE_IMAGE}
-
-ARG BASE_IMAGE
+ARG BASE_IMAGE=itzg/minecraft-server:java21@sha256:6691a620cb88ae666c9fd2a4211c3c0ae611943ca8bd23e4cebd785921032ec4
 ARG BUILD_DATE=unknown
 ARG VCS_REF=local
 ARG IMAGE_VERSION=0.1.0
@@ -30,6 +28,8 @@ RUN mkdir -p /templates/mods /templates/plugins /data/world /data/mods /data/plu
 USER 1000
 
 WORKDIR /data
+
+STOPSIGNAL SIGTERM
 
 EXPOSE 25565/tcp
 EXPOSE 25575/tcp

@@ -28,7 +28,13 @@ class Sha256Digest:
     value: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "value", self.value.strip().lower())
+        normalized = self.value.strip().lower()
+        if normalized:
+            if any(char not in "0123456789abcdef" for char in normalized):
+                raise ValueError("sha256 deve ser hexadecimal")
+            if len(normalized) != 64:
+                raise ValueError("sha256 deve ter 64 caracteres hexadecimais")
+        object.__setattr__(self, "value", normalized)
 
     def is_present(self) -> bool:
         return bool(self.value)

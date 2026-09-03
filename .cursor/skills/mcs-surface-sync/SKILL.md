@@ -15,7 +15,7 @@ description: >-
 2. Docs — atualizar `.md` cujo significado operacional mudou
 3. Rules — alinhar `.cursor/rules/*.mdc` se contrato/gate mudou
 4. Skills — alinhar `.cursor/skills/*/SKILL.md` se procedimento mudou
-5. Indices — `AGENTS.md` + linha em `agent-coverage.md`
+5. Indices — `AGENTS.md` + linha em `agent-coverage.md` (+ `.cursor/agents/` se subagente mudou)
 6. Contrato — `prompt-model.md` se padrao DDD/QA/DX cross-repo mudou
 7. Anti-sujeira — sem `_tmp*`, refs stale, imports mortos
 8. Higiene pontual — skill `mcs-repo-hygiene` se houver morto no diff

@@ -1,0 +1,16 @@
+---
+description: Senior Python hexagonal — DIP, DTO/mapper, resiliencia sync, tipagem
+globs: app/src/**/*.py,app/tests/**/*.py,run.py
+alwaysApply: false
+---
+
+# Senior Python
+
+- `domain`: so stdlib; entidades/VO; validacao no construtor
+- `application`: ports `Protocol` + use cases; sem HTTP/logs/FS
+- `infrastructure`: adapters; DTO+mapper → dominio; nunca vazar modelo Modrinth/CurseForge
+- `presentation`: composition root + `log_event` apenas
+- HTTP atual: `requests`; async/`httpx`/`TaskGroup` so com TDD e necessidade
+- Resiliencia nos adapters: backoff+jitter em 429/5xx; hash pos-download; sem dump de body
+- mypy strict; arquivo ≤ 300 linhas; cov 100% branch
+- Doc: `docs/engineering-senior-bar.md`; skill: `mcs-senior-software`

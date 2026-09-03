@@ -48,7 +48,6 @@ curated = [
     ("jogo-versao", "Versao Minecraft"),
     ("jogo-tipo", "Loader"),
     ("azure-dns-fqdn-esperado", "DNS Azure esperado"),
-    ("backup-agendamento", "Backup (cron)"),
     ("documentacao-acesso", "Documentacao"),
     ("atualizado-em", "Ultima atualizacao"),
 ]
@@ -111,7 +110,7 @@ load_static()
 if mode == "live":
     load_live()
     title = "Servidor Minecraft (resumo operacional)"
-    note = "Estado atual do cluster AKS (ate 14 informacoes essenciais)."
+    note = "Estado atual do cluster AKS (informacoes essenciais)."
 else:
     title = "Servidor Minecraft (manifestos)"
     note = "Valores estaticos. Conectividade e saude dinamicas aparecem apos o CD."

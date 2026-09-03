@@ -89,7 +89,7 @@ Ver [devops.md](devops.md) (roadmap prioridade 1).
 | `id` | Sim | Nome local do mod |
 | `version` | Sim | Versao exata |
 | `source` | Sim | `modrinth` ou `curseforge` |
-| `sha256` | Recomendado | Integridade |
+| `sha256` | Obrigatorio apos resolucao | Integridade SHA-256 (manifesto ou provedor) |
 | `project_slug` | Modrinth | Slug no Modrinth |
 | `download_url` | Opcional | URL direta |
 
@@ -106,7 +106,7 @@ JARs em `app/runtime/mods/*.jar` estao no `.gitignore`.
 |----------|-----------|
 | `subscription_id`, `tenant_id` | Azure |
 | `kubernetes_version` | Padrao `1.34` (sem downgrade no Azure) |
-| `admin_cidr_list` | CIDRs para RCON no NSG |
+| `admin_cidr_list` | CIDRs para RCON no NSG e allowlist da API AKS |
 | `game_cidr_list` | CIDRs para porta 25565 (vazio = qualquer) |
 | `game_dns_label` | Label DNS do LB (alinhar com patch K8s) |
 

@@ -16,7 +16,7 @@ variable "kubernetes_version" {
 
 variable "admin_cidr_list" {
   type        = list(string)
-  description = "Blocos CIDR permitidos para RCON no NSG (defina em terraform.tfvars)"
+  description = "CIDRs admin: RCON no NSG e, se nao vazio, allowlist da API do AKS"
   default     = []
 }
 

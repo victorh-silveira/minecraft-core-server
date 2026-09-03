@@ -59,6 +59,12 @@ variable "enable_auto_scaling" {
   default     = false
 }
 
+variable "api_server_authorized_ip_ranges" {
+  type        = list(string)
+  description = "CIDRs com acesso a API do AKS (vazio = publico; prefira admin_cidr_list em prod)"
+  default     = []
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags aplicadas aos recursos do modulo"

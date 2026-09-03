@@ -1,0 +1,15 @@
+---
+description: Senior Docker — multi-stage, cache, PID1, non-root, healthcheck
+globs: infra/docker/**/*,**/Dockerfile*
+alwaysApply: false
+---
+
+# Senior Docker
+
+- Multi-stage se houver build; runtime minimal (slim/distroless quando viavel)
+- COPY requirements/lock antes do codigo; cache BuildKit (`--mount=type=cache`) em CI
+- PID 1 com tini/dumb-init ou STOPSIGNAL SIGTERM explicito
+- USER nao-root UID/GID fixos alinhados a Compose/K8s
+- Healthcheck com interval/timeout/retries/start_period (paridade K8s)
+- Sem tag `latest` em base de producao; Hadolint bloqueante
+- Doc: `docs/engineering-senior-bar.md`; skill: `mcs-senior-cloud-ops`

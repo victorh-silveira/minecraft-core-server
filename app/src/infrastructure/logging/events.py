@@ -1,18 +1,32 @@
 import logging
+import re
 from typing import Any
 from urllib.parse import urlparse, urlunparse
 
 
 _SECRET_MARKERS = ("password", "token", "secret", "api_key")
+_URL_RE = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
 
 
-def redact_url(url: str) -> str:
-    parsed = urlparse(url)
+def _redact_one(candidate: str) -> str:
+    parsed = urlparse(candidate)
     if not parsed.scheme or not parsed.netloc:
-        return url
+        return candidate
     query = "***" if parsed.query else ""
     redacted = parsed._replace(query=query, path=parsed.path or "")
     return urlunparse(redacted)
+
+
+def redact_url(url: str) -> str:
+    if "://" not in url:
+        return url
+
+    def replace(match: re.Match[str]) -> str:
+        raw = match.group(0)
+        trimmed = raw.rstrip(".,);]")
+        return _redact_one(trimmed) + raw[len(trimmed) :]
+
+    return _URL_RE.sub(replace, url)
 
 
 def _is_secret(key: str) -> bool:
@@ -24,7 +38,7 @@ def _format_value(key: str, value: Any) -> str:
     if _is_secret(key):
         return "***"
     text = str(value)
-    if key in {"url", "download_url", "host"} or "://" in text:
+    if key in {"url", "download_url", "host", "reason", "error"} or "://" in text:
         return redact_url(text)
     return text
 

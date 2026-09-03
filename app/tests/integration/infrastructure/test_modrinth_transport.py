@@ -3,6 +3,9 @@ from infrastructure.adapters.http_client import RequestsHttpClient
 from infrastructure.adapters.modrinth_resolver import ModrinthResolver
 
 
+SHA_API = "abc123" + "0" * 58
+
+
 class RecordingTransport:
     def __init__(self) -> None:
         self.urls: list[str] = []
@@ -21,7 +24,7 @@ class RecordingTransport:
                         "files": [
                             {
                                 "url": "https://cdn.modrinth.com/data/P7dR8mSH/fabric-api.jar",
-                                "hashes": {"sha256": "abc123"},
+                                "hashes": {"sha256": SHA_API},
                             }
                         ],
                     }
@@ -46,6 +49,6 @@ def test_modrinth_http_mock_transport() -> None:
     )
     artifact = resolver.resolve(entry, "1.20.6", "fabric")
     assert artifact.url.endswith("fabric-api.jar")
-    assert artifact.sha256.value == "abc123"
+    assert artifact.sha256.value == SHA_API
     assert transport.urls
     assert "api.modrinth.com" in transport.urls[0]

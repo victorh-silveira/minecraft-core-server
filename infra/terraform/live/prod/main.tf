@@ -16,17 +16,18 @@ module "network" {
 }
 
 module "aks" {
-  source              = "../../modules/aks"
-  cluster_name        = local.aks_cluster_name
-  resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
-  dns_prefix          = local.dns_prefix
-  subnet_id           = module.network.aks_subnet_id
-  kubernetes_version  = var.kubernetes_version
-  sku_tier            = "Free"
-  node_count          = 1
-  vm_size             = var.node_vm_size
-  os_disk_size_gb     = var.node_os_disk_size_gb
-  enable_auto_scaling = false
-  tags                = local.tags
+  source                          = "../../modules/aks"
+  cluster_name                    = local.aks_cluster_name
+  resource_group_name             = data.azurerm_resource_group.this.name
+  location                        = data.azurerm_resource_group.this.location
+  dns_prefix                      = local.dns_prefix
+  subnet_id                       = module.network.aks_subnet_id
+  kubernetes_version              = var.kubernetes_version
+  sku_tier                        = "Free"
+  node_count                      = 1
+  vm_size                         = var.node_vm_size
+  os_disk_size_gb                 = var.node_os_disk_size_gb
+  enable_auto_scaling             = false
+  api_server_authorized_ip_ranges = var.admin_cidr_list
+  tags                            = local.tags
 }

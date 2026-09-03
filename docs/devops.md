@@ -40,7 +40,7 @@ Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem e
 | `ci-test` | alias de `app-test` |
 | `ci-validate` | testes + security + docker-smoke |
 | `ci-fmt` / `ci-validate-infra` / `terraform-plan` | Terraform live/prod |
-| `k8s-apply` | Kustomize prod + annotations |
+| `k8s-apply` | Alias seguro de deploy; exige `IMAGE_DIGEST` |
 | `k8s-annotate` | `atualizar-annotations-k8s.sh` |
 | `k8s-test` | `test-aks.sh` |
 | `app-setup` | deps + hooks + commit-msg |
@@ -55,7 +55,7 @@ Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem e
 | `infra/kubernetes/overlays/prod` | Patches prod + annotations |
 
 ```bash
-make k8s-apply
+IMAGE_DIGEST=sha256:... RCON_PASSWORD=... make k8s-deploy
 make k8s-annotate
 bash app/scripts/bash/test-aks.sh
 ```
@@ -77,6 +77,15 @@ Hooks: `Python |`, `Terraform |`, `Docker |`, `Kubernetes |`, `JSON |`, `Commit 
 ## Quality gate
 
 [`app/scripts/operations/clean_workspace.py`](../app/scripts/operations/clean_workspace.py)
+
+| Area | Lint / Validate / Test / Security |
+|------|-----------------------------------|
+| Python | Ruff, mypy, pytest cov 100%, Bandit, pip-audit |
+| Docker | Hadolint; `trivy config`; `trivy image` se `TRIVY_IMAGE` setado (CVE de imagem bloqueante no CD `deploy-app`) |
+| Kubernetes | YAML + kubeconform no overlay prod; Trivy config |
+| Terraform | fmt, tflint, tfsec, validate |
+
+Detalhe da barra senior: [engineering-senior-bar.md](engineering-senior-bar.md).
 
 | Stage | Ferramentas |
 |-------|-------------|
@@ -101,7 +110,7 @@ Detalhe de secrets: [.github/README.md](../.github/README.md).
 | `CI - Validacao` | pytest, Bandit, pip-audit, Gitleaks, Docker, kubeconform, tflint, tfsec |
 | `CD - Deploy Infra` | `terraform apply` condicional + environment `production-infra` |
 | `CI - Release` | sync tags + semantic-release apos gates |
-| `CD - Deploy App` | build/push ACR com cache GHA, rollout AKS, environment `production` |
+| `CD - Deploy App` | build/push GHCR, Trivy image, rollout AKS por digest, environment `production` |
 | `CD - Pos-deploy` | annotations, `test-aks.sh`, probe TCP 25565 |
 | `CI/CD - Resumo` | tabela de status no GitHub Summary |
 
@@ -139,13 +148,13 @@ Manual, confirmar `DESTROY`. Remove namespace K8s, depois `terraform destroy`. P
 
 | Item | Status |
 |------|--------|
-| Dockerfile / Compose | OK |
+| Dockerfile / Compose | OK (base pinada por digest; STOPSIGNAL) |
 | Makefile | OK |
-| Pre-commit + CI | OK |
-| Terraform + AKS | OK |
-| Backup CronJob + WI | OK |
+| Pre-commit + CI | OK (OIDC; `[skip-cd]` so CD; Trivy image no deploy) |
+| Terraform + AKS | OK (Free tier, pool unico documentado) |
+| Backup CronJob + WI/KV | Desativado / futuro (ver architecture.md) |
 | Annotations operacionais | OK |
-| Key Vault / Docker Secrets | Pendente |
+| Key Vault / Docker Secrets | Pendente (WI habilitado; secrets via GitHub Secrets) |
 | Metricas Prometheus | Pendente |
 
 ## Principios de codigo
@@ -185,12 +194,12 @@ Historico de releases: [CHANGELOG.md](CHANGELOG.md).
 | Prioridade | Item |
 |------------|------|
 | 1 | Unificar `ONLINE_MODE`, `DIFFICULTY`, `MAX_PLAYERS` entre `.env` e `server.properties` |
-| 2 | Pin da imagem base `itzg/minecraft-server` (tag ou digest fixo) |
-| 3 | Manter injecao de dependencias nos adapters do sync |
-| 4 | Segredos em Azure Key Vault + CSI / External Secrets |
-| 5 | Profiles Compose `dev` / `staging` |
-| 6 | Metricas Prometheus (avaliar RAM no node unico) |
-| 7 | Lifecycle policy no blob `world-backups` |
+| 2 | Segredos em Azure Key Vault + CSI / External Secrets (WI ja ligado no AKS) |
+| 3 | Profiles Compose `dev` / `staging` |
+| 4 | Metricas Prometheus (avaliar RAM no node unico) |
+| 5 | Reativar backup (CronJob + container `world-backups`) se sair do Free tier |
+| 6 | Segregar system/user node pools no AKS (SKU pago; Free permanece pool unico) |
+| 7 | Lifecycle policy no blob quando houver `world-backups` |
 | 8 | HA / segundo node AKS |
 
 ### Atualizar mods

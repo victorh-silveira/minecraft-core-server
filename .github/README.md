@@ -64,10 +64,9 @@ flowchart LR
 
 | Secret | Uso |
 |--------|-----|
-| `AZURE_CLIENT_ID` | OIDC |
+| `AZURE_CLIENT_ID` | OIDC (obrigatorio) |
 | `AZURE_TENANT_ID` | Azure / Terraform ARM |
 | `AZURE_SUBSCRIPTION_ID` | Azure / Terraform ARM |
-| `AZURE_CREDENTIALS` | Fallback service principal |
 | `RCON_PASSWORD` | Secret `mc-rcon` |
 | `MINECRAFT_WHITELIST` | Secret `mc-access` |
 | `GITHUB_TOKEN` | Release e Gitleaks |

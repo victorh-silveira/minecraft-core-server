@@ -21,6 +21,7 @@ Rules/skills vivem em [`.cursor/`](../.cursor/) e sao **versionadas** no git.
 | Higienizacao | [engineering-repo-hygiene.md](engineering-repo-hygiene.md) | `mcs-repo-hygiene.mdc` | `mcs-repo-hygiene` |
 | Surface sync | [engineering-surface-sync.md](engineering-surface-sync.md) | `mcs-surface-sync.mdc` | `mcs-surface-sync` |
 | Contrato prompt-modelo | [prompt-model.md](../prompt-model.md) | `mcs-engineering.mdc` | `mcs-surface-sync` |
+| Barra senior (SW + Cloud Ops) | [engineering-senior-bar.md](engineering-senior-bar.md) | `mcs-senior-posture.mdc` + `mcs-senior-python.mdc` + `mcs-senior-docker.mdc` + `mcs-senior-cloud.mdc` + `mcs-senior-cicd.mdc` | `mcs-senior-software` + `mcs-senior-cloud-ops` + `mcs-senior-review` |
 
 ## Pastas DDD ↔ matriz
 
@@ -33,7 +34,9 @@ Rules/skills vivem em [`.cursor/`](../.cursor/) e sao **versionadas** no git.
 | `app/runtime/` | Runtime / dados Fabric |
 | `infra/` | Infra Docker / AKS |
 | `app/scripts/` | Scripts / ops |
-| `.cursor/` | Surface sync + Doutrina LLM |
+| `.cursor/` | Surface sync + Doutrina LLM + Barra senior |
+| `.cursor/agents/` | Barra senior (subagentes) |
+| `.github/` | Barra senior (CI/CD) |
 
 ## Enforcement
 

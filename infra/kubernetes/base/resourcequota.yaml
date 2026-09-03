@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mc-server-quota
+  namespace: minecraft-server-prod
+  labels:
+    app.kubernetes.io/name: mc-server
+    app.kubernetes.io/component: servidor-jogo
+spec:
+  hard:
+    pods: "4"
+    requests.cpu: "2"
+    requests.memory: 4Gi
+    limits.cpu: "4"
+    limits.memory: 6Gi
+    persistentvolumeclaims: "2"
+    requests.storage: 32Gi

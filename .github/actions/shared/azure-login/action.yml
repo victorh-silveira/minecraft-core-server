@@ -1,42 +1,37 @@
 name: Autenticacao Azure
-description: Autentica via OIDC (preferencial) ou service principal JSON (legado)
+description: Autentica via OIDC federado do GitHub Actions (obrigatorio)
 
 inputs:
   azure_client_id:
     description: ID do cliente do app registration (OIDC)
-    required: false
-    default: ""
+    required: true
   azure_tenant_id:
     description: ID do locatario Azure
     required: true
   azure_subscription_id:
     description: ID da assinatura Azure
     required: true
-  azure_credentials:
-    description: JSON do service principal (fallback se OIDC nao configurado)
-    required: false
-    default: ""
 
 runs:
   using: composite
 
   steps:
+    - name: Validar OIDC
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.azure_client_id }}" ]; then
+          echo "[ERRO] azure_client_id obrigatorio (OIDC). Service principal estatico nao e suportado."
+          exit 1
+        fi
+
     - name: Autenticar via OIDC
-      if: inputs.azure_client_id != ''
       uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure_client_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
 
-    - name: Autenticar via service principal
-      if: inputs.azure_client_id == ''
-      uses: azure/login@v2
-      with:
-        creds: ${{ inputs.azure_credentials }}
-
     - name: Exportar credenciais ARM para Terraform (OIDC)
-      if: inputs.azure_client_id != ''
       shell: bash
       run: |
         echo "ARM_USE_OIDC=true" >> "$GITHUB_ENV"

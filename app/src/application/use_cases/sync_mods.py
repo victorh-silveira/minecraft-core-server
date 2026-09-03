@@ -81,11 +81,13 @@ class SyncModsUseCase:
         if resolver is None:
             raise ValueError(f"Mod {entry.mod_id.value}: source desconhecida '{entry.source.value}'")
         artifact = resolver.resolve(entry, manifest.minecraft_version, manifest.loader)
+        if not artifact.sha256.is_present():
+            raise ValueError(f"Mod {entry.mod_id.value}: sha256 ausente apos resolucao")
         if self._store.exists(filename) and matches_expected(self._store.digest(filename), artifact.sha256):
             return ModSyncItem(entry.mod_id, ModSyncStatus.SKIPPED_CACHED)
         self._downloader.download(artifact.url, filename)
         actual = self._store.digest(filename)
-        if artifact.sha256.is_present() and actual != artifact.sha256:
+        if actual != artifact.sha256:
             self._store.remove(filename)
             raise ValueError(
                 f"Mod {entry.mod_id.value}: sha256 esperado {artifact.sha256.value}, obtido {actual.value}"

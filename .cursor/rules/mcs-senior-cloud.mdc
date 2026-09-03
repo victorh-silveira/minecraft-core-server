@@ -1,0 +1,15 @@
+---
+description: Senior AKS/Kustomize/Terraform — probes, OIDC, Workload Identity, PDB
+globs: infra/kubernetes/**/*,infra/terraform/**/*
+alwaysApply: false
+---
+
+# Senior Cloud
+
+- Probes: startup separado; readiness ≠ liveness
+- Config/Secret via montagem ou env; nada sensivel bake-in na imagem
+- Kustomize: base + overlays; patches, sem YAML duplicado
+- Terraform: modulos com blast-radius isolado; state Blob com lock/versioning/RBAC
+- Auth: OIDC GitHub → Azure; Workload Identity para Key Vault/ACR
+- Prod: PDB, quotas, NetworkPolicy egress minimo; Spot so jobs nao criticos
+- Doc: `docs/engineering-senior-bar.md`; skill: `mcs-senior-cloud-ops`

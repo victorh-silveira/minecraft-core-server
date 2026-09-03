@@ -62,7 +62,7 @@ pre-commit run --all-files
 | Infra | Formatar Terraform | `ci-infra-local.sh fmt` (versao em `linters/.terraform-version`, padrao 1.15.4) |
 | Infra | Validar Terraform | `ci-infra-local.sh validate` (tflint, tfsec, `terraform validate` em `live/prod`) |
 | Infra | Validar sintaxe YAML | `infra/kubernetes/`, `.github/workflows/` |
-| Docker | Lint Dockerfile | Hadolint em `infra/docker/Dockerfile` (ignore DL3006) |
+| Docker | Lint Dockerfile | Hadolint em `infra/docker/Dockerfile` (base pinada por digest; sem ignore DL3006) |
 | Workflows | Lint GitHub Actions | actionlint |
 | Arquivo | Newline no fim | Arquivos texto (exceto `app/runtime/world`) |
 | Arquivo | Remover espacos no fim | Trailing whitespace |

@@ -27,8 +27,10 @@ Ponto de entrada para agentes Cursor/LLM neste repositorio.
 - **Nao e:** processo do servidor Fabric, substituto dos gates, nem gerador de stack OTRS/WireMock/MariaDB
 
 Doutrina: [`docs/llm-engineering-doctrine.md`](docs/llm-engineering-doctrine.md)
+Barra senior: [`docs/engineering-senior-bar.md`](docs/engineering-senior-bar.md)
 Matriz 100% cobertura: [`docs/agent-coverage.md`](docs/agent-coverage.md)
 Rules/skills versionadas: [`.cursor/rules/`](.cursor/rules/) e [`.cursor/skills/`](.cursor/skills/)
+Subagentes senior: [`.cursor/agents/`](.cursor/agents/) (`mcs-senior-software-engineer`, `mcs-senior-cloud-ops`, `mcs-senior-qa-auditor`)
 
 ## Proibicoes globais
 
@@ -67,11 +69,14 @@ Formato: `tipo(escopo): assunto em PT-BR` + corpo obrigatorio.
 | Tarefa | Abrir primeiro |
 |--------|----------------|
 | Qualquer mudanca | este arquivo + `docs/agent-coverage.md` |
-| Hexagonal / nova feature Python | `docs/arquitetura.md` + skill `mcs-hexagonal-tdd` |
+| Barra senior / postura SW ou Cloud Ops | `docs/engineering-senior-bar.md` + skill `mcs-senior-software` ou `mcs-senior-cloud-ops` |
+| Review / auditoria senior | skill `mcs-senior-review` + agente `mcs-senior-qa-auditor` |
+| Hexagonal / nova feature Python | `docs/arquitetura.md` + skill `mcs-hexagonal-tdd` (+ `mcs-senior-software`) |
 | Sync de mods / manifesto | `docs/configuration.md` + skill `mcs-mods-sync` |
 | Logging | `docs/engineering-logging.md` + skill `mcs-logging-audit` |
-| Docker / volumes / runtime | `docs/infra-docker.md` + skill `mcs-infra-stack` |
-| AKS / Terraform / ops | `docs/operations.md` + skill `mcs-ops-runbook` |
+| Docker / volumes / runtime | `docs/infra-docker.md` + skill `mcs-infra-stack` (+ `mcs-senior-cloud-ops`) |
+| AKS / Terraform / ops | `docs/operations.md` + skill `mcs-ops-runbook` (+ `mcs-senior-cloud-ops`) |
+| CI/CD / skip-cd / OIDC | `docs/engineering-senior-bar.md` + rule `mcs-senior-cicd` |
 | QA / pre-commit / cobertura | `docs/engineering-python.md` + skill `mcs-precommit` |
 | Deps Python | `docs/engineering-python-deps.md` + skill `mcs-python-deps` |
 | Higienizacao | `docs/engineering-repo-hygiene.md` + skill `mcs-repo-hygiene` |

@@ -1,1 +1,2 @@
+# itzg escreve sob /data; root FS read-only exigiria emptyDirs extras na imagem base
 KSV-0014

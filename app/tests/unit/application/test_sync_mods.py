@@ -8,6 +8,13 @@ from domain.entities.mod_source import ModSource
 from domain.services.jar_naming import jar_filename
 
 
+SHA_A = "a" * 64
+SHA_B = "b" * 64
+SHA_C = "c" * 64
+SHA_D = "d" * 64
+SHA_F = "f" * 64
+
+
 class FakeLoader:
     def __init__(self, manifest: ModManifest) -> None:
         self._manifest = manifest
@@ -68,7 +75,7 @@ def _entry(source: str = "modrinth", **overrides: object) -> ModEntry:
         "version": "1.0",
         "source": source,
         "download_url": "https://cdn/demo.jar",
-        "sha256": "aa",
+        "sha256": SHA_A,
     }
     payload.update(overrides)
     return ModEntry.from_mapping(payload)
@@ -93,8 +100,8 @@ def test_skip_cached_when_hash_matches() -> None:
     entry = _entry()
     filename = jar_filename(entry.mod_id, entry.version)
     store = FakeStore()
-    store.files[filename] = "aa"
-    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest("aa"))
+    store.files[filename] = SHA_A
+    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest(SHA_A))
     use_case = SyncModsUseCase(
         FakeLoader(_manifest(entry)),
         {ModSource.MODRINTH: FakeResolver(artifact)},
@@ -107,11 +114,11 @@ def test_skip_cached_when_hash_matches() -> None:
     assert result.skipped == 1
 
 
-def test_skip_cached_without_expected_hash() -> None:
+def test_missing_hash_after_resolve_is_failure() -> None:
     entry = _entry(sha256="")
     filename = jar_filename(entry.mod_id, entry.version)
     store = FakeStore()
-    store.files[filename] = "ff"
+    store.files[filename] = SHA_F
     artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest(""))
     use_case = SyncModsUseCase(
         FakeLoader(_manifest(entry)),
@@ -120,16 +127,17 @@ def test_skip_cached_without_expected_hash() -> None:
         FakeDownloader(store, {}),
     )
     result = use_case.execute()
-    assert result.items[0].status is ModSyncStatus.SKIPPED_CACHED
+    assert not result.ok
+    assert "sha256 ausente" in result.failures[0].reason
 
 
 def test_redownload_on_hash_mismatch_then_success() -> None:
-    entry = _entry(sha256="bb")
+    entry = _entry(sha256=SHA_B)
     filename = jar_filename(entry.mod_id, entry.version)
     store = FakeStore()
-    store.files[filename] = "aa"
-    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest("bb"))
-    downloader = FakeDownloader(store, {filename: "bb"})
+    store.files[filename] = SHA_A
+    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest(SHA_B))
+    downloader = FakeDownloader(store, {filename: SHA_B})
     use_case = SyncModsUseCase(
         FakeLoader(_manifest(entry)),
         {ModSource.MODRINTH: FakeResolver(artifact)},
@@ -144,15 +152,15 @@ def test_redownload_on_hash_mismatch_then_success() -> None:
 
 
 def test_invalid_hash_after_download_is_failure() -> None:
-    entry = _entry(sha256="cc")
+    entry = _entry(sha256=SHA_C)
     filename = jar_filename(entry.mod_id, entry.version)
     store = FakeStore()
-    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest("cc"))
+    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest(SHA_C))
     use_case = SyncModsUseCase(
         FakeLoader(_manifest(entry)),
         {ModSource.MODRINTH: FakeResolver(artifact)},
         store,
-        FakeDownloader(store, {filename: "dd"}),
+        FakeDownloader(store, {filename: SHA_D}),
     )
     result = use_case.execute()
     assert not result.ok
@@ -176,11 +184,11 @@ def test_unknown_source_and_resolver_and_download_errors() -> None:
     )
     assert "nao encontrada" in resolver_error.execute().failures[0].reason
 
-    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest("aa"))
+    artifact = DownloadArtifact("https://cdn/demo.jar", Sha256Digest(SHA_A))
     download_error = SyncModsUseCase(
         FakeLoader(_manifest(entry)),
         {ModSource.MODRINTH: FakeResolver(artifact)},
         store,
-        FakeDownloader(store, {filename: "aa"}, error="rede"),
+        FakeDownloader(store, {filename: SHA_A}, error="rede"),
     )
     assert download_error.execute().failures[0].reason == "rede"

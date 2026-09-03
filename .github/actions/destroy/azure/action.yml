@@ -4,18 +4,13 @@ description: Plano e execucao de destroy Terraform da stack live/prod
 inputs:
   azure_client_id:
     description: ID do cliente do app registration Azure (OIDC)
-    required: false
-    default: ""
+    required: true
   azure_tenant_id:
     description: ID do locatario Azure
     required: true
   azure_subscription_id:
     description: ID da assinatura Azure
     required: true
-  azure_credentials:
-    description: JSON do service principal (fallback se OIDC nao configurado)
-    required: false
-    default: ""
   confirm_token:
     description: Token de confirmacao (deve ser DESTROY)
     required: true
@@ -38,7 +33,6 @@ runs:
         azure_client_id: ${{ inputs.azure_client_id }}
         azure_tenant_id: ${{ inputs.azure_tenant_id }}
         azure_subscription_id: ${{ inputs.azure_subscription_id }}
-        azure_credentials: ${{ inputs.azure_credentials }}
 
     - name: Configurar Terraform
       uses: hashicorp/setup-terraform@v3

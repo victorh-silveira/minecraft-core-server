@@ -22,7 +22,7 @@ output "host" {
 
 output "kubelet_identity_object_id" {
   value       = azurerm_kubernetes_cluster.this.kubelet_identity[0].object_id
-  description = "Object ID da identidade do kubelet (para RBAC AcrPull)"
+  description = "Object ID da identidade do kubelet (Workload Identity / RBAC futuro)"
 }
 
 output "oidc_issuer_url" {

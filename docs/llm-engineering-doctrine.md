@@ -11,7 +11,7 @@ O LLM e **copiloto de engenharia e auditoria** neste repositorio. Nao e o proces
 | Atualiza docs/rules/skills alinhados ao codigo | Fonte de verdade acima do codigo e do Make |
 | Audita imports, logging e higiene | Gerador de stack OTRS/WireMock/MariaDB |
 
-Entrada operacional: [`AGENTS.md`](../AGENTS.md). Matriz: [`agent-coverage.md`](agent-coverage.md). Contrato: [`prompt-model.md`](../prompt-model.md).
+Entrada operacional: [`AGENTS.md`](../AGENTS.md). Matriz: [`agent-coverage.md`](agent-coverage.md). Contrato: [`prompt-model.md`](../prompt-model.md). Barra senior: [`engineering-senior-bar.md`](engineering-senior-bar.md).
 
 ## Invariantes
 

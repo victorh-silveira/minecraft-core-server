@@ -20,7 +20,7 @@ Caminho feliz: duas linhas INFO (`started` e `finished`). Detalhe por mod fica e
 ## Anti-poluicao
 
 - Nao logar JSON do manifesto nem body HTTP em INFO.
-- URLs com query string viram `?***`.
+- URLs com query string viram `?***` (incluindo URL embutida em `reason`/`error`).
 - Campos com `password`, `token`, `secret` ou `api_key` viram `***`.
 - `exc_info` apenas em DEBUG quando o campo `error` esta presente.
 - Loggers `urllib3` e `requests` em WARNING.

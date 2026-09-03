@@ -33,7 +33,7 @@ flowchart TB
 | VNet | `vnet-minecraft-server-prod-bs` | `10.10.0.0/16` |
 | Subnet AKS | `snet-aks-minecraft-server-prod-bs` | `10.10.0.0/22` |
 | AKS | `aks-minecraft-server-prod` | Tier Free, K8s **1.34**, OIDC + Workload Identity |
-| Node pool | `default` | 1 no, VM **Standard_B2ats_v2**, disco OS 30Gi |
+| Node pool | `default` | 1 no, VM **Standard_B2ats_v2**, disco OS 30Gi; system+workload no mesmo pool (Free); segregacao system/user fica para SKU pago |
 | Imagens | `ghcr.io/victorh-silveira/minecraft-core-server` | GHCR publico (sem ACR pago) |
 | Storage | `stminecraftserverprod001` | Apenas `tfstate` (LRS) |
 | DNS label (LB K8s) | `minecraftserverprod` | Annotation no Service `mc-server-game` |
@@ -53,7 +53,7 @@ infra/terraform/
     providers.tf  backend azurerm em stminecraftserverprod001
 ```
 
-Bootstrap do state: `infra/terraform/bootstrap/` (uso inicial).
+Bootstrap do state: script `app/scripts/bash/ensure-tfstate-backend.sh` (RG + storage + container `tfstate` com versioning/soft-delete).
 
 ## Pre-requisitos
 
@@ -85,7 +85,7 @@ game_cidr_list  = []
 game_dns_label  = "minecraftserverprod"
 ```
 
-`admin_cidr_list` habilita regra NSG para RCON (25575) apenas dos CIDRs listados. `game_cidr_list` vazio permite Minecraft de qualquer origem (whitelist no servidor continua obrigatoria).
+`admin_cidr_list` habilita regra NSG para RCON (25575) apenas dos CIDRs listados e, quando nao vazio, allowlist da API do AKS (`api_server_access_profile`). `game_cidr_list` vazio permite Minecraft de qualquer origem (whitelist no servidor continua obrigatoria).
 
 ```bash
 terraform init
@@ -129,16 +129,11 @@ kubectl -n minecraft-server-prod create secret generic mc-access \
 Exemplos versionados (sem valores reais): `secret-rcon.yaml.example`, `secret-access.yaml.example`.
 
 ```bash
-make k8s-apply
+IMAGE_DIGEST=sha256:... RCON_PASSWORD='sua-senha-forte' make k8s-deploy
 make k8s-annotate
 ```
 
-Ou apenas:
-
-```bash
-kubectl apply -k infra/kubernetes/overlays/prod
-bash app/scripts/bash/atualizar-annotations-k8s.sh
-```
+Nao use `kubectl apply -k` com a tag `placeholder` do overlay; o CD e `deploy-aks.sh` substituem por digest.
 
 ## 4. Conectar no jogo
 

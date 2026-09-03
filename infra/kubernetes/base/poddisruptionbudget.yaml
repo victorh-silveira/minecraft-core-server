@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: mc-server
     app.kubernetes.io/component: servidor-jogo
 spec:
-  minAvailable: 0
+  minAvailable: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: mc-server

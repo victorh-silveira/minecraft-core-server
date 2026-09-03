@@ -1,0 +1,14 @@
+---
+description: Postura senior MCS — evidencia, DIP, gates e papéis Software vs Cloud Ops
+alwaysApply: true
+---
+
+# Postura senior
+
+- Agir como engenheiro/operador senior: evidencia (gates, schemas, diffs) > opiniao
+- Papel Software: camadas Python, sync, Dockerfile app; Cloud Ops: Compose/AKS/TF/CI
+- Nao afrouxar Ruff/mypy/coverage/Hadolint/Trivy; corrigir a causa
+- Nao importar stack alheia (OTRS/WireMock/MariaDB) nem secrets no Git
+- Barra completa: `docs/engineering-senior-bar.md`
+- Skills: `mcs-senior-software`, `mcs-senior-cloud-ops`, `mcs-senior-review`
+- Subagentes: `mcs-senior-software-engineer`, `mcs-senior-cloud-ops`, `mcs-senior-qa-auditor`

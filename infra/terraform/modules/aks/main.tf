@@ -17,10 +17,13 @@ resource "azurerm_kubernetes_cluster" "this" {
     name                         = "default"
     vm_size                      = var.vm_size
     vnet_subnet_id               = var.subnet_id
-    node_count                   = var.node_count
     os_disk_size_gb              = var.os_disk_size_gb
     only_critical_addons_enabled = false
     temporary_name_for_rotation  = "defaulttmp"
+    enable_auto_scaling          = var.enable_auto_scaling
+    min_count                    = var.enable_auto_scaling ? 1 : null
+    max_count                    = var.enable_auto_scaling ? max(var.node_count, 2) : null
+    node_count                   = var.enable_auto_scaling ? null : var.node_count
     upgrade_settings {
       max_surge = "10%"
     }
@@ -28,6 +31,13 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   identity {
     type = "SystemAssigned"
+  }
+
+  dynamic "api_server_access_profile" {
+    for_each = length(var.api_server_authorized_ip_ranges) > 0 ? [1] : []
+    content {
+      authorized_ip_ranges = var.api_server_authorized_ip_ranges
+    }
   }
 
   network_profile {

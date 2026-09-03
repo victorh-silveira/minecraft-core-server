@@ -73,8 +73,8 @@ help:
 	@echo -e ""
 	@echo -e "$(YELLOW)Kubernetes:$(RESET)"
 	@echo -e "  $(GREEN)k8s-annotate$(RESET)         - Atualiza annotations de conectividade"
-	@echo -e "  $(GREEN)k8s-apply$(RESET)            - Aplica overlay prod no cluster"
-	@echo -e "  $(GREEN)k8s-deploy$(RESET)           - Deploy manual no AKS (IMAGE_TAG, RCON_PASSWORD, MINECRAFT_WHITELIST)"
+	@echo -e "  $(GREEN)k8s-apply$(RESET)            - Deploy AKS exigindo IMAGE_DIGEST=sha256:..."
+	@echo -e "  $(GREEN)k8s-deploy$(RESET)           - Deploy AKS (IMAGE_DIGEST, RCON_PASSWORD, MINECRAFT_WHITELIST)"
 	@echo -e "  $(GREEN)k8s-test$(RESET)             - Diagnostico pos-deploy no AKS"
 	@echo -e "$(BLUE)========================================================================$(RESET)"
 
@@ -206,7 +206,12 @@ k8s-deploy:
 	$(RUN_LINUX) bash $(APP_DIR)/scripts/bash/deploy-aks.sh
 
 k8s-apply:
-	$(RUN_LINUX) bash -lc "kubectl apply -k infra/kubernetes/overlays/prod"
+	$(RUN_LINUX) bash -lc 'set -euo pipefail; \
+		if [[ -z "$${IMAGE_DIGEST:-}" ]]; then \
+			echo "[ERRO] Defina IMAGE_DIGEST=sha256:... (equivale a make k8s-deploy)"; \
+			exit 1; \
+		fi; \
+		bash app/scripts/bash/deploy-aks.sh'
 
 k8s-annotate:
 	$(RUN_LINUX) bash $(APP_DIR)/scripts/bash/atualizar-annotations-k8s.sh

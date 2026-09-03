@@ -108,7 +108,7 @@ game_cidr_list = ["203.0.113.10/32", "198.51.100.0/24"]
 
 Limita TCP 25565 no NSG. Jogadores com IP dinamico dependem de whitelist, nao desta lista.
 
-`admin_cidr_list` restringe RCON (25575) na borda da rede Azure quando preenchido.
+`admin_cidr_list` restringe RCON (25575) na borda da rede Azure e a API do AKS quando preenchido.
 
 ## Migracao offline para online
 

@@ -1,7 +1,6 @@
 locals {
   project       = "minecraft-server"
   environment   = "prod"
-  region        = "brazilsouth"
   region_suffix = "bs"
 
   tags = {
