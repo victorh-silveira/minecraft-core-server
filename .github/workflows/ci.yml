@@ -103,8 +103,40 @@ jobs:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Docker matriz
-        uses: ./.github/actions/ci/validate-docker
+      - name: Setup Python
+        uses: ./.github/actions/ci/setup-python
+
+      - name: Instalar Hadolint
+        shell: bash
+        run: |
+          curl -fsSL -o /tmp/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
+          chmod +x /tmp/hadolint
+          sudo mv /tmp/hadolint /usr/local/bin/hadolint
+
+      - name: Instalar Trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
+        with:
+          version: v0.74.0
+
+      - name: Docker | Lint
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area docker --stage lint
+
+      - name: Docker | Seguranca
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area docker --stage security
+
+      - name: Docker | Testes
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area docker --stage test
+
+      - name: Docker | Validate
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area docker --stage validate
+
+      - name: Docker | Build
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area docker --stage build
 
   kubernetes:
     name: CI - Kubernetes
@@ -115,8 +147,33 @@ jobs:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Kubernetes matriz
-        uses: ./.github/actions/ci/validate-kubernetes
+      - name: Setup Python
+        uses: ./.github/actions/ci/setup-python
+
+      - name: Instalar Trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
+        with:
+          version: v0.74.0
+
+      - name: Kubernetes | Lint
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage lint
+
+      - name: Kubernetes | Seguranca
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage security
+
+      - name: Kubernetes | Testes
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage test
+
+      - name: Kubernetes | Validate
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage validate
+
+      - name: Kubernetes | Build
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area kubernetes --stage build
 
   terraform:
     name: CI - Terraform
@@ -127,8 +184,46 @@ jobs:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Terraform matriz
-        uses: ./.github/actions/ci/validate-terraform
+      - name: Setup Python
+        uses: ./.github/actions/ci/setup-python
+
+      - name: Configurar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.4"
+          terraform_wrapper: false
+
+      - name: Configurar TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.54.0
+
+      - name: Instalar tfsec
+        shell: bash
+        run: |
+          curl -fsSL -o /tmp/tfsec https://github.com/aquasecurity/tfsec/releases/download/v1.28.11/tfsec-linux-amd64
+          chmod +x /tmp/tfsec
+          sudo mv /tmp/tfsec /usr/local/bin/tfsec
+
+      - name: Terraform | Lint
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area terraform --stage lint
+
+      - name: Terraform | Seguranca
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area terraform --stage security
+
+      - name: Terraform | Testes
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area terraform --stage test
+
+      - name: Terraform | Validate
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area terraform --stage validate
+
+      - name: Terraform | Build
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area terraform --stage build
 
   github:
     name: CI - GitHub
@@ -139,8 +234,28 @@ jobs:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: GitHub matriz
-        uses: ./.github/actions/ci/validate-github
+      - name: Setup Python
+        uses: ./.github/actions/ci/setup-python
+
+      - name: GitHub | Lint
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area github --stage lint
+
+      - name: GitHub | Seguranca
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area github --stage security
+
+      - name: GitHub | Testes
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area github --stage test
+
+      - name: GitHub | Validate
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area github --stage validate
+
+      - name: GitHub | Build
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area github --stage build
 
   scripts:
     name: CI - Scripts
@@ -151,8 +266,28 @@ jobs:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Scripts matriz
-        uses: ./.github/actions/ci/validate-scripts
+      - name: Setup Python
+        uses: ./.github/actions/ci/setup-python
+
+      - name: Scripts | Lint
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area scripts --stage lint
+
+      - name: Scripts | Seguranca
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area scripts --stage security
+
+      - name: Scripts | Testes
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area scripts --stage test
+
+      - name: Scripts | Validate
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area scripts --stage validate
+
+      - name: Scripts | Build
+        shell: bash
+        run: python app/scripts/operations/clean_workspace.py --area scripts --stage build
 
   deploy-infra:
     name: CD - Deploy Infra

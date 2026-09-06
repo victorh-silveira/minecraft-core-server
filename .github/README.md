@@ -42,7 +42,7 @@ flowchart LR
 
 | Workflow | Gatilho | Uso |
 |----------|---------|-----|
-| [ci.yml](workflows/ci.yml) | push/PR `main`, manual | CI matriz; CD no push `main` |
+| [ci.yml](workflows/ci.yml) | push/PR `main`, manual | CI por tecnologia; CD no push `main` |
 | [cd.yml](workflows/cd.yml) | release externa, manual | Re-deploy sob demanda |
 | [destroy.yml](workflows/destroy.yml) | manual | Remocao controlada |
 
@@ -55,7 +55,7 @@ flowchart LR
 │   ├── aks-context/
 │   ├── resolve-whitelist/
 │   └── pipeline-summary/
-├── ci/                       setup-python, validate-docker/k8s/terraform/github/scripts
+├── ci/                       setup-python, release, sync-tags, ...
 ├── cd/
 └── destroy/azure/
 ```
