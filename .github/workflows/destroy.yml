@@ -30,7 +30,7 @@ jobs:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
 
-      - name: Remover stack Azure
+      - name: Destroy | Azure
         uses: ./.github/actions/destroy/azure
         with:
           azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}

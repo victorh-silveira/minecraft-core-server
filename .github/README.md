@@ -32,11 +32,12 @@ flowchart LR
 
 | Fase | Job | Notas |
 |------|-----|-------|
-| CI | Python / Docker / Kubernetes / Terraform / GitHub / Scripts | Mesmo orquestrador e nomes do pre-commit |
-| CD infra | Deploy Infra condicional | `paths-filter`, `[skip-cd]`, `[force-infra]` |
-| Release | Semantic release | Apos gates + infra OK |
-| CD app | Deploy App | Environment `production` |
-| Verificacao | Pos-deploy | Saude K8s + TCP |
+| CI | `CI - Python` / Docker / Kubernetes / Terraform / GitHub / Scripts | Steps `Tech \| Stage` (Lint → Build) |
+| CD infra | `CD - Deploy Infra` | Steps `Infra \| *`; `[skip-cd]`, `[force-infra]` |
+| Release | `CI - Release` | `Release \| Tags`, `Release \| Semantic` |
+| CD app | `CD - Deploy App` | Steps `App \| *` |
+| Verificacao | `CD - Pos-deploy` | Steps `Pos-deploy \| *` |
+| Resumo | `CI - Resumo` | `Resumo \| Pipeline` |
 
 ## Workflows
 
