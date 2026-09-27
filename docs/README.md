@@ -1,6 +1,6 @@
 # Documentacao tecnica
 
-Indice dos guias do projeto **Minecraft Server** (Fabric, Docker, Azure AKS, Terraform, Kubernetes, aplicacao hexagonal).
+Indice dos guias do projeto **Minecraft Server** (Forge, Docker, Azure AKS, Terraform, Kubernetes, aplicacao hexagonal).
 
 ## Por onde comecar
 

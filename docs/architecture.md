@@ -1,6 +1,6 @@
 # Arquitetura
 
-Visao da stack completa: codigo do repositorio, entrega local, infraestrutura Azure (Terraform), orquestracao Kubernetes e runtime do servidor Minecraft Fabric.
+Visao da stack completa: codigo do repositorio, entrega local, infraestrutura Azure (Terraform), orquestracao Kubernetes e runtime do servidor Minecraft Forge.
 
 ## Diagrama — producao (Azure AKS)
 
@@ -65,7 +65,7 @@ Codigo hexagonal: [arquitetura.md](arquitetura.md). Volumes locais: [infra-docke
 | Aplicacao Python | `app/src/application` | Use case e ports |
 | Infra Python | `app/src/infrastructure` | Adapters HTTP/FS, Settings, log_event |
 | Presentation | `app/src/presentation` | CLI e composition root |
-| Runtime Fabric | `app/runtime/` | Mundo, configs, JARs, logs, database |
+| Runtime Forge | `app/runtime/` | Mundo, configs, JARs, logs, database |
 | Entrega local | `infra/docker/` | Dockerfile + Compose |
 | IaC | `infra/terraform/live/prod` | AKS + rede (OIDC); imagem via GHCR |
 | Runtime cloud | `infra/kubernetes/` | StatefulSet, Services, PDB, NetPol, quotas |
@@ -83,7 +83,7 @@ Codigo hexagonal: [arquitetura.md](arquitetura.md). Volumes locais: [infra-docke
 |--------------|---------|----------------------|----------|
 | `app/runtime/world` | subPath `world` | `/data/world` | Chunks, jogadores |
 | `app/runtime/configs/server.properties` | ConfigMap | `/data/server.properties` | Politicas (K8s) |
-| `app/runtime/mods` | subPath `mods` | `/data/mods` | JARs Fabric |
+| `app/runtime/mods` | subPath `mods` | `/data/mods` | Manifesto vazio; nenhum mod instalado |
 | `app/runtime/plugins` | subPath `plugins` | `/data/plugins` | Plugins |
 | `app/runtime/logs` | subPath `logs` | `/data/logs` | Logs |
 | `app/runtime/database` | subPath `database` | `/data/database` | SQLite / auth |
@@ -94,8 +94,8 @@ No AKS um unico PVC `mc-data` (**8Gi**, `mc-standard-ssd`, **Retain**) agrupa os
 
 | Parametro | Valor producao (StatefulSet) | Local (`.env`) |
 |-----------|------------------------------|----------------|
-| Versao | `1.20.6` | `MINECRAFT_VERSION` |
-| Loader | `FABRIC` | `SERVER_TYPE` |
+| Versao | `26.3` | `MINECRAFT_VERSION` |
+| Loader | `FORGE` 66.0.6 | `SERVER_TYPE` + `FORGE_VERSION` |
 | Memoria | overlay prod `1G` (limites no patch) | `MEMORY_LIMIT` |
 | Porta jogo | `25565` | `GAME_PORT` |
 | RCON | `25575` (ClusterIP no AKS) | `RCON_PORT` (localhost only) |
@@ -104,7 +104,7 @@ No AKS um unico PVC `mc-data` (**8Gi**, `mc-standard-ssd`, **Retain**) agrupa os
 | Flags JVM | `USE_AIKAR_FLAGS=true` | idem |
 | Probes | startup TCP `25565`; readiness/liveness `mc-health` (paridade Compose) | healthcheck `mc-health` |
 
-Imagem base pinada por digest em `infra/docker/Dockerfile` (`itzg/minecraft-server:java21@sha256:...`), publicada no **GHCR** como `ghcr.io/victorh-silveira/minecraft-core-server:<tag>` e aplicada no cluster por **digest**.
+Imagem base pinada por digest em `infra/docker/Dockerfile` (`itzg/minecraft-server:java25@sha256:...`), publicada no **GHCR** como `ghcr.io/victorh-silveira/minecraft-core-server:<tag>` e aplicada no cluster por **digest**.
 
 ## Infraestrutura Azure (Terraform)
 

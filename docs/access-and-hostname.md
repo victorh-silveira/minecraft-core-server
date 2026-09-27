@@ -7,20 +7,19 @@ Quem pode entrar no servidor e como conectar de forma estavel (hostname em vez d
 | Camada | Docker local | AKS producao |
 |--------|--------------|--------------|
 | Conta Mojang | `ONLINE_MODE=false` no `.env` | `ONLINE_MODE=FALSE` no StatefulSet |
-| Whitelist | `MINECRAFT_WHITELIST` no `.env` | Secret `mc-access` / GitHub `MINECRAFT_WHITELIST` |
+| Whitelist | Desabilitada no Compose | Secret `mc-access` / GitHub `MINECRAFT_WHITELIST` |
 | RCON | Porta `127.0.0.1:25575` apenas | Service `mc-server-rcon` ClusterIP + port-forward |
 | Rede (opcional) | Firewall do host | NSG `game_cidr_list` no Terraform |
 
-Servidor em modo offline (`online-mode=false`): nao exige conta Mojang; whitelist continua validando nicks permitidos. No deploy, nicks do secret `MINECRAFT_WHITELIST` sao convertidos para UUID offline (PlayerDB nao resolve nicks sem conta Mojang).
+Servidor em modo offline (`online-mode=false`): nao exige conta Mojang. No Docker local, qualquer nick pode entrar; no deploy AKS, nicks do secret `MINECRAFT_WHITELIST` sao convertidos para UUID offline (PlayerDB nao resolve nicks sem conta Mojang).
 
 ## Docker local
 
 1. `Copy-Item infra/docker/.env.example infra/docker/.env`
-2. `MINECRAFT_WHITELIST=AnonymousNoobz` (ou varios nicks separados por virgula)
-3. `ONLINE_MODE=false`, `WHITE_LIST=true`, `ENFORCE_WHITELIST=true`
-4. `make docker-up` (converte nicks para UUID offline automaticamente)
+2. `ONLINE_MODE=false`
+3. `make docker-up`
 
-Nao use `ci-test-player` no `.env` local: e placeholder de CI e falha no PlayerDB.
+O Compose fixa `WHITE_LIST=FALSE` e `ENFORCE_WHITELIST=FALSE`. As variaveis de whitelist nao fazem parte do `.env` local.
 
 RCON: `127.0.0.1:25575` no host (Compose publica RCON so em localhost).
 

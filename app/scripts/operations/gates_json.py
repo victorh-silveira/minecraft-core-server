@@ -40,8 +40,8 @@ def stage_lint() -> None:
         print(f"[ERRO] loader invalido: {data['loader']}")
         sys.exit(1)
     mods = data["mods"]
-    if not isinstance(mods, list) or not mods:
-        print("[ERRO] mods deve ser lista nao vazia")
+    if not isinstance(mods, list):
+        print("[ERRO] mods deve ser lista")
         sys.exit(1)
     for index, entry in enumerate(mods):
         if not isinstance(entry, dict):

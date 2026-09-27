@@ -2,7 +2,7 @@
 
 Contrato reutilizavel derivado deste repositorio. Oriente um agente a gerar ou adaptar qualquer projeto (Python ou outra linguagem) com o mesmo padrao: DDD, hexagonal, TDD, qualidade, DX e documentacao.
 
-O dominio Minecraft (sync de mods Fabric + Docker/AKS) e o exemplo de aplicacao neste repo — nao e regra obrigatoria de negocio para um projeto novo. OTRS / Google Chat, WireMock e MariaDB nao fazem parte deste repositorio e nao devem ser copiados.
+O dominio Minecraft (Forge sem mods instalados, com sync opcional por manifesto + Docker/AKS) e o exemplo de aplicacao neste repo — nao e regra obrigatoria de negocio para um projeto novo. OTRS / Google Chat, WireMock e MariaDB nao fazem parte deste repositorio e nao devem ser copiados.
 
 ## 1. Papel e objetivo
 

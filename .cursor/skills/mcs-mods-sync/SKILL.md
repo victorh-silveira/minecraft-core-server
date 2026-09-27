@@ -1,7 +1,7 @@
 ---
 name: mcs-mods-sync
 description: >-
-  Altera ou diagnostica o sync de mods Fabric (manifesto JSON, Modrinth,
+  Altera ou diagnostica o sync de mods Forge (manifesto JSON, Modrinth,
   CurseForge, SHA-256, CLI run.py, make docker-sync-mods). Use when editing
   mods-manifest, resolvers, LocalJarStore, SyncModsUseCase, or when jars fail
   to download or hash-check.
@@ -11,7 +11,7 @@ description: >-
 
 ## Passos
 
-1. Conferir `app/runtime/mods/mods-manifest.json` (id, version, source, slug/url, sha256)
+1. Conferir `app/runtime/mods/mods-manifest.json` (`minecraft_version=26.3`, `loader=forge`, `mods=[]` no estado sem mods)
 2. Rodar `make docker-sync-mods` ou `python run.py` no WSL
 3. Falha de resolve: source, slug, versao Minecraft/loader
 4. Falha de hash: atualizar sha256 no manifesto ou redownload

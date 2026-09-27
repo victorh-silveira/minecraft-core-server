@@ -1,5 +1,5 @@
 ---
-description: Infra MCS — Docker Compose, AKS, Terraform do dominio Fabric
+description: Infra MCS — Docker Compose, AKS, Terraform do dominio Forge
 globs: infra/**/*
 alwaysApply: true
 ---

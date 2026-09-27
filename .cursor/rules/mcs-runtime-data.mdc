@@ -1,5 +1,5 @@
 ---
-description: Runtime Fabric MCS — app/runtime vs app/src; bind mounts
+description: Runtime Forge MCS — app/runtime vs app/src; bind mounts
 globs: app/runtime/**,infra/docker/**
 alwaysApply: true
 ---

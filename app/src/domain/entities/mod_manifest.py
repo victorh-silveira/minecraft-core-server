@@ -22,10 +22,10 @@ class ModManifest:
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, object]) -> "ModManifest":
-        raw_version = payload.get("minecraft_version", "1.20.6")
+        raw_version = payload.get("minecraft_version", "26.3")
         if not isinstance(raw_version, str) or not raw_version.strip():
             raise ValueError("minecraft_version invalida")
-        raw_loader = payload.get("loader", "fabric")
+        raw_loader = payload.get("loader", "forge")
         if not isinstance(raw_loader, str) or not raw_loader.strip():
             raise ValueError("loader invalido")
         raw_mods = payload.get("mods", [])

@@ -8,7 +8,7 @@ Agentes: `.cursor/agents/mcs-senior-*.md`. Skills: `mcs-senior-software`, `mcs-s
 ## Postura
 
 - Preferir evidencia (gates, schemas, diffs, probes) a opiniao.
-- Mudanca minima alinhada ao dominio Fabric; nao importar stacks alheias.
+- Mudanca minima alinhada ao dominio Forge; nao importar stacks alheias.
 - Nao afrouxar QA; corrigir a causa.
 - Separar papel **Software Engineer** (camadas Python, Dockerfile app) de **Cloud Ops** (Compose paridade, AKS, Terraform, CI/CD, observabilidade).
 

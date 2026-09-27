@@ -6,7 +6,7 @@ O LLM e **copiloto de engenharia e auditoria** neste repositorio. Nao e o proces
 
 | E | Nao e |
 |---|-------|
-| Ajuda a projetar/adaptar codigo hexagonal | Runtime do Fabric / itzg |
+| Ajuda a projetar/adaptar codigo hexagonal | Runtime do Forge / itzg |
 | Sugere testes TDD e corrige cobertura | Desculpa para baixar `fail-under` |
 | Atualiza docs/rules/skills alinhados ao codigo | Fonte de verdade acima do codigo e do Make |
 | Audita imports, logging e higiene | Gerador de stack OTRS/WireMock/MariaDB |

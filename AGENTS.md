@@ -11,7 +11,7 @@ Ponto de entrada para agentes Cursor/LLM neste repositorio.
 
 ## Universo operacional
 
-- Servidor Minecraft **Fabric 1.20.6** (imagem itzg/java21)
+- Servidor Minecraft **Forge 26.3 / Forge 66.0.6** (imagem itzg/java25), sem mods instalados
 - Codigo Python hexagonal: sync de JARs a partir de `app/runtime/mods/mods-manifest.json`
 - Camadas: `app/src/{domain,application,infrastructure,presentation}`
 - Dados de jogo: `app/runtime/{world,configs,mods,plugins,logs,database}` — nunca em `app/src/`
@@ -24,7 +24,7 @@ Ponto de entrada para agentes Cursor/LLM neste repositorio.
 ## O que o LLM e / nao e
 
 - **E:** copiloto de engenharia e auditoria
-- **Nao e:** processo do servidor Fabric, substituto dos gates, nem gerador de stack OTRS/WireMock/MariaDB
+- **Nao e:** processo do servidor Forge, substituto dos gates, nem gerador de stack OTRS/WireMock/MariaDB
 
 Doutrina: [`docs/llm-engineering-doctrine.md`](docs/llm-engineering-doctrine.md)
 Barra senior: [`docs/engineering-senior-bar.md`](docs/engineering-senior-bar.md)

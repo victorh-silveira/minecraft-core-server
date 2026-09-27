@@ -2,8 +2,9 @@
 
 [![CI](https://github.com/victorh-silveira/minecraft-core-server/actions/workflows/ci.yml/badge.svg)](https://github.com/victorh-silveira/minecraft-core-server/actions/workflows/ci.yml)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB?logo=python&logoColor=white)](app/pyproject.toml)
-[![Minecraft Fabric](https://img.shields.io/badge/minecraft-Fabric%201.20.6-62B47A?logo=minecraft&logoColor=white)](docs/architecture.md)
-[![Java 21](https://img.shields.io/badge/java-21-ED8B00?logo=openjdk&logoColor=white)](infra/docker/Dockerfile)
+[![Minecraft Forge](https://img.shields.io/badge/minecraft-Forge%2026.3-62B47A?logo=minecraft&logoColor=white)](docs/architecture.md)
+[![Forge 66.0.6](https://img.shields.io/badge/forge-66.0.6-E04E14)](https://files.minecraftforge.net/net/minecraftforge/forge/)
+[![Java 25](https://img.shields.io/badge/java-25-ED8B00?logo=openjdk&logoColor=white)](infra/docker/Dockerfile)
 [![Coverage](https://img.shields.io/badge/coverage-100%25%20branch-brightgreen)](docs/engineering-python.md)
 [![Ruff](https://img.shields.io/badge/linter-ruff-D7FF64?logo=ruff&logoColor=black)](docs/engineering-python.md)
 [![mypy strict](https://img.shields.io/badge/typecheck-mypy%20strict-294E80)](docs/engineering-python.md)
@@ -11,14 +12,14 @@
 [![Kubernetes](https://img.shields.io/badge/k8s-Azure%20AKS-326CE5?logo=kubernetes&logoColor=white)](docs/azure.md)
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-844FBA?logo=terraform&logoColor=white)](docs/azure.md)
 
-Servidor Minecraft **Fabric 1.20.6** com arquitetura hexagonal (DDD + TDD), entrega local via Docker Compose e producao em **Azure AKS** (IaC Terraform + manifestos Kubernetes).
+Servidor Minecraft Java **26.3 com Forge 66.0.6, sem mods instalados**, arquitetura hexagonal (DDD + TDD), entrega local via Docker Compose e producao em **Azure AKS** (IaC Terraform + manifestos Kubernetes).
 
 ## Arquitetura em uma linha
 
 | Camada | Tecnologia | Papel |
 |--------|------------|-------|
-| Jogo | itzg/minecraft-server (Java 21) | Processo do servidor Fabric |
-| App | Python hexagonal (`domain` → CLI) | Sync de mods via manifesto |
+| Jogo | itzg/minecraft-server (Java 25) | Processo do servidor Forge |
+| App | Python hexagonal (`domain` → CLI) | Manifesto vazio e sync opcional de mods |
 | Runtime | `app/runtime/` | Mundo, configs, JARs, logs |
 | Container local | Docker Compose | Desenvolvimento e testes |
 | Orquestracao cloud | AKS 1.34 Free (1x B2ats_v2) | StatefulSet + PVC + LoadBalancer |
@@ -70,6 +71,8 @@ make docker-logs
 
 Conecte em `localhost:25565` (ou `GAME_PORT` do `.env`).
 
+O ambiente Docker local opera sem whitelist. A whitelist de producao no AKS permanece habilitada e gerenciada pelo Secret `mc-access`.
+
 ## Inicio rapido (AKS)
 
 Pre-requisitos: Azure CLI, Terraform, kubectl, credenciais no GitHub (OIDC).
@@ -96,7 +99,7 @@ kubectl -n minecraft-server-prod get svc mc-server-game \
 | Comando | Descricao |
 |---------|-----------|
 | `make app-lint` / `app-test` / `app-security` | Gates de qualidade |
-| `make docker-up` | Sync mods, build e sobe servidor local |
+| `make docker-up` | Valida o manifesto vazio, build e sobe o servidor Forge local |
 | `make docker-smoke` | Valida Docker local |
 | `make ci-lint` / `make ci-test` | Espelha gates do CI |
 | `make k8s-deploy` | Deploy manual completo no AKS |

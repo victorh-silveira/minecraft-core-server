@@ -21,9 +21,9 @@ Preencha cada valor no formato `VARIAVEL=valor`. Os templates usam placeholders 
 
 | Secao | Variaveis |
 |-------|-----------|
-| Servidor | `MINECRAFT_VERSION`, `SERVER_TYPE`, `MEMORY_LIMIT`, `EULA_ACCEPTED` |
+| Servidor | `MINECRAFT_VERSION=26.3`, `SERVER_TYPE=FORGE`, `FORGE_VERSION=66.0.6`, `MEMORY_LIMIT`, `EULA_ACCEPTED` |
 | Portas | `GAME_PORT`, `RCON_PORT` |
-| Seguranca | `ONLINE_MODE`, `WHITE_LIST`, `ENFORCE_WHITELIST`, `MINECRAFT_WHITELIST` |
+| Seguranca local | `ONLINE_MODE`; whitelist e enforcement sao fixados como `FALSE` no Compose |
 | Jogo | `DIFFICULTY`, `MAX_PLAYERS` |
 | Segredos | `RCON_PASSWORD` |
 | Container | `UID`, `GID`, `SKIP_CHOWN`, `DOCKER_PIDS_LIMIT` |
@@ -76,11 +76,13 @@ Ver [devops.md](devops.md) (roadmap prioridade 1).
 
 | Arg | Origem |
 |-----|--------|
-| `BASE_IMAGE` | `DOCKER_BASE_IMAGE` (ex.: `itzg/minecraft-server:java21`) |
+| `BASE_IMAGE` | `DOCKER_BASE_IMAGE` (ex.: `itzg/minecraft-server:java25`) |
 | `IMAGE_VERSION` | `.env` |
 | `BUILD_DATE`, `VCS_REF` | Makefile `docker-build` |
 
 ## Manifesto de mods
+
+O servidor Forge opera sem mods instalados. O manifesto versionado deve manter `mods: []`; a infraestrutura de sync continua disponivel para uma futura mudanca explicitamente aprovada.
 
 `app/runtime/mods/mods-manifest.json`
 

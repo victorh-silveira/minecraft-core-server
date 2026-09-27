@@ -13,8 +13,8 @@ metadata:
   name: mc-server
   namespace: minecraft-server-prod
   annotations:
-    minecraft-server.io/jogo-versao: "1.20.6"
-    minecraft-server.io/jogo-tipo: FABRIC
+    minecraft-server.io/jogo-versao: "26.3"
+    minecraft-server.io/jogo-tipo: FORGE
     minecraft-server.io/jogo-porta: "25565"
 ---
 apiVersion: v1

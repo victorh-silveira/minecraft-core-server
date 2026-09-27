@@ -44,7 +44,7 @@ minecraft-core-server/
 | Caminho | Tipo |
 |---------|------|
 | `app/src/` | Codigo Python hexagonal |
-| `app/runtime/` | Dados do servidor Fabric (bind mounts Docker) |
+| `app/runtime/` | Dados do servidor Forge (bind mounts Docker) |
 | `app/tests/` | Testes |
 | `infra/` | Docker, Kubernetes, Terraform |
 

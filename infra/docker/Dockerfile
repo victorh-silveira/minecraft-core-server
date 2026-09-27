@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1.7
 
-FROM itzg/minecraft-server:java21@sha256:6691a620cb88ae666c9fd2a4211c3c0ae611943ca8bd23e4cebd785921032ec4
+FROM itzg/minecraft-server:java25@sha256:83c076bb24c87e5a5cf5d884d180c7be8896a4c1d5963d74a39a4325401cc2ba
 
-ARG BASE_IMAGE=itzg/minecraft-server:java21@sha256:6691a620cb88ae666c9fd2a4211c3c0ae611943ca8bd23e4cebd785921032ec4
+ARG BASE_IMAGE=itzg/minecraft-server:java25@sha256:83c076bb24c87e5a5cf5d884d180c7be8896a4c1d5963d74a39a4325401cc2ba
 ARG BUILD_DATE=unknown
 ARG VCS_REF=local
 ARG IMAGE_VERSION=0.1.0
 
 LABEL org.opencontainers.image.title="Servidor Minecraft Core"
-LABEL org.opencontainers.image.description="Servidor Minecraft Fabric com Clean Architecture e mods versionados"
+LABEL org.opencontainers.image.description="Servidor Minecraft Forge 26.3 sem mods com Clean Architecture"
 LABEL org.opencontainers.image.version="${IMAGE_VERSION}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.revision="${VCS_REF}"

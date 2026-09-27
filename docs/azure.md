@@ -207,7 +207,7 @@ NetworkPolicy no namespace restringe trafego dos pods (ingress jogo/RCON interno
 | Disco PVC mundo | Standard_LRS 8Gi | Baixo custo; HDD em vez de SSD |
 | Load Balancer | Standard (AKS 1.34+) | Nao ha tier gratuito; custo residual obrigatorio para IP publico |
 
-Nao e possivel ter Minecraft publico em AKS com custo zero absoluto: o Load Balancer Standard e cobrado. O restante foi reduzido ao minimo compativel com Fabric 1.20.6 e 1G de heap.
+Nao e possivel ter Minecraft publico em AKS com custo zero absoluto: o Load Balancer Standard e cobrado. O restante foi reduzido ao minimo compativel com Forge 66.0.6, Minecraft 26.3 e 2G de heap.
 
 ## Observabilidade
 

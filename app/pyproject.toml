@@ -1,7 +1,7 @@
 [project]
 name = "minecraft-server"
 version = "0.0.0"
-description = "Servidor Minecraft Fabric com Docker Compose e sincronizacao de mods via manifesto."
+description = "Servidor Minecraft Forge 26.3 sem mods com Docker Compose e Azure AKS."
 readme = "../README.md"
 requires-python = ">=3.13,<4"
 dependencies = [

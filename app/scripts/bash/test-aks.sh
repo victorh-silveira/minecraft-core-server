@@ -21,8 +21,8 @@ TCP_STATUS="Nao verificado"
 LOG_STATUS="Nao verificado"
 
 GAME_HOST=""
-MC_VERSION="1.20.6"
-MC_TYPE="FABRIC"
+MC_VERSION="26.3"
+MC_TYPE="FORGE"
 
 pass() {
   echo "[OK] $1"
@@ -130,8 +130,8 @@ if kubectl -n "$NAMESPACE" get statefulset mc-server >/dev/null 2>&1; then
     K8S_STS_STATUS="Falhou (${READY}/${DESIRED} prontos)"
   fi
 
-  MC_VERSION="$(kubectl -n "$NAMESPACE" get statefulset mc-server -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="VERSION")].value}' 2>/dev/null || echo "1.20.6")"
-  MC_TYPE="$(kubectl -n "$NAMESPACE" get statefulset mc-server -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="TYPE")].value}' 2>/dev/null || echo "FABRIC")"
+  MC_VERSION="$(kubectl -n "$NAMESPACE" get statefulset mc-server -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="VERSION")].value}' 2>/dev/null || echo "26.3")"
+  MC_TYPE="$(kubectl -n "$NAMESPACE" get statefulset mc-server -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="TYPE")].value}' 2>/dev/null || echo "FORGE")"
 else
   fail "statefulset mc-server nao encontrado"
   K8S_STS_STATUS="Nao encontrado"

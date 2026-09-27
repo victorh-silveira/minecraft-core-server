@@ -1,7 +1,7 @@
 ---
 name: mcs-ops-runbook
 description: >-
-  Operacao do servidor Fabric (Make docker/k8s, backup de mundo, RCON,
+  Operacao do servidor Forge (Make docker/k8s, backup de mundo, RCON,
   annotations, troubleshooting). Use when the user mentions docker-logs,
   k8s-deploy, backup world, whitelist, RCON, or operations checklist.
 ---

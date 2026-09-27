@@ -29,21 +29,6 @@ load_dotenv() {
 
 load_dotenv
 
-ONLINE_MODE_NORM="$(printf '%s' "${ONLINE_MODE:-false}" | tr '[:upper:]' '[:lower:]')"
-if [[ "${ONLINE_MODE_NORM}" == "false" ]]; then
-  if [[ -z "${MINECRAFT_WHITELIST:-}" ]]; then
-    echo "[ERRO] MINECRAFT_WHITELIST vazio no .env"
-    exit 1
-  fi
-  if [[ "${MINECRAFT_WHITELIST}" == "ci-test-player" ]]; then
-    echo "[ERRO] MINECRAFT_WHITELIST=ci-test-player e placeholder de CI; use um nick real (ex. AnonymousNoobz)"
-    exit 1
-  fi
-  RESOLVED="$(bash app/scripts/bash/resolve-whitelist.sh "${MINECRAFT_WHITELIST}")"
-  export MINECRAFT_WHITELIST="${RESOLVED}"
-  echo ">>> Whitelist offline resolvida para UUID(s): ${MINECRAFT_WHITELIST}"
-fi
-
 BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 VCS_REF="$(git rev-parse --short HEAD 2>/dev/null || echo local)"
 export BUILD_DATE VCS_REF

@@ -214,8 +214,8 @@ def test_curseforge_resolver() -> None:
                 "sha256": "a" * 64,
             }
         ),
-        "1.20.6",
-        "fabric",
+        "26.3",
+        "forge",
     )
     assert artifact.url == "https://cdn/x.jar"
     assert artifact.sha256.value == "a" * 64

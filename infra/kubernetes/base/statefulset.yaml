@@ -53,11 +53,13 @@ spec:
             - name: EULA
               value: "TRUE"
             - name: VERSION
-              value: "1.20.6"
+              value: "26.3"
             - name: TYPE
-              value: "FABRIC"
+              value: "FORGE"
+            - name: FORGE_VERSION
+              value: "66.0.6"
             - name: MEMORY
-              value: "1G"
+              value: "2G"
             - name: ONLINE_MODE
               value: "FALSE"
             - name: WHITE_LIST

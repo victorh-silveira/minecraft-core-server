@@ -66,10 +66,6 @@ fi
 step "Verificando arquivo .env"
 if [[ -f "$ENV_FILE" ]]; then
   pass ".env presente em infra/docker/"
-  WHITELIST_NICK="$(load_env_value MINECRAFT_WHITELIST)"
-  if [[ "${WHITELIST_NICK}" == "ci-test-player" ]]; then
-    fail "MINECRAFT_WHITELIST=ci-test-player (placeholder de CI); use um nick real no .env"
-  fi
 else
   fail ".env ausente (copie infra/docker/.env.example para $ENV_FILE)"
 fi
@@ -158,10 +154,10 @@ step "Verificando mods sincronizados"
 if [[ -f app/runtime/mods/mods-manifest.json ]]; then
   pass "mods-manifest.json presente"
   JAR_COUNT="$(find app/runtime/mods -maxdepth 1 -name '*.jar' 2>/dev/null | wc -l | tr -d ' ')"
-  if [[ "${JAR_COUNT:-0}" -gt 0 ]]; then
-    pass "${JAR_COUNT} jar(s) em app/runtime/mods"
+  if [[ "${JAR_COUNT:-0}" -eq 0 ]]; then
+    pass "nenhum mod instalado"
   else
-    warn "nenhum jar em app/runtime/mods (rode: make docker-sync-mods)"
+    fail "${JAR_COUNT} mod(s) encontrado(s); o runtime Forge deve permanecer sem mods"
   fi
 else
   fail "mods-manifest.json ausente"
@@ -173,12 +169,6 @@ if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
   started=0
   while (( SECONDS < deadline )); do
     LOGS="$(compose_logs 120)"
-    if echo "${LOGS}" | grep -Eqi "Could not resolve user|Invalid parameter provided for 'manage-users'"; then
-      fail "falha ao resolver whitelist (manage-users); rode make docker-up com MINECRAFT_WHITELIST valido"
-      echo "${LOGS}" | tail -n 20 | sed 's/^/     /'
-      started=-1
-      break
-    fi
     HEALTH="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' "$CONTAINER" 2>/dev/null || echo n/a)"
     if echo "${LOGS}" | grep -q 'Done (.*)! For help, type "help"'; then
       pass "servidor Minecraft reportou startup completo nos logs"

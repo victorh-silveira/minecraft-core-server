@@ -69,8 +69,8 @@ help:
 	@echo -e "  $(GREEN)docker-restart$(RESET)       - Reinicia o servico (preserva dados)"
 	@echo -e "  $(GREEN)docker-sh$(RESET)            - Shell no container mc-server"
 	@echo -e "  $(GREEN)docker-smoke$(RESET)         - Smoke em 127.0.0.1 e 192.168.0.50 (SMOKE_LAN_HOST)"
-	@echo -e "  $(GREEN)docker-sync-mods$(RESET)     - Baixa JARs via manifesto"
-	@echo -e "  $(GREEN)docker-up$(RESET)            - Sync mods, build e sobe o servidor Fabric"
+	@echo -e "  $(GREEN)docker-sync-mods$(RESET)     - Sincroniza o manifesto (vazio por padrao)"
+	@echo -e "  $(GREEN)docker-up$(RESET)            - Valida manifesto, build e sobe o servidor Forge"
 	@echo -e ""
 	@echo -e "$(YELLOW)Kubernetes:$(RESET)"
 	@echo -e "  $(GREEN)k8s-annotate$(RESET)         - Atualiza annotations de conectividade"
@@ -166,7 +166,7 @@ docker-build: docker-env-check
 
 docker-up: docker-env-check docker-sync-mods
 	@echo -e "$(BLUE)========================================================================$(RESET)"
-	@echo -e "$(GREEN)  docker-up · mc-server (sync mods + build + up)$(RESET)"
+	@echo -e "$(GREEN)  docker-up · mc-server (valida manifesto + build + up)$(RESET)"
 	@echo -e "$(BLUE)========================================================================$(RESET)"
 	$(RUN_LINUX) bash $(APP_DIR)/scripts/bash/docker-compose-up.sh
 

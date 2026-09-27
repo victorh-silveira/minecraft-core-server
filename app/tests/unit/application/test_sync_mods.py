@@ -82,7 +82,7 @@ def _entry(source: str = "modrinth", **overrides: object) -> ModEntry:
 
 
 def _manifest(*entries: ModEntry) -> ModManifest:
-    return ModManifest("1.20.6", "fabric", entries)
+    return ModManifest("26.3", "forge", entries)
 
 
 def test_empty_manifest_prepares_store() -> None:

@@ -1,11 +1,11 @@
 # Servidor Minecraft - Release {VERSION}
 
-Nova versao do servidor **Minecraft Fabric** (Docker Compose e sincronizacao de mods via manifesto).
+Nova versao do servidor **Minecraft Forge** (Docker Compose e manifesto sem mods instalados).
 
 ### Detalhes
 - **Versao:** `{VERSION}`
 - **Data:** `{DATE}`
-- **Stack:** Fabric, itzg/minecraft-server, sincronizacao Python de mods
+- **Stack:** Forge, itzg/minecraft-server, sincronizacao Python por manifesto
 
 ### Historico
 {CHANGELOG}

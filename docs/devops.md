@@ -34,7 +34,7 @@ Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem e
 | Comando | Descricao |
 |---------|-----------|
 | `app-lint` / `app-validate` / `app-test` / `app-security` | Matriz QA (orquestrador) |
-| `docker-up` | Sync mods, build, sobe servidor |
+| `docker-up` | Valida manifesto vazio, build e sobe servidor Forge |
 | `docker-smoke` | `test-docker.sh` (smoke live) |
 | `ci-lint` | pre-commit (matriz) |
 | `ci-test` | alias de `app-test` |

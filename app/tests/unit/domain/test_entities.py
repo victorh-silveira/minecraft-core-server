@@ -16,7 +16,7 @@ SHA_D = "d" * 64
 
 
 def test_mod_id_and_version_strip_and_reject_empty() -> None:
-    assert ModId("  fabric-api ").value == "fabric-api"
+    assert ModId("  example-mod ").value == "example-mod"
     assert ModVersion(" 1.0 ").value == "1.0"
     with pytest.raises(ValueError, match="id do mod"):
         ModId(" ")
@@ -50,13 +50,13 @@ def test_mod_entry_from_mapping_and_unknown_source() -> None:
             "id": "x",
             "version": "1.0",
             "source": "Modrinth",
-            "project_slug": " fabric-api ",
+            "project_slug": " example-mod ",
             "download_url": " ",
             "sha256": 1,
         }
     )
     assert entry.source is ModSource.MODRINTH
-    assert entry.project_slug == "fabric-api"
+    assert entry.project_slug == "example-mod"
     assert entry.download_url is None
     assert not entry.sha256.is_present()
     with pytest.raises(ValueError, match="entrada de mod invalida"):
@@ -73,24 +73,24 @@ def test_mod_entry_from_mapping_and_unknown_source() -> None:
 
 def test_mod_manifest_from_mapping_and_validation() -> None:
     manifest = ModManifest.from_mapping({"mods": []})
-    assert manifest.minecraft_version == "1.20.6"
-    assert manifest.loader == "fabric"
+    assert manifest.minecraft_version == "26.3"
+    assert manifest.loader == "forge"
     assert list(manifest.entries) == []
     with pytest.raises(ValueError, match="minecraft_version invalida"):
-        ModManifest.from_mapping({"minecraft_version": " ", "loader": "fabric", "mods": []})
+        ModManifest.from_mapping({"minecraft_version": " ", "loader": "forge", "mods": []})
     with pytest.raises(ValueError, match="loader invalido"):
-        ModManifest.from_mapping({"minecraft_version": "1.20.6", "loader": " ", "mods": []})
+        ModManifest.from_mapping({"minecraft_version": "26.3", "loader": " ", "mods": []})
     with pytest.raises(ValueError, match="mods deve ser uma lista"):
         ModManifest.from_mapping({"mods": {}})
     with pytest.raises(ValueError, match="minecraft_version e obrigatoria"):
-        ModManifest(" ", "fabric", ())
+        ModManifest(" ", "forge", ())
     with pytest.raises(ValueError, match="loader e obrigatorio"):
-        ModManifest("1.20.6", " ", ())
+        ModManifest("26.3", " ", ())
 
 
 def test_jar_filename_and_checksum() -> None:
-    name = jar_filename(ModId("fabric-api"), ModVersion("1.0/2"))
-    assert name == "fabric-api-1.0_2.jar"
+    name = jar_filename(ModId("example-mod"), ModVersion("1.0/2"))
+    assert name == "example-mod-1.0_2.jar"
     expected = Sha256Digest(SHA_A)
     assert matches_expected(Sha256Digest(SHA_A), expected)
     assert not matches_expected(Sha256Digest(SHA_B), expected)

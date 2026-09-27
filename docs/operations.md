@@ -108,7 +108,7 @@ Pasta `app/runtime/database` montada em `/data/database` no container.
 
 | Loader | Observacao |
 |--------|------------|
-| Fabric (atual) | AuthMe **nao** funciona; use mods Fabric (ex.: EasyAuth) |
+| Forge (atual) | Servidor sem mods; controle de acesso de producao pela whitelist nativa |
 | Paper/Spigot | AuthMe pode usar `/data/database` ou `/data/plugins/AuthMe/` |
 
 Configure o mod/plugin para gravar SQLite em caminho persistente sob `/data/database`.
@@ -147,7 +147,7 @@ Se aparecer `Permission denied` nos logs:
 | Mods nao carregam | `make docker-sync-mods`; conferir JARs em `app/runtime/mods/` |
 | Porta em uso | Alterar `GAME_PORT` no `.env` |
 | `.env` nao encontrado | Copie `infra/docker/.env.example` para `infra/docker/.env` |
-| Healthcheck failing | Aguardar start-period (180s); Fabric + mods demoram |
+| Healthcheck failing | Aguardar start-period (180s); o primeiro boot do Forge pode demorar |
 | Read-only file system em server.properties | Remover `read_only` do volume; itzg precisa gravar propriedades do `.env` no arquivo |
 | Permission denied em /data | Ajustar UID/GID no `.env`; preferir repo em filesystem Linux no WSL |
 

@@ -1,6 +1,6 @@
 # Arquitetura da aplicacao
 
-Camadas hexagonais do codigo Python que sincroniza mods Fabric a partir de um manifesto. A stack Azure/AKS permanece em [architecture.md](architecture.md).
+Camadas hexagonais do codigo Python que sincroniza mods Forge a partir de um manifesto atualmente vazio. A stack Azure/AKS permanece em [architecture.md](architecture.md).
 
 ## Dominio
 
@@ -17,7 +17,7 @@ Entrada principal: CLI (`python run.py` ou `python -m presentation.cli`).
 | infrastructure | `infrastructure.adapters`, `config`, `logging` | JSON, HTTP `requests`, filesystem, Settings, `log_event` |
 | presentation | `presentation.cli`, `presentation.logging` | Composition root, exit code, eventos de log |
 
-`app/runtime/` nao e camada DDD: e persistencia do servidor Fabric (mundo, configs, JARs, logs, database).
+`app/runtime/` nao e camada DDD: e persistencia do servidor Forge (mundo, configs, JARs, logs, database).
 
 ## Fluxo
 

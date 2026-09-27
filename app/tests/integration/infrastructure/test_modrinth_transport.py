@@ -20,10 +20,10 @@ class RecordingTransport:
             def json(self) -> object:
                 return [
                     {
-                        "version_number": "0.100.8+1.20.6",
+                        "version_number": "1.0.0+26.3",
                         "files": [
                             {
-                                "url": "https://cdn.modrinth.com/data/P7dR8mSH/fabric-api.jar",
+                                "url": "https://cdn.modrinth.com/data/example/example-mod.jar",
                                 "hashes": {"sha256": SHA_API},
                             }
                         ],
@@ -41,14 +41,14 @@ def test_modrinth_http_mock_transport() -> None:
     resolver = ModrinthResolver(RequestsHttpClient("minecraft-server-sync/1.0", transport=transport))
     entry = ModEntry.from_mapping(
         {
-            "id": "fabric-api",
-            "version": "0.100.8+1.20.6",
+            "id": "example-mod",
+            "version": "1.0.0+26.3",
             "source": "modrinth",
-            "project_slug": "fabric-api",
+            "project_slug": "example-mod",
         }
     )
-    artifact = resolver.resolve(entry, "1.20.6", "fabric")
-    assert artifact.url.endswith("fabric-api.jar")
+    artifact = resolver.resolve(entry, "26.3", "forge")
+    assert artifact.url.endswith("example-mod.jar")
     assert artifact.sha256.value == SHA_API
     assert transport.urls
     assert "api.modrinth.com" in transport.urls[0]
