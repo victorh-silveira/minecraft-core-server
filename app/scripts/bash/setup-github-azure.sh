@@ -151,10 +151,6 @@ setup_github() {
   else
     echo "RCON_PASSWORD ja existe no GitHub (nao alterada)"
   fi
-  if ! gh secret list --repo "$repo" | grep -q "^MINECRAFT_WHITELIST"; then
-    gh secret set MINECRAFT_WHITELIST --repo "$repo" --body "AnonymousNoobz"
-    echo "MINECRAFT_WHITELIST definida como AnonymousNoobz"
-  fi
   echo "Environments e secrets GitHub configurados."
 }
 

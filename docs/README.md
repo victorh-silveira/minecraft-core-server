@@ -76,7 +76,7 @@ Metadados operacionais: annotations `minecraft-server.io/*` — [annotations.md]
 | `infra/terraform/live/prod/` | Stack de producao |
 | `app/src/` | Codigo hexagonal (domain, application, infrastructure, presentation) |
 | `app/runtime/` | Mundo, configs, mods, plugins, logs, database |
-| `app/scripts/bash/` | `deploy-aks.sh`, `test-aks.sh`, `resolve-whitelist.sh` |
+| `app/scripts/bash/` | `deploy-aks.sh`, `test-aks.sh`, operacao Docker/AKS |
 | `app/scripts/operations/` | Orquestrador de qualidade |
 | `docs/` | Esta documentacao |
 | `linters/` | commitlint, tflint, tfsec, git-hooks |

@@ -71,7 +71,9 @@ make docker-logs
 
 Conecte em `localhost:25565` (ou `GAME_PORT` do `.env`).
 
-O ambiente Docker local opera sem whitelist. A whitelist de producao no AKS permanece habilitada e gerenciada pelo Secret `mc-access`.
+Docker local e AKS operam sem autenticacao Mojang e sem whitelist, aceitando clientes originais e launchers paralelos. `AnonymousNoobz` recebe OP nivel 4 ao conectar; `keepInventory`, sono com um jogador e feedback silencioso sao configurados no boot.
+
+Na lista de servidores, o MOTD exibe **Minecraft Core Server** e os dados do runtime em duas linhas coloridas. O icone versionado e um PNG 64x64. O nome salvo acima do MOTD continua sendo escolhido por cada jogador no cliente Vanilla.
 
 ## Inicio rapido (AKS)
 

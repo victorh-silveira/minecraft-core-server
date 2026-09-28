@@ -52,7 +52,7 @@ flowchart LR
   runtime[app/runtime/world]
   manifest --> sync
   sync --> compose
-  runtime -->|bind mount /data/world| compose
+  runtime -->|bind mount /data| compose
 ```
 
 Codigo hexagonal: [arquitetura.md](arquitetura.md). Volumes locais: [infra-docker.md](infra-docker.md).
@@ -88,7 +88,7 @@ Codigo hexagonal: [arquitetura.md](arquitetura.md). Volumes locais: [infra-docke
 | `app/runtime/logs` | subPath `logs` | `/data/logs` | Logs |
 | `app/runtime/database` | subPath `database` | `/data/database` | SQLite / auth |
 
-No AKS um unico PVC `mc-data` (**8Gi**, `mc-standard-ssd`, **Retain**) agrupa os subPaths.
+No AKS um unico PVC `mc-data` (**8Gi**, `mc-standard-ssd`, **Retain**) e montado integralmente em `/data`. Isso preserva renomes atomicos entre world, temporarios e backups; o init container materializa o ConfigMap de `server.properties` no PVC. O filesystem raiz fica somente leitura e `/tmp` usa `emptyDir` em memoria limitado a 256 Mi.
 
 ## Servidor Minecraft (runtime)
 
@@ -96,11 +96,14 @@ No AKS um unico PVC `mc-data` (**8Gi**, `mc-standard-ssd`, **Retain**) agrupa os
 |-----------|------------------------------|----------------|
 | Versao | `26.3` | `MINECRAFT_VERSION` |
 | Loader | `FORGE` 66.0.6 | `SERVER_TYPE` + `FORGE_VERSION` |
-| Memoria | overlay prod `1G` (limites no patch) | `MEMORY_LIMIT` |
+| Heap JVM | overlay prod `768M` inicial / `1G` maximo | `MINECRAFT_INIT_MEMORY` / `MINECRAFT_MAX_MEMORY` |
+| Limite do container | overlay prod `1536Mi` | `DOCKER_MEMORY_LIMIT=2G` local |
+| CPU | overlay prod `1` CPU | `DOCKER_CPU_LIMIT=4.0` local |
 | Porta jogo | `25565` | `GAME_PORT` |
 | RCON | `25575` (ClusterIP no AKS) | `RCON_PORT` (localhost only) |
 | Online mode | `false` | `ONLINE_MODE` |
-| Whitelist | Secret `mc-access` | `MINECRAFT_WHITELIST` |
+| Whitelist | Desabilitada | Desabilitada |
+| Comandos | OP nivel 4 para `AnonymousNoobz`; gamerules administrativas no boot | Idem |
 | Flags JVM | `USE_AIKAR_FLAGS=true` | idem |
 | Probes | startup TCP `25565`; readiness/liveness `mc-health` (paridade Compose) | healthcheck `mc-health` |
 

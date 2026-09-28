@@ -85,7 +85,7 @@ game_cidr_list  = []
 game_dns_label  = "minecraftserverprod"
 ```
 
-`admin_cidr_list` habilita regra NSG para RCON (25575) apenas dos CIDRs listados e, quando nao vazio, allowlist da API do AKS (`api_server_access_profile`). `game_cidr_list` vazio permite Minecraft de qualquer origem (whitelist no servidor continua obrigatoria).
+`admin_cidr_list` habilita regra NSG para RCON (25575) apenas dos CIDRs listados e, quando nao vazio, allowlist da API do AKS (`api_server_access_profile`). `game_cidr_list` vazio permite Minecraft de qualquer origem, sem autenticacao ou whitelist no servidor.
 
 ```bash
 terraform init
@@ -114,19 +114,16 @@ Em producao o CD publica no GHCR na release (tag semantica, sem `latest`). Deixe
 
 ## 3. Deploy Kubernetes
 
-Secrets obrigatorios (CD ou manual):
+Secret obrigatorio (CD ou manual):
 
 ```bash
 kubectl apply -f infra/kubernetes/base/namespace.yaml
 kubectl -n minecraft-server-prod create secret generic mc-rcon \
   --from-literal=RCON_PASSWORD='sua-senha-forte' \
   --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n minecraft-server-prod create secret generic mc-access \
-  --from-literal=WHITELIST='nick1,nick2' \
-  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-Exemplos versionados (sem valores reais): `secret-rcon.yaml.example`, `secret-access.yaml.example`.
+Exemplo versionado (sem valor real): `secret-rcon.yaml.example`.
 
 ```bash
 IMAGE_DIGEST=sha256:... RCON_PASSWORD='sua-senha-forte' make k8s-deploy
@@ -152,7 +149,7 @@ minecraftserverprod.brazilsouth.cloudapp.azure.com
 
 Porta padrao **25565** (sem sufixo `:25565` em hostnames DNS).
 
-Guia de acesso e whitelist: [access-and-hostname.md](access-and-hostname.md).
+Guia de acesso aberto e comandos: [access-and-hostname.md](access-and-hostname.md).
 
 ## 5. Migracao do mundo
 
@@ -189,7 +186,7 @@ Se o PVC ou StatefulSet for removido, o disco gerenciado **permanece** no Azure 
 
 | Porta | Exposicao | Controle |
 |-------|-----------|----------|
-| 25565 | LoadBalancer publico | NSG opcional (`game_cidr_list`) + whitelist + online-mode |
+| 25565 | LoadBalancer publico | NSG opcional (`game_cidr_list`); sem autenticacao e sem whitelist |
 | 25575 | ClusterIP apenas | `kubectl port-forward`; NSG admin opcional |
 
 NetworkPolicy no namespace restringe trafego dos pods (ingress jogo/RCON interno, egress DNS/HTTPS).
@@ -207,7 +204,7 @@ NetworkPolicy no namespace restringe trafego dos pods (ingress jogo/RCON interno
 | Disco PVC mundo | Standard_LRS 8Gi | Baixo custo; HDD em vez de SSD |
 | Load Balancer | Standard (AKS 1.34+) | Nao ha tier gratuito; custo residual obrigatorio para IP publico |
 
-Nao e possivel ter Minecraft publico em AKS com custo zero absoluto: o Load Balancer Standard e cobrado. O restante foi reduzido ao minimo compativel com Forge 66.0.6, Minecraft 26.3 e 2G de heap.
+Nao e possivel ter Minecraft publico em AKS com custo zero absoluto: o Load Balancer Standard e cobrado. O restante foi reduzido ao minimo compativel com Forge 66.0.6 e Minecraft 26.3. No overlay prod, o heap maximo de `1G` fica sob limite de `1536Mi`, preservando memoria nativa da JVM e do Forge.
 
 ## Observabilidade
 

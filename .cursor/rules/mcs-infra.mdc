@@ -9,6 +9,8 @@ alwaysApply: true
 - Local: `infra/docker/` (Compose + Dockerfile); env em `infra/docker/.env`
 - Cloud: `infra/kubernetes/` + `infra/terraform/live/prod`
 - Codigo Python nao importa Terraform/YAML K8s
+- Heap JVM sempre abaixo do limite total do container; nunca acoplar `MAX_MEMORY` ao limite rigido
+- Uma world autoritativa usa uma replica; escalar verticalmente CPU/memoria
 - Nao copiar WireMock/MariaDB/OTRS
 - Docs: `docs/infra-docker.md`, `docs/architecture.md`, `docs/azure.md`
 - Skills: `mcs-infra-stack`, `mcs-ops-runbook`

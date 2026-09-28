@@ -21,44 +21,61 @@ Preencha cada valor no formato `VARIAVEL=valor`. Os templates usam placeholders 
 
 | Secao | Variaveis |
 |-------|-----------|
-| Servidor | `MINECRAFT_VERSION=26.3`, `SERVER_TYPE=FORGE`, `FORGE_VERSION=66.0.6`, `MEMORY_LIMIT`, `EULA_ACCEPTED` |
+| Servidor | `MINECRAFT_VERSION=26.3`, `SERVER_TYPE=FORGE`, `FORGE_VERSION=66.0.6`, `MINECRAFT_INIT_MEMORY`, `MINECRAFT_MAX_MEMORY`, `EULA_ACCEPTED` |
 | Portas | `GAME_PORT`, `RCON_PORT` |
-| Seguranca local | `ONLINE_MODE`; whitelist e enforcement sao fixados como `FALSE` no Compose |
+| Smoke de rede | `SMOKE_LAN_HOST`, `SMOKE_WAN_PORT`, `SMOKE_DNS_HOST`, `SMOKE_IPIFY_URL`, `SMOKE_CONNECT_TIMEOUT_SEC`, `SMOKE_STARTUP_TIMEOUT_SEC`, `SMOKE_EXPECTED_MOTD`, `SMOKE_EXTERNAL_STATUS_URL`, `SMOKE_USER_AGENT` |
+| Acesso e comandos | `ONLINE_MODE=FALSE`, whitelist/perfil seguro desabilitados e OP para `AnonymousNoobz` |
 | Jogo | `DIFFICULTY`, `MAX_PLAYERS` |
 | Segredos | `RCON_PASSWORD` |
-| Container | `UID`, `GID`, `SKIP_CHOWN`, `DOCKER_PIDS_LIMIT` |
+| Container | `UID`, `GID`, `SKIP_CHOWN`, `DOCKER_CPU_LIMIT`, `DOCKER_MEMORY_LIMIT`, `DOCKER_MEMORY_RESERVATION`, `DOCKER_MEMORY_SWAP_LIMIT`, `DOCKER_PIDS_LIMIT`, `DOCKER_TMPFS_LIMIT` |
 | Build | `DOCKER_BASE_IMAGE`, `IMAGE_VERSION` |
 | Sync Python | `LOG_LEVEL`, `SYNC_DISABLE_DOTENV`, `MODS_MANIFEST_PATH`, `MODS_DIR`, `SYNC_USER_AGENT` |
 
-Producao AKS nao usa este `.env`; equivalentes estao no StatefulSet e nos Secrets `mc-rcon` / `mc-access`.
+Producao AKS nao usa este `.env`; equivalentes estao no StatefulSet e no Secret `mc-rcon`.
 
 ## Producao AKS (StatefulSet + Secrets)
 
 | Config | Origem |
 |--------|--------|
-| `VERSION`, `TYPE`, `MEMORY`, `DIFFICULTY`, `MAX_PLAYERS` | `infra/kubernetes/base/statefulset.yaml` |
-| `ONLINE_MODE`, `WHITE_LIST`, `ENFORCE_WHITELIST` | StatefulSet (`ONLINE_MODE=FALSE`, sem conta Mojang) |
-| `WHITELIST` | Secret `mc-access` (CD) |
+| `VERSION`, `TYPE`, `INIT_MEMORY`, `MAX_MEMORY`, `DIFFICULTY`, `MAX_PLAYERS` | `infra/kubernetes/base/statefulset.yaml` e overlay prod |
+| `ONLINE_MODE`, `WHITE_LIST`, `ENFORCE_WHITELIST`, `ENFORCE_SECURE_PROFILE` | StatefulSet (todos `FALSE`) |
+| `ENABLE_COMMAND_BLOCK`, niveis OP/function | StatefulSet (habilitado, nivel 4) |
+| `RCON_CMDS_STARTUP` | `keep_inventory=true`, sono com um jogador e feedback administrativo silencioso |
+| `RCON_CMDS_ON_CONNECT` | `op AnonymousNoobz` |
 | `RCON_PASSWORD` | Secret `mc-rcon` (CD) |
 | Limites CPU/RAM | Patch `overlays/prod/patches/resources.yaml` |
 | Propriedades extras | ConfigMap `mc-server-properties` |
 
 Overlay prod: `kubectl apply -k infra/kubernetes/overlays/prod`.
 
+O heap Java deve permanecer abaixo do limite do container. No Docker local, o padrao e `1G` inicial, `1536M` maximo e limite rigido de `2G`; os 512 MiB restantes acomodam Metaspace, buffers nativos, threads e o Forge. `DOCKER_MEMORY_SWAP_LIMIT=2G` igual ao limite de memoria impede swap adicional do container. No AKS prod, o heap maximo e `1G` sob limite de `1536Mi`.
+
 ## `server.properties`
 
-Arquivo: `app/runtime/configs/server.properties`
+Template: `app/runtime/configs/server.properties`. No Docker local, o bootstrap gera a copia gravavel e ignorada `app/runtime/server.properties` antes de iniciar o container.
 Montado em `/data/server.properties` (gravavel pela imagem itzg).
 
 | Propriedade | Padrao no arquivo | Producao efetiva |
 |-------------|-------------------|------------------|
 | `online-mode` | `false` | Alinhado a `ONLINE_MODE=FALSE` (local e K8s) |
+| `white-list` | `false` | Desabilitada local e K8s |
+| `enable-command-block` | `true` | Comandos de command block habilitados |
+| `op-permission-level` | `4` | Administracao completa para jogadores com OP |
+| `function-permission-level` | `4` | Funcoes com nivel maximo |
 | `difficulty` | `hard` | Alinhado ao env |
 | `max-players` | `20` | Alinhado ao env |
+| `motd` | Duas linhas coloridas | Alinhado a `MOTD` no Compose e StatefulSet |
 | `enable-rcon` | `true` | RCON ativo |
 | `rcon.port` | `25575` | Porta interna |
 
 Senha RCON efetiva: variavel de ambiente / Secret, nao o campo vazio no arquivo.
+
+## Identidade na lista de servidores
+
+- MOTD: `§a§lMinecraft Core Server§r` e `§7Forge 26.3 §8• §eSurvival §8• §bKeepInventory`.
+- Icone: `app/runtime/configs/server-icon.png`, PNG exatamente 64x64.
+- Runtime: `ICON=/templates/server-icon.png` e `OVERRIDE_ICON=true` copiam o ativo para `/data/server-icon.png`.
+- Nome do servidor: definido pelo jogador ao salvar o endereco no cliente Vanilla; o servidor nao impoe esse campo.
 
 ## Duplicidade env vs `server.properties` (local)
 

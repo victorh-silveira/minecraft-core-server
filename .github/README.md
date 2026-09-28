@@ -54,7 +54,6 @@ flowchart LR
 ├── shared/
 │   ├── azure-login/
 │   ├── aks-context/
-│   ├── resolve-whitelist/
 │   └── pipeline-summary/
 ├── ci/                       setup-python, release, sync-tags, ...
 ├── cd/
@@ -69,7 +68,6 @@ flowchart LR
 | `AZURE_TENANT_ID` | Azure / Terraform ARM |
 | `AZURE_SUBSCRIPTION_ID` | Azure / Terraform ARM |
 | `RCON_PASSWORD` | Secret `mc-rcon` |
-| `MINECRAFT_WHITELIST` | Secret `mc-access` |
 | `GITHUB_TOKEN` | Release e Gitleaks |
 
 ## Environments

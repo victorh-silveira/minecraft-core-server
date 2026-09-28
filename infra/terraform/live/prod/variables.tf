@@ -22,7 +22,7 @@ variable "admin_cidr_list" {
 
 variable "game_cidr_list" {
   type        = list(string)
-  description = "Blocos CIDR permitidos para Minecraft na porta 25565 no NSG (vazio = internet; use whitelist no servidor)"
+  description = "Blocos CIDR permitidos para Minecraft na porta 25565 no NSG (vazio = internet sem restricao de jogadores)"
   default     = []
 }
 

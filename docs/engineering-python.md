@@ -13,7 +13,7 @@ python app/scripts/operations/clean_workspace.py --area <area> --stage <stage>
 | Area | Lint | Seguranca | Testes | Validate | Build |
 |------|------|-----------|--------|----------|-------|
 | python | Ruff, vulture, hexagonal, manifesto | Bandit, pip-audit, hash/https | pytest + ids | mypy + parse JSON | compileall + sha |
-| docker | Hadolint | Trivy config | smoke estatico | compose config | compose build (imagem no CI) |
+| docker | Hadolint | Trivy config + imagem pos-build | smoke estatico | compose config | compose build (imagem no CI) |
 | kubernetes | YAML sintaxe | Trivy config | smoke estatico | kustomize + kubeconform | kustomize build |
 | terraform | fmt-check + tflint | tfsec | terraform test (modulo label) | terraform validate | terraform init |
 | github | parse workflows/hooks | sem credencial estatica | jobs da matriz CI | actionlint | actions locais existem |

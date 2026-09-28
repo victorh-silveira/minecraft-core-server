@@ -30,10 +30,13 @@ spec:
           command:
             - sh
             - -c
-            - mkdir -p /data/world /data/mods /data/plugins /data/logs /data/database
+            - mkdir -p /data/world /data/mods /data/plugins /data/logs /data/database && cp /config/server.properties /data/server.properties
           volumeMounts:
             - name: mc-data
               mountPath: /data
+            - name: server-properties
+              mountPath: /config
+              readOnly: true
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -58,25 +61,46 @@ spec:
               value: "FORGE"
             - name: FORGE_VERSION
               value: "66.0.6"
-            - name: MEMORY
+            - name: INIT_MEMORY
+              value: "1G"
+            - name: MAX_MEMORY
               value: "2G"
             - name: ONLINE_MODE
               value: "FALSE"
             - name: WHITE_LIST
-              value: "TRUE"
+              value: "FALSE"
             - name: ENFORCE_WHITELIST
-              value: "TRUE"
-            - name: WHITELIST
-              valueFrom:
-                secretKeyRef:
-                  name: mc-access
-                  key: WHITELIST
+              value: "FALSE"
+            - name: ENFORCE_SECURE_PROFILE
+              value: "FALSE"
             - name: DIFFICULTY
               value: "hard"
             - name: MAX_PLAYERS
               value: "20"
+            - name: MOTD
+              value: |-
+                §a§lMinecraft Core Server§r
+                §7Forge 26.3 §8• §eSurvival §8• §bKeepInventory
+            - name: ICON
+              value: "/templates/server-icon.png"
+            - name: OVERRIDE_ICON
+              value: "true"
+            - name: ENABLE_COMMAND_BLOCK
+              value: "TRUE"
+            - name: OP_PERMISSION_LEVEL
+              value: "4"
+            - name: FUNCTION_PERMISSION_LEVEL
+              value: "4"
             - name: ENABLE_RCON
               value: "true"
+            - name: RCON_CMDS_STARTUP
+              value: |-
+                gamerule keep_inventory true
+                gamerule players_sleeping_percentage 1
+                gamerule command_block_output false
+                gamerule send_command_feedback false
+            - name: RCON_CMDS_ON_CONNECT
+              value: "op AnonymousNoobz"
             - name: RCON_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -119,31 +143,17 @@ spec:
             failureThreshold: 3
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
-            - name: server-properties
-              mountPath: /data/server.properties
-              subPath: server.properties
             - name: mc-data
-              mountPath: /data/world
-              subPath: world
-            - name: mc-data
-              mountPath: /data/mods
-              subPath: mods
-            - name: mc-data
-              mountPath: /data/plugins
-              subPath: plugins
-            - name: mc-data
-              mountPath: /data/logs
-              subPath: logs
-            - name: mc-data
-              mountPath: /data/database
-              subPath: database
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: server-properties
           configMap:
@@ -151,3 +161,7 @@ spec:
         - name: mc-data
           persistentVolumeClaim:
             claimName: mc-data
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi

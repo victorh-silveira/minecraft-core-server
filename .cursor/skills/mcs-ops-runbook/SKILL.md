@@ -3,7 +3,7 @@ name: mcs-ops-runbook
 description: >-
   Operacao do servidor Forge (Make docker/k8s, backup de mundo, RCON,
   annotations, troubleshooting). Use when the user mentions docker-logs,
-  k8s-deploy, backup world, whitelist, RCON, or operations checklist.
+  k8s-deploy, backup world, acesso aberto, comandos, RCON, or operations checklist.
 ---
 
 # Ops runbook

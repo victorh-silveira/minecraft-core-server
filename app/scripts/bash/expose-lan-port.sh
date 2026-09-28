@@ -21,7 +21,13 @@ if ! command -v powershell.exe >/dev/null 2>&1; then
   exit 0
 fi
 
-echo ">>> Expondo porta ${GAME_PORT} na LAN (${LAN_HOST}) via portproxy (UAC)"
+WSL_HOST="$(ip -4 route get 1.1.1.1 | awk '{for (field_index = 1; field_index <= NF; field_index++) if ($field_index == "src") {print $(field_index + 1); exit}}')"
+if [[ -z "${WSL_HOST}" ]]; then
+  echo "[ERRO] IP do WSL nao identificado"
+  exit 1
+fi
+
+echo ">>> Configurando ${LAN_HOST}:${GAME_PORT} -> WSL ${WSL_HOST}:${GAME_PORT} e Firewall (UAC)"
 WIN_SCRIPT="$(wslpath -w "${ROOT}/app/scripts/bash/expose-lan-port.ps1")"
 powershell.exe -NoProfile -Command \
-  "Start-Process -FilePath powershell.exe -Verb RunAs -Wait -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','${WIN_SCRIPT}','-Port','${GAME_PORT}','-LanHost','${LAN_HOST}'"
+  "Start-Process -FilePath powershell.exe -Verb RunAs -Wait -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','${WIN_SCRIPT}','-Port','${GAME_PORT}','-ConnectHost','${WSL_HOST}','-LanHost','${LAN_HOST}'"

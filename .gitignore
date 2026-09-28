@@ -84,4 +84,27 @@ app/runtime/logs/*
 app/runtime/database/*
 !app/runtime/database/.gitkeep
 
+app/runtime/.cache/
+app/runtime/config/
+app/runtime/defaultconfigs/
+app/runtime/libraries/
+app/runtime/world upgraded/
+app/runtime/.forge-manifest.json
+app/runtime/.rcon-cli.env
+app/runtime/.rcon-cli.yaml
+app/runtime/.run-forge.env
+app/runtime/README.txt
+app/runtime/eula.txt
+app/runtime/forge-*.jar
+app/runtime/run.bat
+app/runtime/run.sh
+app/runtime/server-icon.png
+app/runtime/server.properties
+app/runtime/user_jvm_args.txt
+app/runtime/banned-ips.json
+app/runtime/banned-players.json
+app/runtime/ops.json
+app/runtime/usercache.json
+app/runtime/whitelist.json
+
 .azure-setup-tmp/

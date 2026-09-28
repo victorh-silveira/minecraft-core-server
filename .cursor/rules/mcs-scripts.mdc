@@ -8,6 +8,6 @@ alwaysApply: true
 
 - Orquestrador unico de qualidade: `app/scripts/operations/clean_workspace.py`
 - Makefile chama o orquestrador para lint/test/security/clean
-- Ops bash: deploy AKS, test-docker, annotations, whitelist — em `app/scripts/bash/`
+- Ops bash: deploy AKS, test-docker e annotations — em `app/scripts/bash/`
 - Setup: `app/scripts/setup.sh` / `make app-setup`
 - Doc: `docs/operations.md`, `docs/structure.md`; skill: `mcs-ops-runbook`

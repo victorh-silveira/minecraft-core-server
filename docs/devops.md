@@ -35,7 +35,7 @@ Templates em `/templates/` na imagem; bind mounts de `app/runtime/` prevalecem e
 |---------|-----------|
 | `app-lint` / `app-validate` / `app-test` / `app-security` | Matriz QA (orquestrador) |
 | `docker-up` | Valida manifesto vazio, build e sobe servidor Forge |
-| `docker-smoke` | `test-docker.sh` (smoke live) |
+| `docker-smoke` | Smoke Minecraft local, LAN, WAN via ipify e DNS/WAN |
 | `ci-lint` | pre-commit (matriz) |
 | `ci-test` | alias de `app-test` |
 | `ci-validate` | testes + security + docker-smoke |
@@ -81,7 +81,7 @@ Hooks: `Commit | Lint` primeiro, depois `Python |` / `Docker |` / `Kubernetes |`
 | Area | Lint / Seguranca / Testes / Validate / Build |
 |------|-----------------------------------------------|
 | Python | Ruff + manifesto JSON; Bandit/pip-audit; pytest cov 100%; mypy; compileall |
-| Docker | Hadolint; Trivy config; smoke; compose config; compose build no CI |
+| Docker | Hadolint; Trivy config; smoke; compose config; compose build e Trivy da imagem no CI |
 | Kubernetes | YAML; Trivy; smoke; kubeconform; kustomize build |
 | Terraform | fmt/tflint; tfsec; terraform test; validate; init |
 | GitHub | parse; sem credencial estatica; jobs CI; actionlint; actions locais |
@@ -138,10 +138,10 @@ Manual, confirmar `DESTROY`. Remove namespace K8s, depois `terraform destroy`. P
 | Script | Funcao |
 |--------|--------|
 | `deploy-aks.sh` | Deploy manual no AKS (`make k8s-deploy`) |
-| `resolve-whitelist.sh` | Converte nicks em UUID offline (modo offline) |
 | `test-aks.sh` | Diagnostico Azure + K8s + TCP + logs |
 | `atualizar-annotations-k8s.sh` | Metadados conectividade/saude |
-| `test-docker.sh` | Validacao Compose local |
+| `test-docker.sh` | Validacao Compose e conectividade Minecraft local/LAN/WAN/DNS |
+| `probe_minecraft_status.py` | Handshake de status Minecraft e validacao do MOTD |
 | `setup-github-azure.sh` | Federated credentials OIDC |
 | `ci-infra-local.sh` | fmt/lint/validate Terraform local |
 

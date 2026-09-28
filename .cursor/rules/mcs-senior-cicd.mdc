@@ -11,4 +11,5 @@ alwaysApply: false
 - Cache por hash de lock/requirements; jobs por area em paralelo, stages em sequencia
 - Imagens por SHA curto; nao promover `latest` a prod
 - Gates: Ruff → Bandit/pip-audit → pytest cov-branch 100% → mypy → compileall; Hadolint/Trivy; tflint/tfsec; kubeconform; actionlint
+- CI Docker executa Trivy na imagem efetivamente construida, alem do scan estatico de configuracao
 - Doc: `docs/engineering-senior-bar.md`; skill: `mcs-senior-cloud-ops` + `mcs-precommit`

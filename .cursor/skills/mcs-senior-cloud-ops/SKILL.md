@@ -24,6 +24,7 @@ Mudanca em `infra/**`, `.github/**`, secrets, probes, deploy ou imagem.
 6. CI: QA intacto; `[skip-cd]` nao pula lint/test/security
 7. Imagem imutavel (SHA); Trivy sem CRITICAL/HIGH com fix
 8. Validar: `kubeconform` no `kustomize build`; gates Make no WSL
+9. Executar Trivy na imagem construida no CI; nao limitar seguranca ao Dockerfile
 
 ## Nao fazer
 

@@ -33,6 +33,8 @@ BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 VCS_REF="$(git rev-parse --short HEAD 2>/dev/null || echo local)"
 export BUILD_DATE VCS_REF
 
+install -m 0664 app/runtime/configs/server.properties app/runtime/server.properties
+
 if [[ "${DOCKER_REBUILD:-0}" == "1" ]]; then
   echo ">>> Rebuild sem cache (--no-cache --pull)"
   docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" build --no-cache --pull "${SERVICE}"

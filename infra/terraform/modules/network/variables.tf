@@ -36,7 +36,7 @@ variable "admin_cidr_list" {
 
 variable "game_cidr_list" {
   type        = list(string)
-  description = "Blocos CIDR permitidos para Minecraft TCP 25565 (vazio = qualquer origem)"
+  description = "Blocos CIDR permitidos para Minecraft TCP 25565 (vazio = internet sem restricao de jogadores)"
   default     = []
 }
 

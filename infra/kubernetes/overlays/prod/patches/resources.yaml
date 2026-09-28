@@ -9,7 +9,9 @@ spec:
       containers:
         - name: mc-server
           env:
-            - name: MEMORY
+            - name: INIT_MEMORY
+              value: "768M"
+            - name: MAX_MEMORY
               value: "1G"
           resources:
             requests:

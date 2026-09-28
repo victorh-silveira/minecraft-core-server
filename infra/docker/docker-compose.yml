@@ -19,6 +19,11 @@ x-mc-server-common: &mc-server-common
   logging: *logging-default
   security_opt:
     - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+  tmpfs:
+    - /tmp:rw,exec,nosuid,nodev,size=${DOCKER_TMPFS_LIMIT:-256m},mode=1777
   ulimits:
     nofile:
       soft: 65535
@@ -54,14 +59,31 @@ services:
       VERSION: "${MINECRAFT_VERSION:-26.3}"
       TYPE: "${SERVER_TYPE:-FORGE}"
       FORGE_VERSION: "${FORGE_VERSION:-66.0.6}"
-      MEMORY: "${MEMORY_LIMIT}"
+      INIT_MEMORY: "${MINECRAFT_INIT_MEMORY:-1G}"
+      MAX_MEMORY: "${MINECRAFT_MAX_MEMORY:-1536M}"
       ONLINE_MODE: "${ONLINE_MODE:-FALSE}"
       WHITE_LIST: "FALSE"
       ENFORCE_WHITELIST: "FALSE"
+      ENFORCE_SECURE_PROFILE: "FALSE"
       DIFFICULTY: "${DIFFICULTY}"
       MAX_PLAYERS: "${MAX_PLAYERS}"
+      MOTD: |-
+        §a§lMinecraft Core Server§r
+        §7Forge 26.3 §8• §eSurvival §8• §bKeepInventory
+      ICON: "/templates/server-icon.png"
+      OVERRIDE_ICON: "true"
+      ENABLE_COMMAND_BLOCK: "TRUE"
+      OP_PERMISSION_LEVEL: "4"
+      FUNCTION_PERMISSION_LEVEL: "4"
       ENABLE_RCON: "true"
       RCON_PASSWORD: "${RCON_PASSWORD}"
+      RCON_CMDS_STARTUP: |-
+        gamerule keep_inventory true
+        gamerule players_sleeping_percentage 1
+        gamerule command_block_output false
+        gamerule send_command_feedback false
+      RCON_CMDS_ON_CONNECT: |-
+        op AnonymousNoobz
       UID: "${UID:-1000}"
       GID: "${GID:-1000}"
       USE_AIKAR_FLAGS: "true"
@@ -70,33 +92,8 @@ services:
 
     volumes:
       - type: bind
-        source: ../../app/runtime/world
-        target: /data/world
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ../../app/runtime/configs/server.properties
-        target: /data/server.properties
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ../../app/runtime/mods
-        target: /data/mods
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ../../app/runtime/plugins
-        target: /data/plugins
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ../../app/runtime/logs
-        target: /data/logs
-        bind:
-          create_host_path: true
-      - type: bind
-        source: ../../app/runtime/database
-        target: /data/database
+        source: ../../app/runtime
+        target: /data
         bind:
           create_host_path: true
 
@@ -107,7 +104,10 @@ services:
       retries: 5
       start_period: 180s
 
-    mem_limit: ${MEMORY_LIMIT}
+    cpus: ${DOCKER_CPU_LIMIT:-4.0}
+    mem_limit: ${DOCKER_MEMORY_LIMIT:-2G}
+    mem_reservation: ${DOCKER_MEMORY_RESERVATION:-1536M}
+    memswap_limit: ${DOCKER_MEMORY_SWAP_LIMIT:-2G}
     pids_limit: ${DOCKER_PIDS_LIMIT:-512}
 
     networks:

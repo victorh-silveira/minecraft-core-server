@@ -21,6 +21,7 @@ minecraft-core-server/
 │   │   ├── world/
 │   │   ├── configs/server.properties
 │   │   ├── mods/mods-manifest.json
+│   │   ├── configs/server-icon.png
 │   │   ├── plugins/
 │   │   ├── logs/
 │   │   └── database/
@@ -29,6 +30,8 @@ minecraft-core-server/
 │   │   └── integration/infrastructure/
 │   ├── scripts/
 │   │   ├── bash/
+│   │   ├── python/probe_minecraft_status.py
+│   │   ├── python/probe_external_minecraft.py
 │   │   ├── operations/clean_workspace.py
 │   │   └── setup.sh
 │   ├── pyproject.toml

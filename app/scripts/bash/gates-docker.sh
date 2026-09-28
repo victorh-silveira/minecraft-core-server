@@ -24,7 +24,8 @@ synthetic_env() {
 MINECRAFT_VERSION=26.3
 SERVER_TYPE=FORGE
 FORGE_VERSION=66.0.6
-MEMORY_LIMIT=2G
+MINECRAFT_INIT_MEMORY=1G
+MINECRAFT_MAX_MEMORY=1536M
 EULA_ACCEPTED=TRUE
 GAME_PORT=25565
 RCON_PORT=25575
@@ -36,7 +37,12 @@ UID=1000
 GID=1000
 SKIP_CHOWN=false
 IMAGE_VERSION=0.1.0
+DOCKER_CPU_LIMIT=4.0
+DOCKER_MEMORY_LIMIT=2G
+DOCKER_MEMORY_RESERVATION=1536M
+DOCKER_MEMORY_SWAP_LIMIT=2G
 DOCKER_PIDS_LIMIT=512
+DOCKER_TMPFS_LIMIT=256m
 EOF
 }
 
@@ -115,19 +121,68 @@ cmd_validate() {
 
 cmd_test() {
   echo ">>> docker smoke estatico"
-  local failed=0
+  local failed=0 rendered
   command -v docker >/dev/null 2>&1 || { echo "[FAIL] docker ausente"; failed=1; }
   docker compose version >/dev/null 2>&1 || { echo "[FAIL] docker compose ausente"; failed=1; }
   [[ -f "${COMPOSE_FILE}" ]] || { echo "[FAIL] compose ausente"; failed=1; }
   [[ -f "${DOCKERFILE}" ]] || { echo "[FAIL] Dockerfile ausente"; failed=1; }
   [[ -f app/runtime/mods/mods-manifest.json ]] || { echo "[FAIL] manifesto ausente"; failed=1; }
   synthetic_env
-  if docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" config --quiet; then
+  if rendered="$(docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" config)"; then
     echo "[OK] compose config"
   else
     echo "[FAIL] compose config"
     failed=1
   fi
+  for expected in 'WHITE_LIST: "FALSE"' 'ENFORCE_WHITELIST: "FALSE"' 'ENFORCE_SECURE_PROFILE: "FALSE"' \
+    'ENABLE_COMMAND_BLOCK: "TRUE"' 'OP_PERMISSION_LEVEL: "4"' 'FUNCTION_PERMISSION_LEVEL: "4"' \
+    'gamerule keep_inventory true' 'gamerule players_sleeping_percentage 1' \
+    'gamerule command_block_output false' 'gamerule send_command_feedback false' 'op AnonymousNoobz'; do
+    if ! grep -Fq "${expected}" <<< "${rendered}"; then
+      echo "[FAIL] configuracao ausente no Compose: ${expected}"
+      failed=1
+    fi
+  done
+  if ! grep -A1 -F 'cap_drop:' <<< "${rendered}" | grep -Fq -- '- ALL'; then
+    echo "[FAIL] remocao de capabilities Linux ausente no Compose"
+    failed=1
+  fi
+  if ! grep -Fq 'read_only: true' <<< "${rendered}" \
+    || ! grep -Fq -- '- /tmp:' <<< "${rendered}" \
+    || ! grep -Fq 'tmpfs:' <<< "${rendered}"; then
+    echo "[FAIL] filesystem raiz somente leitura ou tmpfs /tmp ausente no Compose"
+    failed=1
+  fi
+  if ! grep -Fq 'ICON: /templates/server-icon.png' <<< "${rendered}" \
+    || ! grep -Fq 'Minecraft Core Server' <<< "${rendered}"; then
+    echo "[FAIL] identidade visual ausente no Compose"
+    failed=1
+  fi
+  if ! grep -Eq 'source: .*/app/runtime$' <<< "${rendered}" \
+    || ! grep -Fq 'target: /data' <<< "${rendered}"; then
+    echo "[FAIL] bind unico app/runtime -> /data ausente no Compose"
+    failed=1
+  fi
+  for expected in 'cpus:' 'mem_limit:' 'mem_reservation:' 'memswap_limit:' \
+    'INIT_MEMORY:' 'MAX_MEMORY:' 'pids_limit:'; do
+    if ! grep -Fq "${expected}" <<< "${rendered}"; then
+      echo "[FAIL] limite de recurso ausente no Compose: ${expected}"
+      failed=1
+    fi
+  done
+  python - <<'PY' || failed=1
+from pathlib import Path
+import struct
+import sys
+
+path = Path("app/runtime/configs/server-icon.png")
+data = path.read_bytes() if path.is_file() else b""
+valid = data[:8] == b"\x89PNG\r\n\x1a\n" and len(data) >= 24 and struct.unpack(">II", data[16:24]) == (64, 64)
+if not valid:
+    print("[FAIL] server-icon.png deve ser PNG 64x64")
+    sys.exit(1)
+print("[OK] server-icon.png e PNG 64x64")
+PY
   if [[ "${failed}" -ne 0 ]]; then
     exit 1
   fi

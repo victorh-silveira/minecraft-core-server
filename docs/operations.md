@@ -78,8 +78,9 @@ Para VPN de gerenciamento, substitua `127.0.0.1` pelo CIDR da rede privada.
 ### Boas praticas
 
 - `RCON_PASSWORD` forte e unico no `.env`
-- `MINECRAFT_WHITELIST` com nicks Mojang permitidos
 - `ONLINE_MODE=false` (sem autenticacao Mojang)
+- Porta 25565 restrita por firewall/NSG quando o acesso nao for publico
+- `AnonymousNoobz` recebe OP nivel 4 automaticamente; proteja esse nick em modo offline
 - Nunca commitar `.env`
 - Guia completo: [access-and-hostname.md](access-and-hostname.md)
 
@@ -108,7 +109,7 @@ Pasta `app/runtime/database` montada em `/data/database` no container.
 
 | Loader | Observacao |
 |--------|------------|
-| Forge (atual) | Servidor sem mods; controle de acesso de producao pela whitelist nativa |
+| Forge (atual) | Servidor sem mods, sem autenticacao/whitelist e com OP automatico para todos |
 | Paper/Spigot | AuthMe pode usar `/data/database` ou `/data/plugins/AuthMe/` |
 
 Configure o mod/plugin para gravar SQLite em caminho persistente sob `/data/database`.
@@ -175,7 +176,7 @@ Guia completo: [azure.md](azure.md)
 | 1 | `infra/terraform/live/prod` — aplicar VNet + AKS (OIDC) |
 | 2 | `az aks get-credentials` — configurar kubectl |
 | 3 | Build e push da imagem para **GHCR** |
-| 4 | GitHub Secrets `AZURE_CLIENT_ID`, `RCON_PASSWORD`, `MINECRAFT_WHITELIST` |
+| 4 | GitHub Secrets `AZURE_CLIENT_ID`, `RCON_PASSWORD` |
 | 5 | Workflow **CD** manual (`deploy-infra`, `APPLY_INFRA`) na primeira vez |
 | 6 | Workflow **CD** na release (digest + Trivy) ou `IMAGE_DIGEST=sha256:... make k8s-deploy` |
 | 7 | Migrar mundo: `kubectl cp` de `app/runtime/world` |
