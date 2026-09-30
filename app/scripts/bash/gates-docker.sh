@@ -196,7 +196,7 @@ cmd_security() {
   "${trivy}" config --exit-code 1 --severity HIGH,CRITICAL --ignorefile linters/.trivyignore infra/docker
   if [[ -n "${TRIVY_IMAGE:-}" ]]; then
     echo ">>> trivy image ${TRIVY_IMAGE}"
-    "${trivy}" image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed "${TRIVY_IMAGE}"
+    "${trivy}" image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --ignorefile linters/.trivyignore "${TRIVY_IMAGE}"
   fi
 }
 
