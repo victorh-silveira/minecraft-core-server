@@ -30,6 +30,7 @@ minecraft-core-server/
 │   │   └── integration/infrastructure/
 │   ├── scripts/
 │   │   ├── bash/
+│   │   ├── powershell/
 │   │   ├── python/probe_minecraft_status.py
 │   │   ├── python/probe_external_minecraft.py
 │   │   ├── operations/clean_workspace.py

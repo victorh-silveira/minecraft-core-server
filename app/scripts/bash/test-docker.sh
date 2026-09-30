@@ -121,7 +121,7 @@ else
   warn "container parado; pulando checagem de portas"
 fi
 
-PROBE_PS="${ROOT}/app/scripts/bash/probe-tcp.ps1"
+PROBE_PS="${ROOT}/app/scripts/powershell/probe-tcp.ps1"
 MINECRAFT_PROBE="${ROOT}/app/scripts/python/probe_minecraft_status.py"
 EXTERNAL_MINECRAFT_PROBE="${ROOT}/app/scripts/python/probe_external_minecraft.py"
 

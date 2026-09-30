@@ -28,6 +28,6 @@ if [[ -z "${WSL_HOST}" ]]; then
 fi
 
 echo ">>> Configurando ${LAN_HOST}:${GAME_PORT} -> WSL ${WSL_HOST}:${GAME_PORT} e Firewall (UAC)"
-WIN_SCRIPT="$(wslpath -w "${ROOT}/app/scripts/bash/expose-lan-port.ps1")"
+WIN_SCRIPT="$(wslpath -w "${ROOT}/app/scripts/powershell/expose-lan-port.ps1")"
 powershell.exe -NoProfile -Command \
   "Start-Process -FilePath powershell.exe -Verb RunAs -Wait -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','${WIN_SCRIPT}','-Port','${GAME_PORT}','-ConnectHost','${WSL_HOST}','-LanHost','${LAN_HOST}'"
