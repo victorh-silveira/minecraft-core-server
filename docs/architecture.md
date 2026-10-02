@@ -148,7 +148,7 @@ Script `app/scripts/bash/atualizar-annotations-k8s.sh` preenche conectividade e 
 
 Auth Azure: **OIDC obrigatorio** (`AZURE_CLIENT_ID`); sem fallback de service principal.
 
-Detalhes: [devops.md](devops.md) e [.github/README.md](../.github/README.md).
+Detalhes: [devops.md](devops.md) e [.github/WORKFLOWS.md](../.github/WORKFLOWS.md).
 
 ## Sync de mods
 

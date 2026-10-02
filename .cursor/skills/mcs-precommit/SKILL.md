@@ -25,4 +25,4 @@ Nomes dos hooks = nomes dos steps CI: `Python | Lint`, `Docker | Seguranca`, etc
 
 ## Docs
 
-`docs/engineering-python.md`, `AGENTS.md`, `.github/README.md`
+`docs/engineering-python.md`, `AGENTS.md`, `.github/WORKFLOWS.md`

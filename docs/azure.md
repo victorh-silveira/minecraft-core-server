@@ -61,7 +61,7 @@ Bootstrap do state: script `app/scripts/bash/ensure-tfstate-backend.sh` (RG + st
 - Terraform >= 1.6
 - kubectl + Kustomize (incluso no kubectl)
 - Permissoes: Contributor na subscription; **Storage Blob Data Contributor** no container `tfstate` para o backend
-- GitHub OIDC configurado para CI/CD (ver [.github/README.md](../.github/README.md))
+- GitHub OIDC configurado para CI/CD (ver [.github/WORKFLOWS.md](../.github/WORKFLOWS.md))
 
 ## 1. Deploy da infraestrutura
 

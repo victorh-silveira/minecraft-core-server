@@ -1,6 +1,7 @@
-# Minecraft Server
+# Minecraft Core Server
 
 [![CI](https://github.com/victorh-silveira/minecraft-core-server/actions/workflows/ci.yml/badge.svg)](https://github.com/victorh-silveira/minecraft-core-server/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/victorh-silveira/minecraft-core-server?color=blue&logo=github)](https://github.com/victorh-silveira/minecraft-core-server/releases/latest)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB?logo=python&logoColor=white)](app/pyproject.toml)
 [![Minecraft Forge](https://img.shields.io/badge/minecraft-Forge%2026.3-62B47A?logo=minecraft&logoColor=white)](docs/architecture.md)
 [![Forge 66.0.6](https://img.shields.io/badge/forge-66.0.6-E04E14)](https://files.minecraftforge.net/net/minecraftforge/forge/)
@@ -49,6 +50,7 @@ minecraft-core-server/
 │   ├── src/                 domain, application, infrastructure, presentation
 │   ├── runtime/             mundo, configs, mods, plugins, logs, database
 │   ├── scripts/bash/        deploy, testes, annotations, CI infra
+│   ├── scripts/powershell/  probe TCP, exposicao LAN Windows
 │   ├── scripts/operations/  orquestrador lint/test/security/clean
 │   └── tests/               unit por camada + integration
 ├── docs/
@@ -129,7 +131,7 @@ kubectl -n minecraft-server-prod get svc mc-server-game \
 | [docs/operations.md](docs/operations.md) | Operacao, backup, troubleshooting |
 | [docs/configuration.md](docs/configuration.md) | `.env`, mods, server.properties |
 | [docs/access-and-hostname.md](docs/access-and-hostname.md) | Whitelist, hostname, NSG |
-| [.github/README.md](.github/README.md) | Workflows e secrets |
+| [.github/WORKFLOWS.md](.github/WORKFLOWS.md) | Workflows e secrets |
 
 Historico de versoes: [docs/CHANGELOG.md](docs/CHANGELOG.md) (gerado por release semantica).
 

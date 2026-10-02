@@ -102,7 +102,7 @@ Detalhe da barra senior: [engineering-senior-bar.md](engineering-senior-bar.md).
 
 ## CI/CD
 
-Detalhe de secrets: [.github/README.md](../.github/README.md).
+Detalhe de secrets: [.github/WORKFLOWS.md](../.github/WORKFLOWS.md).
 
 ### CI/CD — `ci.yml`
 
