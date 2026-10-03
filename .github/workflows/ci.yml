@@ -226,6 +226,9 @@ jobs:
     name: CI - Terraform
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TFLINT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Obter codigo fonte
@@ -246,6 +249,15 @@ jobs:
         uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: v0.54.0
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache plugins TFLint
+        uses: actions/cache@v4
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-plugins-${{ runner.os }}-${{ hashFiles('linters/.tflint.hcl') }}
+          restore-keys: |
+            tflint-plugins-${{ runner.os }}-
 
       - name: Cache tfsec
         id: cache-tfsec
