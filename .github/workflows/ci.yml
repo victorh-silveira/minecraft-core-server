@@ -61,18 +61,28 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
 
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
 
+      - name: Cache Gitleaks
+        id: cache-gitleaks
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/gitleaks
+          key: gitleaks-8.24.2-linux-x64
+
       - name: Instalar Gitleaks
         shell: bash
         run: |
-          GITLEAKS_VERSION="8.24.2"
-          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tar.gz
-          tar -xzf /tmp/gitleaks.tar.gz -C /tmp
-          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          if [ "${{ steps.cache-gitleaks.outputs.cache-hit }}" != "true" ]; then
+            GITLEAKS_VERSION="8.24.2"
+            curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tar.gz
+            tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/.local/bin" gitleaks
+            chmod +x "$HOME/.local/bin/gitleaks"
+          fi
 
       - name: Python | Lint
         shell: bash
@@ -105,18 +115,38 @@ jobs:
 
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
+        with:
+          dev: "false"
+
+      - name: Cache Hadolint
+        id: cache-hadolint
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/hadolint
+          key: hadolint-2.12.0-linux-x86_64
 
       - name: Instalar Hadolint
         shell: bash
         run: |
-          curl -fsSL -o /tmp/hadolint https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
-          chmod +x /tmp/hadolint
-          sudo mv /tmp/hadolint /usr/local/bin/hadolint
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          if [ "${{ steps.cache-hadolint.outputs.cache-hit }}" != "true" ]; then
+            curl -fsSL -o "$HOME/.local/bin/hadolint" https://github.com/hadolint/hadolint/releases/download/v2.12.0/hadolint-Linux-x86_64
+            chmod +x "$HOME/.local/bin/hadolint"
+          fi
 
       - name: Instalar Trivy
         uses: aquasecurity/setup-trivy@v0.2.6
         with:
           version: v0.74.0
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-cache-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            trivy-cache-${{ runner.os }}-
 
       - name: Docker | Lint
         shell: bash
@@ -155,11 +185,22 @@ jobs:
 
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
+        with:
+          dev: "false"
+          yaml: "true"
 
       - name: Instalar Trivy
         uses: aquasecurity/setup-trivy@v0.2.6
         with:
           version: v0.74.0
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-cache-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            trivy-cache-${{ runner.os }}-
 
       - name: Kubernetes | Lint
         shell: bash
@@ -192,6 +233,8 @@ jobs:
 
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
+        with:
+          dev: "false"
 
       - name: Configurar Terraform
         uses: hashicorp/setup-terraform@v3
@@ -204,12 +247,22 @@ jobs:
         with:
           tflint_version: v0.54.0
 
+      - name: Cache tfsec
+        id: cache-tfsec
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/tfsec
+          key: tfsec-1.28.11-linux-amd64
+
       - name: Instalar tfsec
         shell: bash
         run: |
-          curl -fsSL -o /tmp/tfsec https://github.com/aquasecurity/tfsec/releases/download/v1.28.11/tfsec-linux-amd64
-          chmod +x /tmp/tfsec
-          sudo mv /tmp/tfsec /usr/local/bin/tfsec
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          if [ "${{ steps.cache-tfsec.outputs.cache-hit }}" != "true" ]; then
+            curl -fsSL -o "$HOME/.local/bin/tfsec" https://github.com/aquasecurity/tfsec/releases/download/v1.28.11/tfsec-linux-amd64
+            chmod +x "$HOME/.local/bin/tfsec"
+          fi
 
       - name: Terraform | Lint
         shell: bash
@@ -242,6 +295,9 @@ jobs:
 
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
+        with:
+          dev: "false"
+          yaml: "true"
 
       - name: GitHub | Lint
         shell: bash
@@ -274,6 +330,8 @@ jobs:
 
       - name: Setup Python
         uses: ./.github/actions/ci/setup-python
+        with:
+          dev: "false"
 
       - name: Scripts | Lint
         shell: bash
@@ -492,6 +550,9 @@ jobs:
     steps:
       - name: Obter codigo fonte
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
 
       - name: Resumo | Pipeline
         uses: ./.github/actions/shared/pipeline-summary

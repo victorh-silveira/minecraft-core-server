@@ -101,6 +101,14 @@ runs:
       with:
         version: v0.74.0
 
+    - name: Cache Trivy DB
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/trivy
+        key: trivy-cache-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          trivy-cache-${{ runner.os }}-
+
     - name: Trivy image
       shell: bash
       run: |

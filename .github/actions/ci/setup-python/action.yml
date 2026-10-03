@@ -1,6 +1,16 @@
 name: CI - Setup Python
 description: Python 3.13 e dependencias de QA
 
+inputs:
+  dev:
+    description: Instalar dependencias completas de desenvolvimento e testes
+    required: false
+    default: "true"
+  yaml:
+    description: Instalar biblioteca PyYAML
+    required: false
+    default: "false"
+
 runs:
   using: composite
 
@@ -9,13 +19,19 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version-file: app/.python-version
-        cache: pip
+        cache: ${{ inputs.dev == 'true' && 'pip' || '' }}
         cache-dependency-path: |
           app/requirements.txt
           app/requirements-dev.txt
 
-    - name: Instalar dependencias
+    - name: Instalar dependencias completas
+      if: inputs.dev == 'true'
       shell: bash
       run: |
-        python -m pip install --upgrade pip
         pip install -r app/requirements.txt -r app/requirements-dev.txt
+
+    - name: Instalar PyYAML
+      if: inputs.dev != 'true' && inputs.yaml == 'true'
+      shell: bash
+      run: |
+        pip install "PyYAML>=6.0.2"
