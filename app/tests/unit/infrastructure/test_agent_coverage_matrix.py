@@ -95,14 +95,14 @@ def test_coverage_matrix_subagents_exist() -> None:
     assert expected_agents.issubset(present_agents)
 
 
-def test_cursor_compatibility_bridge() -> None:
+def test_agents_harness_structure() -> None:
     repo_root = _get_repo_root()
-    cursor_dir = repo_root / ".cursor"
-    assert cursor_dir.is_dir()
+    agents_dir = repo_root / ".agents"
+    assert agents_dir.is_dir()
     for item in ("rules", "skills", "agents", "mcp.json"):
-        path = cursor_dir / item
-        assert path.exists(), f"Ponte do Cursor ausente: {path}"
-        assert path.is_symlink(), f"Item no .cursor deve ser link simbolico: {path}"
+        path = agents_dir / item
+        assert path.exists(), f"Componente do harness canonico ausente: {path}"
+    assert not (repo_root / ".cursor").exists()
 
 
 def test_mcp_config_valid() -> None:

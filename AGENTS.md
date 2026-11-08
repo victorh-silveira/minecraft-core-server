@@ -8,7 +8,7 @@ Guia mestre e ponto de entrada para agentes de IA e copilotos de engenharia nest
 - Terminal e execucao: **WSL Linux** obrigatorio (nunca CMD ou PowerShell nativo)
 - Proibicao de emojis: Sem emojis em codigo-fonte, mensagens de log, commits ou documentacao tecnica
 - Codigo limpo: Sem comentarios no codigo-fonte (o codigo deve ser autoexplicativo por nomes e tipagem estrita)
-- Estrutura de agentes: Harness canonico versionado em [`.agents/`](.agents/) com ponte de retrocompatibilidade em [`.cursor/`](.cursor/)
+- Estrutura de agentes: Harness canonico e agnostico versionado em [`.agents/`](.agents/)
 
 ## 2. Universo Operacional do Projeto
 

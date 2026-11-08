@@ -51,7 +51,6 @@ Ao projetar, estender ou adaptar um repositorio sob este modelo, voce deve:
 │   ├── skills/                   # Habilidades operacionais com SKILL.md
 │   ├── agents/                   # Personas e subagentes seniores
 │   └── mcp.json                  # Configuracao canonica de ferramentas MCP
-├── .cursor/                      # Ponte de retrocompatibilidade para Cursor IDE
 ├── app/
 │   ├── src/
 │   │   ├── domain/               # Entidades e servicos de dominio puro

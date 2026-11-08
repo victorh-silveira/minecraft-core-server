@@ -38,7 +38,6 @@ minecraft-core-server/
 ├── AGENTS.md                entrada para agentes LLM
 ├── prompt-model.md
 ├── .agents/                 harness canonico de agentes (rules, skills, agents, mcp.json)
-├── .cursor/                 ponte de retrocompatibilidade para Cursor IDE
 ├── .vscode/settings.json
 ├── .github/                 workflows CI, CD, Destroy
 ├── infra/

@@ -84,6 +84,5 @@ Metadados operacionais: annotations `minecraft-server.io/*` — [annotations.md]
 | `.agents/skills/` | Skills versionadas (`mcs-*/SKILL.md`) |
 | `.agents/agents/` | Subagentes senior (`mcs-senior-*.md`) |
 | `.agents/mcp.json` | Configuracao canonica de MCP servers |
-| `.cursor/` | Ponte de retrocompatibilidade para Cursor IDE |
 
 Entrada do repositorio: [README.md](../README.md).

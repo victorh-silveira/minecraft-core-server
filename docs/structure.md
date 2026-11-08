@@ -16,7 +16,6 @@ minecraft-core-server/
 │   ├── skills/
 │   ├── agents/
 │   └── mcp.json
-├── .cursor/ (ponte de compatibilidade)
 ├── app/
 │   ├── src/
 │   │   ├── domain/

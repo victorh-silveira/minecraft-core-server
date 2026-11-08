@@ -41,7 +41,7 @@ package.json
 yarn-debug.log*
 yarn-error.log*
 
-# ---- IA E FERRAMENTAS DE AGENTES (CURSOR/MCP) ----
+# ---- IA E HARNESS DE AGENTES (GENERICO/MCP) ----
 .agent
 .agents
 .antigravity

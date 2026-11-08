@@ -3,7 +3,7 @@
 Cada superficie arquitetural, funcional e operacional do servidor Minecraft possui cobertura formal composta por **documentacao tecnica + regra de governanca + habilidade operacional** (ou indicacao justificada de dispensa).
 
 Ponto de entrada canônico do repositorio: [`AGENTS.md`](../AGENTS.md).
-As regras e habilidades residem no harness canônico em [`.agents/`](../.agents/) com ponte de retrocompatibilidade em [`.cursor/`](../.cursor/) e sao **estritamente versionadas** no Git.
+As regras e habilidades residem no harness canônico em [`.agents/`](../.agents/) e sao **estritamente versionadas** no Git.
 
 ## 1. Matriz de Cobertura de Superficies
 
@@ -37,7 +37,6 @@ As regras e habilidades residem no harness canônico em [`.agents/`](../.agents/
 | `app/scripts/` | Scripts e Operacoes |
 | `.agents/` | Fechamento e Superficie + Doutrina LLM + Barra Senior |
 | `.agents/agents/` | Barra Senior (Subagentes Especializados) |
-| `.cursor/` | Ponte de retrocompatibilidade para Cursor IDE |
 | `.github/` | Barra Senior (CI/CD) |
 
 ## 3. Mecanismo de Garantia e Enforcement
