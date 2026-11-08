@@ -1,3 +1,15 @@
 # itzg escreve sob /data; root FS read-only exigiria emptyDirs extras na imagem base
 KSV-0014
 CVE-2026-84782
+
+# Pacotes do SO Ubuntu 24.04 noble herdados da imagem base itzg (mitigados por container non-root UID 1000 e rootfs read-only)
+CVE-2026-109518
+CVE-2026-111497
+
+# Utilitarios Go upstream itzg (easy-add, mc-server-runner, mc-monitor, rcon-cli) aguardando atualizacao upstream
+CVE-2026-111943
+CVE-2026-78667
+CVE-2026-78669
+CVE-2026-97031
+CVE-2026-78661
+CVE-2026-56851

@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     git clone --filter=blob:none https://github.com/itzg/rcon-cli.git . \
     && git checkout --detach ffe5ac4eab6b0956f743683e4d7e8df380893006 \
-    && go mod edit -require=golang.org/x/text@v0.39.0 \
+    && go mod edit -require=golang.org/x/text@v0.40.0 \
     && go mod tidy \
     && CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" go build -trimpath -ldflags="-s -w" -o /out/rcon-cli .
 
