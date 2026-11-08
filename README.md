@@ -37,9 +37,8 @@ minecraft-core-server/
 ├── Makefile                 app-*, docker-*, k8s-*
 ├── AGENTS.md                entrada para agentes LLM
 ├── prompt-model.md
-├── .cursor/
-│   ├── rules/               rules mcs-*.mdc
-│   └── skills/              skills mcs-*/SKILL.md
+├── .agents/                 harness canonico de agentes (rules, skills, agents, mcp.json)
+├── .cursor/                 ponte de retrocompatibilidade para Cursor IDE
 ├── .vscode/settings.json
 ├── .github/                 workflows CI, CD, Destroy
 ├── infra/

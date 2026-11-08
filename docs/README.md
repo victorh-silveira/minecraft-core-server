@@ -80,8 +80,10 @@ Metadados operacionais: annotations `minecraft-server.io/*` — [annotations.md]
 | `app/scripts/operations/` | Orquestrador de qualidade |
 | `docs/` | Esta documentacao |
 | `linters/` | commitlint, tflint, tfsec, git-hooks |
-| `.cursor/rules/` | Rules versionadas para agentes (`mcs-*.mdc`) |
-| `.cursor/skills/` | Skills versionadas (`mcs-*/SKILL.md`) |
-| `.cursor/agents/` | Subagentes senior (`mcs-senior-*.md`) |
+| `.agents/rules/` | Rules versionadas para agentes (`mcs-*.mdc`) |
+| `.agents/skills/` | Skills versionadas (`mcs-*/SKILL.md`) |
+| `.agents/agents/` | Subagentes senior (`mcs-senior-*.md`) |
+| `.agents/mcp.json` | Configuracao canonica de MCP servers |
+| `.cursor/` | Ponte de retrocompatibilidade para Cursor IDE |
 
 Entrada do repositorio: [README.md](../README.md).

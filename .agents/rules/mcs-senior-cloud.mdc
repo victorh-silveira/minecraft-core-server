@@ -1,0 +1,16 @@
+---
+description: Barra Senior de Cloud Azure e Kubernetes — AKS, Workload Identity e modularidade Terraform
+globs: infra/kubernetes/**,infra/terraform/**
+alwaysApply: false
+---
+
+# Regra: Barra Senior de Cloud Azure e Kubernetes
+
+A infraestrutura em nuvem na Azure e provisionada via Terraform e operada via Kubernetes (AKS) com foco em resiliencia e custo-beneficio.
+
+## Padroes de Nuvem
+
+1. Azure AKS: O cluster de producao opera sob a camada Free tier com nodes dimensionados para a carga do Forge, utilizando StatefulSet e PersistentVolumeClaim com storage class de disco gerenciado.
+2. Identidade federada (OIDC): Toda interacao de CI/CD ou autenticacao com a Azure deve utilizar Azure Workload Identity baseada em OIDC federado com o GitHub Actions, eliminando segredos estaticos (`ARM_CLIENT_SECRET`).
+3. Modulos Terraform: Codigo em `infra/terraform/modules/` deve ser estritamente modular, desacoplado de estados de producao, e coberto por `terraform test`.
+4. Seguranca com Tfsec e TFLint: Toda alteracao em arquivos `.tf` deve passar com sucesso nos gates de seguranca e boas praticas.

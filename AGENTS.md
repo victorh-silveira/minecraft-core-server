@@ -1,90 +1,68 @@
 # AGENTS.md — Minecraft Core Server
 
-Ponto de entrada para agentes Cursor/LLM neste repositorio.
+Guia mestre e ponto de entrada para agentes de IA e copilotos de engenharia neste repositorio.
 
-## Idioma e ambiente
+## 1. Ambiente e Diretrizes Gerais
 
-- Respostas e commits em **PT-BR**
-- Terminal/scripts: **WSL Linux** (nunca CMD/PowerShell nativo)
-- Sem emojis em codigo, logs ou docs tecnicos
-- Sem comentarios no codigo
+- Idioma: Respostas, mensagens de commit e documentacao tecnica exclusivamente em **PT-BR**
+- Terminal e execucao: **WSL Linux** obrigatorio (nunca CMD ou PowerShell nativo)
+- Proibicao de emojis: Sem emojis em codigo-fonte, mensagens de log, commits ou documentacao tecnica
+- Codigo limpo: Sem comentarios no codigo-fonte (o codigo deve ser autoexplicativo por nomes e tipagem estrita)
+- Estrutura de agentes: Harness canonico versionado em [`.agents/`](.agents/) com ponte de retrocompatibilidade em [`.cursor/`](.cursor/)
 
-## Universo operacional
+## 2. Universo Operacional do Projeto
 
-- Servidor Minecraft **Forge 26.3 / Forge 66.0.6** (imagem itzg/java25), sem mods instalados
-- Codigo Python hexagonal: sync de JARs a partir de `app/runtime/mods/mods-manifest.json`
-- Camadas: `app/src/{domain,application,infrastructure,presentation}`
-- Dados de jogo: `app/runtime/{world,configs,mods,plugins,logs,database}` — nunca em `app/src/`
-- Entrega local: Docker Compose; producao: Azure AKS + Terraform
-- Entrypoints sync: `python run.py`, `make docker-sync-mods`
-- Gates: `make app-lint`, `make app-security`, `make app-test`, `make app-validate`, `make app-build`
-- Orquestrador: `app/scripts/operations/clean_workspace.py` (`--area` / `--stage`)
-- Contrato: [`prompt-model.md`](prompt-model.md)
+- Servidor de jogo: Minecraft **Forge 26.3 / Forge 66.0.6** (imagem oficial `itzg/java25`), operando sem mods instalados por padrao
+- Aplicacao Python: Sincronizador de JARs com arquitetura hexagonal estrita, consumindo manifesto em `app/runtime/mods/mods-manifest.json`
+- Camadas da aplicacao: `app/src/{domain,application,infrastructure,presentation}`
+- Segregacao de dados de jogo: `app/runtime/{world,configs,mods,plugins,logs,database}` (nunca versionar sob `app/src/`)
+- Orquestracao de contêineres: Docker Compose para desenvolvimento local; Azure AKS com modulos Terraform para ambiente produtivo
+- Entrypoints da aplicacao: `python run.py`, `make docker-sync-mods`
+- Orquestrador de qualidade: `app/scripts/operations/clean_workspace.py` (`--area` e `--stage`)
 
-## O que o LLM e / nao e
+## 3. Papel do Agente de IA
 
-- **E:** copiloto de engenharia e auditoria
-- **Nao e:** processo do servidor Forge, substituto dos gates, nem gerador de stack OTRS/WireMock/MariaDB
+- O agente atua como copiloto avancado de engenharia de software, automacao de infraestrutura e auditoria tecnica
+- O agente nao substitui os gates de qualidade automatizados, nao executa acoes destrutivas sem validacao e nao adultera contratos de camadas
+- O agente deve sempre coletar evidencias objetivas (saidas de comandos, relatorios de testes, analises estaticas) antes de concluir qualquer alteracao
 
-Doutrina: [`docs/llm-engineering-doctrine.md`](docs/llm-engineering-doctrine.md)
-Barra senior: [`docs/engineering-senior-bar.md`](docs/engineering-senior-bar.md)
-Matriz 100% cobertura: [`docs/agent-coverage.md`](docs/agent-coverage.md)
-Rules/skills versionadas: [`.cursor/rules/`](.cursor/rules/) e [`.cursor/skills/`](.cursor/skills/)
-Subagentes senior: [`.cursor/agents/`](.cursor/agents/) (`mcs-senior-software-engineer`, `mcs-senior-cloud-ops`, `mcs-senior-qa-auditor`)
+## 4. Proibicoes Globais Inegociaveis
 
-## Proibicoes globais
+- Nunca importar clientes HTTP, drivers de banco de dados ou frameworks externos nas camadas `domain` ou `application`
+- Nunca emitir chamadas de log dentro de use cases ou entidades de dominio
+- Nunca posicionar o composition root fora da camada `presentation`
+- Nunca gravar dados de runtime do jogo sob `app/src/`
+- Nunca permitir que arquivos Python em `app/src/**/*.py` ou `run.py` ultrapassem o limite de **300** linhas
+- Nunca permitir cobertura branch de testes abaixo de **100%** nas camadas `domain`, `application`, `infrastructure` e `presentation`
+- Nunca rebaixar `fail-under` ou desativar temporariamente analisadores (Ruff, Mypy, Vulture, Pylint, Bandit, Pip-audit, Trivy)
+- Nunca commitar arquivos `.env`, credenciais, tokens de API ou arquivos binarios `*.jar` de mods
+- Nunca utilizar mensagens de commit em idioma diferente de PT-BR ou com escopos fora do enum de commitlint
 
-- HTTP/DB/framework web em `domain` ou `application`
-- Logs dentro de use case ou entidade
-- Composition root fora de `presentation`
-- Dados de jogo (mundo, JARs, logs) sob `app/src/`
-- Arquivos `app/src/**/*.py` ou `run.py` acima de **300** linhas
-- Cobertura branch nas camadas de app abaixo de **100%**
-- Baixar `fail-under` ou pular mypy/ruff/vulture “temporariamente”
-- Commitar `.env`, tokens ou `*.jar` de mods
-- Assunto de commit em ingles; escopo fora do enum commitlint
-- Copiar stack de outro dominio sem necessidade
+## 5. Roteamento de Contexto por Tarefa
 
-## Escopos commitlint
+| Tipo de Tarefa | Documentacao Primaria | Regra (.agents/rules/) | Habilidade (.agents/skills/) | Subagente Recomendado |
+|---|---|---|---|---|
+| Nova feature Python / Dominio | `docs/arquitetura.md` | `mcs-hexagonal.mdc`, `mcs-domain-pure.mdc` | `mcs-hexagonal-tdd` | `mcs-senior-software-engineer` |
+| Sincronizacao de mods / Resolvers | `docs/configuration.md` | `mcs-mods-sync.mdc` | `mcs-mods-sync` | `mcs-senior-software-engineer` |
+| Logging e telemetria | `docs/engineering-logging.md` | `mcs-logging.mdc` | `mcs-logging-audit` | `mcs-senior-software-engineer` |
+| Docker / Runtime / Bind mounts | `docs/infra-docker.md` | `mcs-infra.mdc`, `mcs-runtime-data.mdc` | `mcs-infra-stack` | `mcs-senior-cloud-ops` |
+| Azure AKS / Terraform / Cloud Ops | `docs/operations.md`, `docs/azure.md` | `mcs-senior-cloud.mdc`, `mcs-senior-cicd.mdc` | `mcs-senior-cloud-ops` | `mcs-senior-cloud-ops` |
+| Revisao de codigo / Auditoria QA | `docs/engineering-senior-bar.md` | `mcs-senior-posture.mdc` | `mcs-senior-review` | `mcs-senior-qa-auditor` |
+| Dependencias Python | `docs/engineering-python-deps.md` | `mcs-python-deps.mdc` | `mcs-python-deps` | `mcs-senior-software-engineer` |
+| Limpeza e remocao de codigo morto | `docs/engineering-repo-hygiene.md` | `mcs-repo-hygiene.mdc` | `mcs-repo-hygiene` | `mcs-senior-software-engineer` |
+| Fechamento e sincronizacao | `docs/engineering-surface-sync.md` | `mcs-surface-sync.mdc` | `mcs-surface-sync` | `mcs-senior-qa-auditor` |
 
-`all`, `application`, `config`, `deps`, `docker`, `domain`, `infra`, `llm`, `mods`, `presentation`, `release`, `repo`, `runtime`, `scripts`, `test`, `tools`
+## 6. Comandos e Portoes de Qualidade (Make)
 
-Formato: `tipo(escopo): assunto em PT-BR` + corpo obrigatorio.
+| Comando | Escopo e Efeito |
+|---|---|
+| `make app-install` | Valida instalacao das dependencias no ambiente virtual WSL |
+| `make app-lint` | Executa Ruff, Vulture, Pylint e verificacoes estruturais em modo crash-first |
+| `make app-validate` | Executa Mypy strict em todas as fontes e valida schemas de infraestrutura |
+| `make app-security` | Executa Bandit, Pip-audit, Gitleaks, Trivy e Tfsec |
+| `make app-test` | Executa testes unitarios e de integracao exigindo 100% de cobertura branch |
+| `make app-build` | Executa compilacao de bytecode Python para validacao de sintaxe |
+| `make app-pre-commit-run` | Dispara toda a suite de verificacao em lote em todos os arquivos |
 
-## Pre-commit / Make
-
-`.pre-commit-config.yaml` + `clean_workspace.py` stages crash-first: lint, security, test, validate, build; `Commit | Lint` primeiro; commit-msg: commitlint.
-
-| Alvo | Efeito |
-|------|--------|
-| `make app-setup` | venv + hooks |
-| `make app-lint` | lint crash-first de todas as areas |
-| `make app-security` | seguranca crash-first |
-| `make app-test` | testes + cobertura 100% branch |
-| `make app-validate` | validate crash-first |
-| `make app-build` | build crash-first |
-| `make app-run` | sync de mods |
-| `make app-pre-commit-run` | pre-commit em todos os arquivos |
-
-## Leitura por tarefa
-
-| Tarefa | Abrir primeiro |
-|--------|----------------|
-| Qualquer mudanca | este arquivo + `docs/agent-coverage.md` |
-| Barra senior / postura SW ou Cloud Ops | `docs/engineering-senior-bar.md` + skill `mcs-senior-software` ou `mcs-senior-cloud-ops` |
-| Review / auditoria senior | skill `mcs-senior-review` + agente `mcs-senior-qa-auditor` |
-| Hexagonal / nova feature Python | `docs/arquitetura.md` + skill `mcs-hexagonal-tdd` (+ `mcs-senior-software`) |
-| Sync de mods / manifesto | `docs/configuration.md` + skill `mcs-mods-sync` |
-| Logging | `docs/engineering-logging.md` + skill `mcs-logging-audit` |
-| Docker / volumes / runtime | `docs/infra-docker.md` + skill `mcs-infra-stack` (+ `mcs-senior-cloud-ops`) |
-| AKS / Terraform / ops | `docs/operations.md` + skill `mcs-ops-runbook` (+ `mcs-senior-cloud-ops`) |
-| CI/CD / skip-cd / OIDC | `docs/engineering-senior-bar.md` + rule `mcs-senior-cicd` |
-| QA / pre-commit / cobertura | `docs/engineering-python.md` + skill `mcs-precommit` |
-| Deps Python | `docs/engineering-python-deps.md` + skill `mcs-python-deps` |
-| Higienizacao | `docs/engineering-repo-hygiene.md` + skill `mcs-repo-hygiene` |
-| Fechamento de mudanca | `docs/engineering-surface-sync.md` + skill `mcs-surface-sync` |
-| Scaffold / contrato | `prompt-model.md` + skill `mcs-surface-sync` |
-
-Inventario: [`docs/structure.md`](docs/structure.md)
-Arquitetura app: [`docs/arquitetura.md`](docs/arquitetura.md)
-Stack cloud: [`docs/architecture.md`](docs/architecture.md)
+Entrada detalhada da matriz de cobertura: [`docs/agent-coverage.md`](docs/agent-coverage.md).
+Contrato arquitetural: [`prompt-model.md`](prompt-model.md).

@@ -1,0 +1,18 @@
+---
+description: Logging Semantico e Telemetria — eventos estruturados via log_event e mascaramento
+globs: app/src/**/*.py
+alwaysApply: false
+---
+
+# Regra: Logging Semantico e Telemetria
+
+O registro de logs no sistema segue um modelo semantico estrito para garantir rastreabilidade em producao sem poluir o console nem expor informacoes sensiveis.
+
+## Principios Operacionais
+
+1. Interface unificada: Toda emissao de log deve utilizar a funcao `log_event(logger, level, event, **fields)`.
+2. Proibicao no nucleo: Use cases e entidades de dominio nunca realizam chamadas de logging. A telemetria e de responsabilidade exclusiva dos adaptadores e da camada presentation.
+3. Economia de saida (caminho feliz): O fluxo de execucao normal deve emitir no maximo cerca de 3 linhas de log em nivel INFO (inicio, sumario de acao, conclusao).
+4. Proibicao de dumps brutos: Proibido realizar dump de corpos JSON completos, respostas brutas da API Modrinth ou cabecalhos HTTP em nivel INFO.
+5. Mascaramento e segredos: URLs completas com parametros de query, tokens de autorizacao e chaves de API devem ser obrigatoriamente mascarados.
+6. Rastreamento de erro: `exc_info=True` deve ser reservado exclusivamente para nivel DEBUG; niveis WARNING e ERROR registram apenas a mensagem de erro estruturada.

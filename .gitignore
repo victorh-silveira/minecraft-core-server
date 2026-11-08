@@ -37,16 +37,23 @@ package.json
 yarn-debug.log*
 yarn-error.log*
 
-# ---- IA E FERRAMENTAS DE AGENTES (CURSOR/MCP) ----
+# ---- IA E FERRAMENTAS DE AGENTES (GENERICO/MCP/CURSOR) ----
 .agent/
-.agents/
 .antigravity/
 .gemini/
+.agents/*
+!.agents/rules/
+!.agents/rules/**
+!.agents/skills/
+!.agents/skills/**
+!.agents/agents/
+!.agents/agents/**
+!.agents/mcp.json
 .cursor/*
-!.cursor/rules/
-!.cursor/rules/**
-!.cursor/skills/
-!.cursor/skills/**
+!.cursor/rules
+!.cursor/skills
+!.cursor/agents
+!.cursor/mcp.json
 
 # ---- IDEs E SISTEMA OPERACIONAL ----
 *.swp

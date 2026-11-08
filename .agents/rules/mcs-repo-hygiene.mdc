@@ -1,0 +1,15 @@
+---
+description: Higiene e Prevencao de Codigo Morto — deteccao via Vulture e limpeza proativa
+alwaysApply: true
+---
+
+# Regra: Higiene e Prevencao de Codigo Morto
+
+O repositorio deve se manter enxuto e livre de residuos tecnicos, modulos nao utilizados ou arquivos temporarios de execucoes passadas.
+
+## Diretrizes de Higiene
+
+1. Deteccao de codigo morto: A ferramenta Vulture e executada automaticamente sob `make app-lint` em `app/src`, `app/scripts/operations` e `run.py`. Nenhuma funcao, classe ou variavel sem uso e tolerada.
+2. Limpeza de artefatos efemeros: Arquivos temporarios (`_tmp*`, `.coverage`, `*.pyc`, `__pycache__`, `.pytest_cache`) devem ser eliminados pelo stage `clean` do orquestrador (`python clean_workspace.py --stage clean`).
+3. Auditoria de git status: Antes de concluir qualquer tarefa, certifique-se de que nenhum arquivo nao rastreado (untracked) indesejado permaneceu no disco.
+4. Preservacao de runtime: Nunca remova arquivos `.gitkeep` versionados em `app/runtime/` durante rotinas de limpeza.

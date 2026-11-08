@@ -1,25 +1,30 @@
-# Surface sync (fechamento de mudanca)
+# Sincronizacao de Superficie (Surface Sync)
 
-Checklist obrigatorio antes do commit/push final apos mudanca material em codigo, infra, docs ou superficie Cursor.
+Checklist e protocolo mandatorio a ser executado antes da finalizacao e persistencia de qualquer alteracao relevante em codigo, infraestrutura, documentacao ou harness de agentes.
 
-## Passos
+## 1. Etapas do Protocolo de Sincronizacao
 
-1. Listar arquivos tocados e superficies impactadas em [`agent-coverage.md`](agent-coverage.md).
-2. Atualizar docs de engenharia/ops cujo significado operacional mudou.
-3. Se contrato/camada/gate mudou, alinhar `.cursor/rules/*.mdc`.
-4. Se o procedimento do agente mudou, alinhar `.cursor/skills/*/SKILL.md`.
-5. Atualizar [`AGENTS.md`](../AGENTS.md) (tabela de leitura) e a linha correspondente em `agent-coverage.md`.
-6. Se o padrao DDD/QA/DX cross-repo mudou, atualizar [`prompt-model.md`](../prompt-model.md).
-7. Remover sujeira local (`_tmp*`, caches acidentais); grep por refs stale.
-8. Morto comprovado: seguir [`engineering-repo-hygiene.md`](engineering-repo-hygiene.md).
-9. Rodar no **WSL**: `make app-lint`, `make app-test`, `make app-security` (ou `pre-commit run --all-files`).
-10. Commits Conventional Commits PT-BR; escopo `llm` se so superficie de agentes.
+1. Mapeamento de Impacto: Identifique todas as superficies tocadas no diff consultando a matriz em [`agent-coverage.md`](agent-coverage.md).
+2. Atualizacao Documental: Atualize os documentos tecnicos cujo significado operacional ou especificacao tenha sido alterado pela mudanca.
+3. Alinhamento de Regras de Governanca: Caso contratos, limites de qualidade ou regras de camada tenham mudado, atualize as regras correspondentes em [`.agents/rules/*.mdc`](../.agents/rules/).
+4. Alinhamento de Habilidades Operacionais: Caso procedimentos de execucao ou rotinas tenham mudado, atualize as habilidades em [`.agents/skills/*/SKILL.md`](../.agents/skills/).
+5. Atualizacao dos Indices Mestres: Atualize a tabela de roteamento de [`AGENTS.md`](../AGENTS.md), as entradas em `docs/agent-coverage.md` e os subagentes em `.agents/agents/` se houver alteracao de personas.
+6. Contrato Geral de Engenharia: Atualize [`prompt-model.md`](../prompt-model.md) se os padroes de scaffold, camadas ou DX forem modificados.
+7. Higiene Ativa: Remova quaisquer arquivos temporarios, caches locais ou referencias orfas geradas durante o desenvolvimento.
+8. Execucao de Gates no WSL Linux:
+   ```bash
+   make app-lint
+   make app-validate
+   make app-security
+   make app-test
+   ```
+9. Validacao da Matriz Automatizada:
+   ```bash
+   pytest app/tests/unit/infrastructure/test_agent_coverage_matrix.py
+   ```
+10. Mensagem de Commit Padronizada: Formate a mensagem segundo o padrao Conventional Commits em PT-BR, utilizando o escopo `llm` se a mudanca for exclusiva do harness de agentes.
 
-## Nunca
+## 2. Proibicoes Expressas
 
-- Commitar so codigo com doutrina/rules/skills desatualizadas
-- Pular gates ou baixar cobertura / limite de linhas
-- Apagar skill/doc indexado na matriz sem atualizar `agent-coverage` + `AGENTS.md`
-- Apagar conteudo de `app/runtime/world` no processo de “higiene”
-
-Skill: `mcs-surface-sync`. Companion: `mcs-precommit`, `mcs-repo-hygiene`.
+- Nunca commitar codigo sem atualizar a respectiva documentacao, regras de agentes e skills operacionais.
+- Nunca commitar alteracoes com testes pendentes ou falhas nos gates de qualidade.

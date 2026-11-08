@@ -1,0 +1,17 @@
+---
+description: Sincronizacao de Mods — manifesto JSON, integridade SHA-256 e resolucao Modrinth
+globs: app/src/**/mod*/**/*.py,app/runtime/mods/**
+alwaysApply: false
+---
+
+# Regra: Sincronizacao de Mods
+
+A sincronizacao de mods Forge e orientada pelo manifesto declarativo localizado em `app/runtime/mods/mods-manifest.json`.
+
+## Regras de Negocio e Integridade
+
+1. Manifesto declarativo: O manifesto especifica a versao de jogo compativel (Minecraft 26.3 / Forge 66.0.6) e o array de mods.
+2. Identificadores unicos: Nenhum mod pode possuir identificador duplicado no manifesto.
+3. Integridade criptografica: Todo mod com hash informado deve ter seu checksum SHA-256 validado obrigatoriamente apos o download. Em caso de divergencia, o arquivo deve ser descartado e a operacao deve falhar com erro explicito.
+4. Nomes de arquivo canônicos: O armazenamento no disco (`app/runtime/mods/*.jar`) deve respeitar a convencao `{mod_id}-{version}.jar`.
+5. Proibicao de binarios no git: Arquivos `*.jar` de mods nunca devem ser commitados no repositorio (bloqueados pelo `.gitignore`).

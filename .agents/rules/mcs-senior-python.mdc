@@ -1,0 +1,17 @@
+---
+description: Barra Senior de Python — tipagem estrita com Mypy, pattern matching e boas praticas 3.13+
+globs: app/src/**/*.py,app/tests/**/*.py,run.py
+alwaysApply: false
+---
+
+# Regra: Barra Senior de Python
+
+Exige o uso avancado e moderno dos recursos do Python 3.13+, priorizando clareza, seguranca de tipos e performance.
+
+## Padroes de Codigo
+
+1. Tipagem estrita: Todo parametro e retorno de funcao/metodo deve ser tipado. O Mypy e configurado com `strict = true` e nao deve emitir nenhum alerta.
+2. Uso de Protocols: Utilize `typing.Protocol` para desacoplar interfaces e ports, evitando herancas desnecessarias.
+3. Tratamento de excecoes estruturado: Use blocos `try/except` especificos, tratando excecoes conhecidas (`requests.RequestException`, `json.JSONDecodeError`) e nunca capturando `Exception` de forma cega sem re-lancamento.
+4. Expressividade: Prefira pattern matching (`match/case`), pattern guards e unioes de tipos com pipe (`TypeA | TypeB`) aos metodos legados.
+5. Limite maximo: Funcoes curtas e objetivas; cada arquivo deve se manter estritamente abaixo do limite de 300 linhas.

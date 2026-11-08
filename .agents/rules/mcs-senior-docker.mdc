@@ -1,0 +1,16 @@
+---
+description: Barra Senior de Docker — seguranca de contêineres, multi-stage, volumes e Hadolint
+globs: infra/docker/**,**/Dockerfile*
+alwaysApply: false
+---
+
+# Regra: Barra Senior de Docker
+
+O ciclo de vida dos contêineres Docker deve atender aos mais altos padroes de seguranca e eficiencia de execucao.
+
+## Requisitos de Contêineres
+
+1. Multi-stage build: Separar explicitamente estagios de construcao/instalacao do estagio final de execucao para minimizar o tamanho da imagem e a superficie de ataque.
+2. Manipulador de sinais e PID 1: Garantir que o processo principal receba e trate adequadamente os sinais `SIGTERM` e `SIGINT` para finalizacao graciosa do servidor Minecraft.
+3. Seguranca e escaneamento: As imagens e arquivos Dockerfile sao analisados continuamente pelo Hadolint e Trivy em `make app-security`, exigindo zero misconfigurations bloqueantes.
+4. Mapeamento de volumes: Os bind mounts em `infra/docker/docker-compose.yml` devem isolar `app/runtime/` preservando os UID/GID corretos do usuario de execucao.

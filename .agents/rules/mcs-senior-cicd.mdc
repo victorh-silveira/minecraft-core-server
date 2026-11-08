@@ -1,0 +1,16 @@
+---
+description: Barra Senior de CI/CD — GitHub Actions, cache inteligente e skip-cd seguro
+globs: .github/**
+alwaysApply: false
+---
+
+# Regra: Barra Senior de CI/CD
+
+As esteiras de integracao e entrega continua em `.github/workflows/` automatizam a garantia de qualidade e publicacao do projeto.
+
+## Diretrizes de CI/CD
+
+1. Espelhamento local e remoto: Os jobs do GitHub Actions devem executar exatamente os mesmos comandos que o desenvolvedor executa localmente via `clean_workspace.py` e `Makefile`.
+2. Otimizacao de cache: Utilizacao de cache eficiente para dependencias Python (`~/.cache/pip`), plugins do TFLint (`~/.tflint.d/plugins`) e binarios do Actionlint.
+3. Skip-CD consciente: Commits que alterem exclusivamente documentacao ou metadados de infraestrutura devem incluir a flag `[skip-cd]` no cabecalho para economizar tempo de execucao, mantendo a integridade da esteira.
+4. Seguranca de secrets: Proibido o uso de senhas ou tokens gravados em texto claro nos workflows; utilize variaveis de ambiente vinculadas a GitHub Secrets ou federacao OIDC.

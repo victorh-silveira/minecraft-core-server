@@ -1,0 +1,18 @@
+---
+description: Padroes Globais de Engenharia — limites de linhas, WSL, 100% de cobertura e clean code
+alwaysApply: true
+---
+
+# Regra: Padroes Globais de Engenharia
+
+Esta regra define os padroes fundamentais de engenharia de software e operacao aplicados a todo o repositorio.
+
+## Principios Fundamentais
+
+1. Ambiente operacional: Todo comando de terminal, build ou teste deve rodar exclusivamente no ambiente WSL Linux. Comandos em CMD ou PowerShell nativo sao proibidos.
+2. Limite de tamanho de arquivo: Nenhum arquivo Python em `app/src/**/*.py` ou `run.py` pode ultrapassar **300** linhas. Caso atinja o limite, decomponha em modulos menores.
+3. Cobertura branch obrigatoria: As camadas de aplicacao (`domain`, `application`, `infrastructure`, `presentation`) devem manter **100% de cobertura branch** verificada pelo Pytest.
+4. Codigo limpo: E terminantemente proibido o uso de comentarios no codigo-fonte. A clareza deve vir de nomes expressivos e tipagem estrita.
+5. Ausencia de emojis: Proibido o uso de emojis em codigo-fonte, logs, commits ou documentacao tecnica.
+6. Padrao de commit: Utilizacao estrita de Conventional Commits em **PT-BR** com escopos definidos em `linters/commitlint.config.mjs`.
+7. Pipeline de qualidade: Os gates executam em ordem crash-first (`make app-lint`, `make app-validate`, `make app-security`, `make app-test`, `make app-build`).

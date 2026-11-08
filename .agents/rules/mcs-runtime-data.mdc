@@ -1,0 +1,16 @@
+---
+description: Segregacao de Dados de Runtime — desacoplamento entre codigo e dados do jogo
+globs: app/runtime/**
+alwaysApply: false
+---
+
+# Regra: Segregacao de Dados de Runtime
+
+O diretorio `app/runtime/` contem todos os dados persistentes, configuracoes e logs gerados pelo servidor Minecraft Forge em tempo de execucao.
+
+## Fronteiras de Persistencia
+
+1. Desacoplamento do codigo: E expressamente proibido misturar arquivos de dados de jogo com o codigo-fonte sob `app/src/`.
+2. Pastas volateis: As pastas `world/`, `logs/`, `database/` e `plugins/` contem apenas arquivos `.gitkeep` versionados; todo o seu conteudo dinâmico e bloqueado pelo `.gitignore`.
+3. Configuracoes versionadas: Apenas `app/runtime/configs/server.properties`, `app/runtime/configs/server-icon.png` e `app/runtime/mods/mods-manifest.json` sao rastreados no git.
+4. Higiene de build context: O `.dockerignore` impede que o diretorio `runtime/` seja enviado indevidamente para o contexto de build da imagem da aplicacao.

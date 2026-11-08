@@ -1,0 +1,17 @@
+---
+description: Padroes de Infraestrutura e Docker — contêineres, Kustomize e modulos Terraform
+globs: infra/**
+alwaysApply: false
+---
+
+# Regra: Padroes de Infraestrutura e Docker
+
+Esta regra estabelece as diretrizes para contêineres Docker, manifestos Kubernetes e modulos de infraestrutura como codigo (Terraform).
+
+## Diretrizes de Entrega
+
+1. Dockerfile: Adocao de multi-stage builds, usuario nao-root quando aplicavel e validacao continua via Hadolint.
+2. Paridade de desenvolvimento: O arquivo `infra/docker/docker-compose.yml` e a fonte da verdade para execucao local e deve espelhar com exatidao os volumes de `app/runtime/`.
+3. Kubernetes e Kustomize: Os manifestos em `infra/kubernetes/` dividem-se em `base/` e `overlays/prod/`, sendo estritamente validados pelo Kubeconform.
+4. Probes de saude: StatefulSets do servidor Minecraft devem possuir probes de startup, liveness e readiness baseadas na porta TCP de jogo (25565) ou RCON.
+5. Modulos Terraform: Definicoes de infraestrutura no Azure em `infra/terraform/` devem ser formatadas (`terraform fmt -check`), validadas com TFLint e inspecionadas por seguranca via Tfsec.

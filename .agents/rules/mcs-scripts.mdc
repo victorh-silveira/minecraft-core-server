@@ -1,0 +1,22 @@
+---
+description: Padroes de Scripts de Automacao — seguranca bash, tratamento de erros e orquestracao
+globs: app/scripts/**
+alwaysApply: false
+---
+
+# Regra: Padroes de Scripts de Automacao
+
+Scripts utilitarios e rotinas de automacao devem garantir idempotencia, seguranca na manipulacao de variaveis e execucao sem falhas silenciosas.
+
+## Padroes por Tipo de Script
+
+1. Scripts Bash (`app/scripts/bash/`):
+   - Cabecalho obrigatorio com `#!/usr/bin/env bash` e `set -euo pipefail`.
+   - Validacao sintatica obrigatoria via `bash -n` e analise estatica via Shellcheck.
+   - Nenhuma variavel de ambiente sensivel ou credencial deve ser exposta em texto plano.
+2. Scripts Python de Operacoes (`app/scripts/operations/`):
+   - O orquestrador `clean_workspace.py` e o ponto de entrada unico dos stages do Makefile.
+   - Scripts de operacoes devem tratar codigos de saida (exit codes) rigorosamente, abortando a execucao em caso de erro.
+   - Aplicam-se as mesmas regras de limite de 300 linhas por arquivo.
+3. Scripts PowerShell (`app/scripts/powershell/`):
+   - Restritos a funcoes auxiliares de suporte ao ambiente Windows do host (como liberacao de porta no firewall ou probes locais).

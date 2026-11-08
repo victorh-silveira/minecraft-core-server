@@ -1,38 +1,37 @@
-# Doutrina de engenharia com LLM
+# Doutrina de Engenharia com LLM
 
-O LLM e **copiloto de engenharia e auditoria** neste repositorio. Nao e o processo do servidor Minecraft, nao decide politica de jogo e nao substitui gates de qualidade.
+O modelo de linguagem atua como **copiloto avancado de engenharia de software e auditoria tecnica** neste repositorio. Ele nao e o processo do servidor Forge, nao dita regras de negocio arbitrarias e nao tem permissao para dispensar ou contornar gates de qualidade.
 
-## Papel
+## 1. Papeis e Limites
 
-| E | Nao e |
-|---|-------|
-| Ajuda a projetar/adaptar codigo hexagonal | Runtime do Forge / itzg |
-| Sugere testes TDD e corrige cobertura | Desculpa para baixar `fail-under` |
-| Atualiza docs/rules/skills alinhados ao codigo | Fonte de verdade acima do codigo e do Make |
-| Audita imports, logging e higiene | Gerador de stack OTRS/WireMock/MariaDB |
+| O que o Agente de IA E | O que o Agente de IA NAO E |
+|---|---|
+| Projetista e refatorador de codigo hexagonal puro | O runtime do servidor Forge ou da imagem `itzg/java25` |
+| Construtor de suites de testes TDD com cobertura branch | Um atalho para diminuir `fail-under` ou desativar Mypy/Ruff |
+| Mantenedor rigoroso de docs, rules e skills alinhadas | Uma fonte de verdade acima do codigo e dos testes automatizados |
+| Auditor de acoplamento de camadas, logging e seguranca | Um gerador de stacks nao solicitadas (ex: Redis, MariaDB, OTRS) |
 
-Entrada operacional: [`AGENTS.md`](../AGENTS.md). Matriz: [`agent-coverage.md`](agent-coverage.md). Contrato: [`prompt-model.md`](../prompt-model.md). Barra senior: [`engineering-senior-bar.md`](engineering-senior-bar.md).
+Ponto de entrada canônico: [`AGENTS.md`](../AGENTS.md). Matriz de cobertura: [`agent-coverage.md`](agent-coverage.md). Contrato de scaffold: [`prompt-model.md`](../prompt-model.md). Barra de senioridade: [`engineering-senior-bar.md`](engineering-senior-bar.md).
 
-## Invariantes
+## 2. Invariantes Arquiteturais Inegociaveis
 
-1. `domain` e `application` nao importam `infrastructure` nem `presentation`.
-2. Validacao no dominio; composition root so em `presentation`.
-3. Domain e use case nao emitem logs; `log_event` na presentation/adapters.
-4. Dados do servidor ficam em `app/runtime/`, nunca em `app/src/`.
-5. Cobertura 100% branch nas quatro camadas; arquivos `.py` ≤ 300 linhas.
-6. Terminal e scripts: **WSL Linux** apenas.
-7. Sem comentarios no codigo; docs e commits em PT-BR; sem emojis.
-8. Docker/AKS/Terraform existem porque o dominio precisa deles — nao copiar stacks alheias.
+1. Isolamento de Camadas: `domain` e `application` nunca importam `infrastructure` nem `presentation`.
+2. Encapsulamento: Validacoes de regras de negocio pertencem as entidades e value objects; composition root reside exclusivamente na camada `presentation`.
+3. Ausencia de Logs no Nucleo: Entidades e casos de uso nunca emitem logs. A telemetria e tratada via `log_event` na camada de adaptadores e presentation.
+4. Desacoplamento de Runtime: Dados gerados pelo servidor residem exclusivamente em `app/runtime/`, jamais sob `app/src/`.
+5. Metricas de Qualidade: 100% de cobertura branch nas quatro camadas de aplicacao; limite maximo de 300 linhas por arquivo de codigo.
+6. Ambiente e Estilo: Terminal exclusivamente em **WSL Linux**; commits e documentacao em **PT-BR**; ausencia total de comentarios no codigo e de emojis.
+7. Infraestrutura Sob Demanda: Contêineres Docker, Azure AKS e modulos Terraform existem unicamente para atender aos requisitos operacionais do servidor Forge.
 
-## Anti-padroes
+## 3. Anti-Padroes Proibidos
 
-- HTTP client, SQL ou framework web em `domain` / `application`
-- `print` no sync; dump de manifesto/body HTTP em INFO
-- Composition root espalhado fora de `presentation`
-- Commitar `.env`, tokens ou JARs de mods
-- Atualizar so codigo e deixar `AGENTS.md` / rules / skills mentindo o SSOT
-- Afrouxar Ruff/mypy/vulture/coverage “temporariamente” para passar o hook
+- Inserir clientes HTTP, comandos de banco de dados ou frameworks nas camadas `domain` ou `application`.
+- Imprimir mensagens com `print` no fluxo de execucao ou emitir corpos brutos de requisicoes HTTP em nivel INFO.
+- Espalhar instanciacao de adaptadores concretos fora do composition root.
+- Commitar arquivos de configuracao local (`.env`), tokens de acesso ou binarios `*.jar` de mods.
+- Modificar o codigo-fonte sem atualizar a respectiva documentacao e a matriz de agentes.
+- Utilizar supressoes (`# type: ignore`, `# noqa`, `# pragma: no cover`) para burlar falhas de linters ou cobertura.
 
-## Fechamento
+## 4. Fechamento de Ciclo
 
-Antes do commit final de uma mudanca material: skill `mcs-surface-sync` + [`engineering-surface-sync.md`](engineering-surface-sync.md).
+Antes da finalizacao e persistencia de qualquer alteracao relevante no repositorio, e mandatorio executar a habilidade `mcs-surface-sync` e validar o checklist de [`engineering-surface-sync.md`](engineering-surface-sync.md).

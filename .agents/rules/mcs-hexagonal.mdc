@@ -1,0 +1,24 @@
+---
+description: Arquitetura Hexagonal — segregacao estrita entre ports, adapters e use cases
+globs: app/src/**/*.py
+alwaysApply: false
+---
+
+# Regra: Arquitetura Hexagonal
+
+A arquitetura do software segue o padrao Ports and Adapters (Hexagonal), garantindo desacoplamento entre regras de negocio e detalhes de entrega.
+
+## Estrutura das Camadas
+
+- `domain`: Nucleo puro sem dependencias externas.
+- `application`: Orquestracao de regras de negocio atraves de Use Cases; define contratos de entrada e saida via Ports.
+- `infrastructure`: Implementacao dos adaptadores de rede, persistencia de disco, logging e carregamento de configuracoes.
+- `presentation`: Ponto de entrada (CLI, main) e Composition Root onde adapters sao instanciados e injetados nos use cases.
+
+## Invariantes de Dependencia
+
+1. `domain` e `application` nunca importam `infrastructure` ou `presentation`.
+2. Ports sao definidos na camada `application` utilizando `typing.Protocol` ou classes abstratas puras.
+3. Adapters concretos pertencem a `infrastructure` e implementam os contratos dos Ports.
+4. O Composition Root reside exclusivamente em `app/src/presentation/` (especificamente em `cli/main.py` ou setup de injecao).
+5. O orquestrador estatico (`gates_python.py`) falha imediatamente se qualquer fronteira de importacao for violada.

@@ -1,0 +1,22 @@
+---
+description: Padroes de Testes e TDD — piramide de testes, fakes em memoria e 100% branch
+globs: app/tests/**/*.py
+alwaysApply: false
+---
+
+# Regra: Padroes de Testes e TDD
+
+Toda alteracao de funcionalidade ou correcao de defeito deve ser conduzida pelo ciclo de Desenvolvimento Orientado a Testes (TDD).
+
+## Estrutura da Suite de Testes
+
+- `app/tests/unit/domain/`: Testes puros de logica e invariantes de entidades e servicos. Nao utilize mocks.
+- `app/tests/unit/application/`: Testes de Use Cases utilizando fakes em memoria que implementam os Ports. Evite mocks com acoplamento a chamadas internas.
+- `app/tests/unit/infrastructure/` e `app/tests/integration/`: Testes de adaptadores de I/O (rede, disco, deserializacao) com transportes controlados.
+- `app/tests/unit/presentation/`: Testes de entrada de CLI validando argumentos e integracao do composition root.
+
+## Exigencias de Qualidade
+
+1. Cobertura estrita: Meta minima inegociavel de 100% de cobertura branch sob o comando `make app-test`.
+2. Isolamento de ambiente: Testes nao devem depender do arquivo `.env` local ou de rede externa ativa.
+3. Tipagem estrita: Funcoes de teste devem possuir tipagem estrita de retorno (`-> None`) e respeitar as regras do Mypy strict.

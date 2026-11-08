@@ -1,0 +1,15 @@
+---
+description: Postura Senior de Engenharia — solidez técnica, design minimalista e combate a overengineering
+alwaysApply: true
+---
+
+# Regra: Postura Senior de Engenharia
+
+O desenvolvimento neste projeto exige rigor profissional, solidez nas decisoes e combate ativo ao desperdicio de complexidade.
+
+## Diretrizes de Postura
+
+1. Solucoes minimas e robustas: Escolha a solucao mais simples e elegante que resolva integralmente o problema. Nao introduza bibliotecas externas ou camadas artificiais desnecessarias.
+2. Trate a falha na borda: Trate excecoes e erros de rede nos adaptadores da camada de infraestrutura, convertendo-os em excecoes semânticas de aplicacao antes de atingir os casos de uso.
+3. Imutabilidade e previsibilidade: Modele objetos de dominio e dados de transferencia com estruturas imutaveis (`dataclass(frozen=True)` ou tipos primitivos protegidos).
+4. Separacao de responsabilidades: Respeite a fronteira entre as competencias de Software Engineering (logica, TDD, portas) e Cloud Ops (Docker, Kubernetes, Terraform).

@@ -1,192 +1,116 @@
-# Contrato de engenharia
+# Contrato de Engenharia e Modelo de Scaffold
 
-Contrato reutilizavel derivado deste repositorio. Oriente um agente a gerar ou adaptar qualquer projeto (Python ou outra linguagem) com o mesmo padrao: DDD, hexagonal, TDD, qualidade, DX e documentacao.
+Contrato reutilizavel e agnostico de engenharia derivado da arquitetura deste repositorio. Define o modelo canônico para criacao ou refatoracao de qualquer projeto orientado a DDD, Arquitetura Hexagonal, TDD rigoroso, barra de qualidade maxima e harness de agentes.
 
-O dominio Minecraft (Forge sem mods instalados, com sync opcional por manifesto + Docker/AKS) e o exemplo de aplicacao neste repo — nao e regra obrigatoria de negocio para um projeto novo. OTRS / Google Chat, WireMock e MariaDB nao fazem parte deste repositorio e nao devem ser copiados.
+O dominio Minecraft Forge deste repositorio serve como referencia de implementacao prática; os principios definidos neste contrato sao universais e aplicaveis a qualquer dominio de negocio.
 
-## 1. Papel e objetivo
+## 1. Missao do Engenheiro de Software
 
-Voce e um engenheiro senior. Ao receber um novo dominio de negocio e (opcionalmente) uma linguagem, deve:
+Ao projetar, estender ou adaptar um repositorio sob este modelo, voce deve:
 
-- Projetar e implementar a solucao no padrao deste contrato.
-- Adaptar ferramentas e pastas a linguagem escolhida sem abandonar os invariantes.
-- Manter docs, Makefile, hooks e gates alinhados ao codigo.
-- Preferir TDD: testes primeiro nas camadas de dominio e application; integracao nos adapters de IO.
+- Isolar o nucleo de negocio de qualquer acoplamento tecnologico externo
+- Construir a solucao respeitando o fluxo TDD camada por camada
+- Garantir 100% de cobertura branch nas camadas de aplicacao
+- Manter documentacao tecnica, regras de agentes, hooks e Makefiles perfeitamente sincronizados com o codigo-fonte
+- Nao adicionar frameworks, bibliotecas ou servicos externos sem demanda explicita do dominio
 
-Objetivo final: o novo repositorio deve parecer este projeto em arquitetura, qualidade e operacao — nao copiar o negocio Minecraft nem qualquer PoC externa.
+## 2. Invariantes Arquiteturais (Agnosticos de Linguagem)
 
-## 2. Contrato invariavel (language-agnostic)
+### Segregacao Estrita de Camadas (Hexagonal / DDD)
 
-### Camadas (hexagonal / DDD)
+| Camada | Responsabilidade | Dependencias Permitidas |
+|---|---|---|
+| `domain` | Entidades, Value Objects, Domain Services, validacao de invariantes de negocio | Nenhuma dependencia externa ao dominio |
+| `application` | Casos de uso (Use Cases) e contratos de saida/entrada (Ports / Interfaces) | Apenas `domain` |
+| `infrastructure` | Adaptadores concretos (HTTP, Banco de Dados, Arquivos), configuracao e logging | `application` e `domain` |
+| `presentation` | Entrypoints (CLI, API, UI, Workers) e Composition Root (injecao de dependencias) | `application`, `domain` e `infrastructure` |
 
-| Camada | Conteudo | Pode depender de |
-|--------|----------|------------------|
-| domain | Entidades, value objects, domain services, validacoes | Ninguem de fora do dominio |
-| application | Use cases + ports (contratos) | domain |
-| infrastructure | Adapters (HTTP, DB, filas), config, logging de borda | application, domain |
-| presentation | CLI/API/UI + composition root | application, domain, infrastructure |
+### Regras Mandatorias de Dependencia
 
-Regras:
+1. `domain` e `application` nunca importam `infrastructure` nem `presentation`.
+2. Ports sao contratos puros (Protocols/Interfaces). Adapters implementam esses contratos na camada `infrastructure`.
+3. Validacoes e regras de negocio pertencem exclusivamente ao `domain`.
+4. Domain e use cases nunca emitem logs ou realizam I/O direto. O logging semantico reside nos adapters e na presentation.
+5. O Composition Root (leitura de configuracoes e instanciacao dos adapters e use cases) localiza-se unicamente na camada `presentation`.
 
-- domain e application nao importam infrastructure nem presentation.
-- Ports sao contratos (Protocol / interface / trait). Adapters implementam ports na infrastructure.
-- Validacao de entidades fica no dominio.
-- Formatacao de payload / regras de saida ficam no dominio ou application — nao na CLI/controller.
-- Domain e use case nao emitem logs. Logging semantico fica na presentation e/ou adapters.
-- Composition root (wiring Settings → adapters → use case) fica na presentation.
+### Diretrizes de Qualidade e Limpeza
 
-### Qualidade e estilo
+- Codigo limpo: Sem comentarios no codigo-fonte. O design e a tipagem estrita devem expressar a intencao.
+- Padrao de idioma: Documentacao tecnica, mensagens de erro e commits exclusivamente em **PT-BR**.
+- Ausencia de emojis: Proibido o uso de emojis em codigo, logs, commits ou documentacao tecnica.
+- Limite de complexidade: Nenhum arquivo de aplicacao deve exceder **300** linhas de codigo.
+- Cobertura de testes: Meta inegociavel de **100% branch coverage** nas camadas `domain`, `application`, `infrastructure` e `presentation`.
+- Seguranca: Configuracao via `.env` na raiz apoiada por `.env.example`. Proibido versionar credenciais ou tokens.
 
-- Sem comentarios no codigo de aplicacao (codigo autodescritivo).
-- Documentacao tecnica em PT-BR; sem emojis em codigo, logs ou docs.
-- Conventional Commits.
-- Config via `.env` na raiz + `.env.example`; nunca commitar segredos.
-- Cobertura alta nas camadas de app (neste repo: 100% com branch coverage em domain, application, infrastructure, presentation).
-- Limite de tamanho por arquivo de codigo (~300 linhas); extrair quando passar.
-- Type checking estrito quando a linguagem permitir.
-
-### Testes (TDD)
-
-- Unitarios por camada: `tests/unit/{domain,application,infrastructure,presentation}`.
-- Integracao para adapters de IO (HTTP mock transport, DB fake/testcontainer, etc.).
-- Application: preferir fakes dos ports.
-- Isolar testes do `.env` local (flag/env do tipo `*_DISABLE_DOTENV`).
-
-## 3. Arquitetura de pastas (template)
-
-Ajuste nomes de entrypoint/build file a linguagem; preserve a intencao das pastas.
+## 3. Topologia Padrao de Diretorios
 
 ```text
 .
+├── .agents/                      # Harness canonico de IA
+│   ├── rules/                    # Regras de governanca (.mdc)
+│   ├── skills/                   # Habilidades operacionais com SKILL.md
+│   ├── agents/                   # Personas e subagentes seniores
+│   └── mcp.json                  # Configuracao canonica de ferramentas MCP
+├── .cursor/                      # Ponte de retrocompatibilidade para Cursor IDE
 ├── app/
 │   ├── src/
-│   │   ├── domain/
-│   │   │   ├── entities/
-│   │   │   └── services/
-│   │   ├── application/
-│   │   │   ├── ports/
-│   │   │   └── use_cases/
-│   │   ├── infrastructure/
-│   │   │   ├── adapters/
-│   │   │   ├── config/
-│   │   │   └── logging/
-│   │   └── presentation/
-│   │       ├── cli/
-│   │       └── logging/
-│   ├── runtime/              dados de execucao (este repo: mundo, JARs, logs)
+│   │   ├── domain/               # Entidades e servicos de dominio puro
+│   │   ├── application/          # Casos de uso e portas abstratas
+│   │   ├── infrastructure/       # Adaptadores de rede, disco e configuracao
+│   │   └── presentation/         # CLI, entrypoint e composition root
+│   ├── runtime/                  # Dados volateis de execucao desacoplados do codigo
 │   ├── tests/
-│   │   ├── unit/
-│   │   └── integration/
+│   │   ├── unit/                 # Testes unitarios por camada com fakes
+│   │   └── integration/          # Testes de adaptadores de I/O
 │   ├── scripts/
-│   │   ├── setup.sh
-│   │   └── operations/
+│   │   └── operations/           # Orquestrador de qualidade e gates
 │   ├── pyproject.toml
 │   ├── requirements.txt
 │   └── requirements-dev.txt
-├── docs/
-├── infra/                    somente se houver stack local / integracao
-├── linters/
-├── Makefile
-├── AGENTS.md
-├── prompt-model.md
-├── README.md
-├── .env.example
-└── run.py
+├── docs/                         # Documentacao tecnica e matriz de cobertura 100%
+├── infra/                        # Contêineres e definicoes de nuvem (Docker, AKS, Terraform)
+├── linters/                      # Configuracoes de commitlint e hooks de git
+├── Makefile                      # Comandos padronizados de DX e automacao
+├── AGENTS.md                     # Ponto de entrada universal para LLMs
+├── prompt-model.md               # Este contrato de engenharia
+└── README.md                     # Portal do desenvolvedor
 ```
 
-Imports da aplicacao devem ser limpos: `from domain...`, `from application...`.
+## 4. Engenharia de Testes (TDD por Camada)
 
-## 4. Qualidade e DX
+1. `domain`: Testes unitarios puros validando entidades, invariantes e servicos sem nenhum mock.
+2. `application`: Testes unitarios usando Fakes em memoria para os Ports, garantindo isolamento total de I/O externo.
+3. `infrastructure`: Testes de integracao com transportes simulados (mocks de rede ou bancos em memoria) validando contratos.
+4. `presentation`: Testes de ponta a ponta da CLI/API garantindo o wiring do composition root.
 
-Gates conceituais obrigatorios: lint/format, type check, dead code, test+coverage, security, hooks, Make (`app-install`, `app-lint`, `app-test`, `app-security`, `app-clean`, `app-setup`).
+## 5. Portao de Qualidade e Linters
 
-Orquestrador central: `app/scripts/operations/clean_workspace.py` e o unico ponto chamado pelo Makefile para lint/test/security/clean.
+- Python: Ruff (lint e formatacao), Mypy (`strict = true`), Vulture (deteccao de codigo morto), Pylint (codigo duplicado), Bandit (analise estatica de seguranca), Pip-audit (vulnerabilidades em dependencias), Gitleaks (deteccao de segredos) e Pytest com cobertura branch minima de 100%.
+- Outras linguagens: Ferramentas equivalentes que garantam analise estatica estrita, zero codigo morto e 100% de cobertura.
+- Orquestrador: Script central (`clean_workspace.py`) chamado pelos alvos do `Makefile` (`make app-lint`, `make app-validate`, `make app-test`, `make app-security`, `make app-build`).
 
-Para Python: Ruff, mypy `--strict`, vulture, pytest-cov 100% branch, bandit, pip-audit, pre-commit, commitlint, Makefile.
+## 6. Prompt para Bootstrap de Novos Projetos
 
-## 5. Logging semantico
-
-API unica `log_event(logger, level, event, **fields)`. Eventos nomeados e estaveis. Caminho feliz: cerca de 3 linhas INFO. Sem dump de payload JSON nem body HTTP em INFO. Redact de URLs/segredos. `exc_info` apenas em DEBUG. Detalhes: [docs/engineering-logging.md](docs/engineering-logging.md).
-
-## 6. Documentacao obrigatoria
-
-Manter alinhada ao codigo: `docs/arquitetura.md`, `docs/structure.md`, `docs/engineering-<lang>.md`, `docs/engineering-logging.md`, `AGENTS.md`, `README.md`, `.env.example`.
-
-## 7. Protocolo de adaptacao
-
-1. Ler o dominio/requisitos do novo projeto e a linguagem alvo.
-2. Listar entidades, use cases, ports e adapters necessarios.
-3. Criar a arvore de pastas e impor regras de dependencia.
-4. Configurar build, `.env.example`, Makefile e orquestrador de qualidade.
-5. Instalar hooks (pre-commit + Conventional Commits).
-6. Implementar em TDD: domain → application (fakes) → adapters → presentation.
-7. Adicionar `infra/` somente se o contexto exigir runtime local.
-8. Escrever/atualizar docs e `AGENTS.md`.
-9. Rodar `make app-lint`, `make app-test`, `make app-security` ate verde.
-10. Garantir commits Conventional Commits e ausencia de segredos.
-
-## 8. Anti-padroes
-
-HTTP client, SQL ou framework web dentro de domain / application. Comentarios no codigo de aplicacao. Logs dentro de use case ou entidade. Composition root espalhado ou fora de presentation. Baixar fail-under sem decisao explicita. Commits fora de Conventional Commits. Docs desatualizadas. Commitar `.env` ou tokens. Copiar stack de outro dominio sem necessidade.
-
-## 9. PROMPT PARA COLAR
-
-Copie o bloco abaixo integralmente em um novo chat/projeto. Substitua apenas as linhas marcadas com `<<< >>>`.
+Copie o modelo abaixo para instruir um agente a construir ou migrar um projeto aderente a este contrato:
 
 ```text
-Voce e um engenheiro senior. Adapte ou crie o repositorio abaixo para ficar equivalente ao contrato de engenharia do projeto de referencia (DDD + hexagonal + TDD + DX forte).
+Voce e um engenheiro de software senior. Implemente o projeto abaixo seguindo integralmente o Contrato de Engenharia de Referencia (DDD + Arquitetura Hexagonal + TDD + Harness de Agentes .agents/).
 
-NOVO PROJETO
-- Nome: <<<NOME>>>
-- Dominio / objetivo: <<<DESCRICAO DO NEGOCIO>>>
-- Linguagem/runtime: <<<python|go|rust|ts|outra>>>
-- Entrada principal: <<<CLI|API HTTP|worker|outro>>>
-- Integracoes externas: <<<listar ou "nenhuma ainda">>>
-- Infra local necessaria: <<<sim/nao; se sim, o minimo>>>
+PROJETO:
+- Nome: <<<NOME_DO_PROJETO>>>
+- Dominio e Objetivo: <<<DESCRICAO_DO_DOMINIO>>>
+- Linguagem e Runtime: <<<LINGUAGEM>>>
+- Ponto de Entrada: <<<CLI/API/WORKER>>>
+- Integracoes Externas: <<<SERVICOS_EXTERNOS>>>
 
-INVARIANTES (obrigatorios)
-1. Camadas: domain, application (ports + use_cases), infrastructure (adapters/config/logging), presentation (composition root).
-2. domain e application NAO importam infrastructure nem presentation.
-3. Ports como contratos; adapters na infrastructure.
-4. Validacao no dominio; formatacao de payload em domain/application, nao na borda de UI/CLI.
-5. Domain e use case NAO logam; logging semantico na presentation/adapters (eventos *.started|finished|failed|skipped_*; sem dump de payload/segredos; redact de URLs; ~3 INFO no caminho feliz).
-6. Sem comentarios no codigo; docs em PT-BR; sem emojis; Conventional Commits.
-7. Config via .env na raiz + .env.example; nunca commitar segredos.
-8. Testes TDD: unit por camada + integracao nos adapters de IO; fakes nos ports da application.
-9. Cobertura alta nas camadas de app (meta 100% branch se a ferramenta permitir).
-10. Gates via Makefile: install, lint, test, security, clean, setup; orquestrador unico em app/scripts/operations (ou equivalente).
-11. Limite ~300 linhas por arquivo de codigo.
-12. Type checking estrito quando a linguagem permitir.
-
-PASTAS ALVO
-app/src/{domain,application,infrastructure,presentation}
-app/tests/{unit,integration}
-app/scripts/operations/
-docs/{arquitetura,structure,engineering-<lang>,engineering-logging}.md
-linters/ (commitlint + git-hooks)
-Makefile, AGENTS.md, README.md, .env.example, entrypoint na raiz
-infra/ somente se necessario ao dominio
-
-QUALIDADE
-- Python: Ruff, mypy --strict, vulture, pytest+cov fail-under 100, bandit, pip-audit, pre-commit, commitlint.
-- Outra linguagem: escolha equivalentes idiomaticos mantendo os MESMOS gates conceituais (lint, types, dead-code, test+coverage, security, hooks, conventional commits).
-
-DOCS A MANTER ALINHADAS AO CODIGO
-docs/arquitetura.md, docs/structure.md, docs/engineering-<lang>.md, docs/engineering-logging.md, AGENTS.md, README.md
-
-PROTOCOLO
-1) Mapear entidades/use cases/ports/adapters do dominio informado.
-2) Criar arvore e regras de dependencia.
-3) Configurar build, env, Makefile, hooks.
-4) Implementar TDD (domain → application → adapters → presentation).
-5) Nao copiar stack de outro dominio a menos que o dominio peca algo equivalente.
-6) Atualizar docs e AGENTS.md.
-7) Rodar gates ate verde.
-
-ANTI-PADROES
-HTTP/DB no dominio; comentarios; logs no use case; composition root fora de presentation; commits nao convencionais; docs defasadas; segredos no git.
-
-Entregue: estrutura, codigo, testes, Makefile, docs e AGENTS.md coerentes com este contrato.
+DIRETRIZES OBRIGATORIAS:
+1. Camadas: domain (puro), application (use cases + ports), infrastructure (adapters), presentation (composition root).
+2. Proibicao absoluta de imports de infraestrutura ou presentation em domain/application.
+3. Sem comentarios no codigo; documentacao em PT-BR; zero emojis; commits no padrao Conventional Commits.
+4. TDD camada por camada com cobertura branch de 100%.
+5. Harness de agentes estruturado em .agents/ com rules, skills, subagentes e mcp.json.
+6. Limite maximo de 300 linhas por arquivo.
+7. Makefile padronizado (app-install, app-lint, app-validate, app-test, app-security, app-build).
 ```
 
-Referencia neste repositorio: [AGENTS.md](AGENTS.md), [docs/arquitetura.md](docs/arquitetura.md), [docs/structure.md](docs/structure.md), [docs/engineering-python.md](docs/engineering-python.md), [docs/engineering-logging.md](docs/engineering-logging.md), [docs/infra-docker.md](docs/infra-docker.md).
+Referencias locais: [`AGENTS.md`](AGENTS.md), [`docs/arquitetura.md`](docs/arquitetura.md), [`docs/structure.md`](docs/structure.md), [`docs/agent-coverage.md`](docs/agent-coverage.md).

@@ -1,0 +1,17 @@
+---
+description: Fechamento de Mudanca e Sincronizacao de Superficie — checklist antes de commitar
+alwaysApply: true
+---
+
+# Regra: Fechamento de Mudanca e Sincronizacao de Superficie
+
+Nenhuma mudanca material em codigo, infraestrutura, documentacao ou harness de IA pode ser considerada concluida sem a sincronizacao completa de todas as superficies afetadas.
+
+## Checklist Obrigatorio de Fechamento
+
+1. Codigo e Testes: Cobertura branch mantida em 100% nas quatro camadas de aplicacao (`make app-test`).
+2. Linters e Analise Estatica: Aprovacao limpa sem avisos de Ruff, Mypy (`--strict`), Vulture e Pylint (`make app-lint` e `make app-validate`).
+3. Seguranca: Aprovacao de Bandit, Pip-audit, Gitleaks, Trivy e Tfsec (`make app-security`).
+4. Documentacao: Atualizar o documento correspondente em `docs/` se o significado ou comportamento de uma funcionalidade foi alterado.
+5. Harness e Matriz: Caso novas regras, skills ou subagentes tenham sido criados ou modificados, atualizar `AGENTS.md`, `docs/agent-coverage.md` e validar com `pytest app/tests/unit/infrastructure/test_agent_coverage_matrix.py`.
+6. Commits: Utilizar padrao Conventional Commits em PT-BR com o escopo adequado.

@@ -1,0 +1,16 @@
+---
+description: Gestao de Dependencias Python — alinhamento de requirements, pyproject e pip-audit
+globs: app/requirements*.txt,app/pyproject.toml
+alwaysApply: false
+---
+
+# Regra: Gestao de Dependencias Python
+
+A introducao ou atualizacao de dependencias no ambiente Python exige alinhamento triplo e auditoria de vulnerabilidades.
+
+## Procedimento Obrigatorio
+
+1. Triplo alinhamento: Toda dependencia de producao deve constar em `app/pyproject.toml` (`[project.dependencies]`) e em `app/requirements.txt`. Dependencias de desenvolvimento devem constar em `[project.optional-dependencies.dev]` e em `app/requirements-dev.txt`.
+2. Fixacao e compatibilidade: Declarar restricoes de versao semanticamente compativeis com Python 3.13+.
+3. Auditoria de seguranca: Executar `pip-audit` sob `make app-security`. Nenhuma dependencia com vulnerabilidades conhecidas (CVEs) ativas pode ser introduzida.
+4. Minimalismo: Nao adicione bibliotecas para funcoes triviais suportadas nativamente pela biblioteca padrao do Python (`pathlib`, `json`, `dataclasses`, `urllib`).

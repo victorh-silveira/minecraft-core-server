@@ -1,0 +1,17 @@
+---
+description: Pureza do Dominio — isolamento tecnologico absoluto da camada domain
+globs: app/src/domain/**/*.py
+alwaysApply: false
+---
+
+# Regra: Pureza do Dominio
+
+A camada `domain` representa o nucleo de regras de negocio do servidor e deve permanecer totalmente pura e agnostica a qualquer tecnologia de infraestrutura.
+
+## Diretrizes Mandatorias
+
+1. Isolamento de dependencias: Proibido importar `application`, `infrastructure`, `presentation` ou quaisquer bibliotecas de terceiros (como `requests`, frameworks web, drivers de banco).
+2. Entidades e Value Objects: As entidades devem ser imutaveis ou ricas em comportamento, validando seus proprios invariantes na instanciacao.
+3. Sem I/O e sem efeitos colaterais: O dominio nao realiza leitura ou gravacao em disco, comunicacao de rede ou chamadas de sistema operacional.
+4. Proibicao de logs: E estritamente vedada a utilizacao de loggers dentro de entidades ou domain services.
+5. Regras de saida e calculos: Formatacoes de dados de dominio, calculos de checksum e regras de negocio pertencem a esta camada.

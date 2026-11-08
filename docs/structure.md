@@ -11,6 +11,12 @@ minecraft-core-server/
 ├── AGENTS.md
 ├── prompt-model.md
 ├── .env.example
+├── .agents/
+│   ├── rules/
+│   ├── skills/
+│   ├── agents/
+│   └── mcp.json
+├── .cursor/ (ponte de compatibilidade)
 ├── app/
 │   ├── src/
 │   │   ├── domain/
