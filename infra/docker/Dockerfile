@@ -7,7 +7,7 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 ARG TARGETOS
 ARG TARGETARCH
 
-RUN apk add --no-cache git=2.54.0-r0
+RUN apk add --no-cache git=2.54.1-r0
 
 WORKDIR /build/rcon-cli
 
