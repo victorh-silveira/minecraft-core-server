@@ -1,3 +1,5 @@
+"""Execucao direta do pacote presentation.cli como modulo Python."""
+
 from presentation.cli.main import main
 
 

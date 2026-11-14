@@ -1,3 +1,5 @@
+"""Portoes de qualidade Python: lint, tipagem estrita, testes, seguranca e build."""
+
 import ast
 import os
 import shutil
@@ -23,10 +25,12 @@ FORBIDDEN_IMPORTS = {
 
 
 def _top_module(name: str) -> str:
+    """Extrai o nome do modulo raiz a partir de um caminho de importacao."""
     return name.split(".", 1)[0]
 
 
 def stage_import_boundaries() -> None:
+    """Valida fronteiras hexagonais proibindo imports externos em domain e application."""
     print("\n>>> Executando: Regras de dependencia hexagonal")
     violations: list[str] = []
     for layer, banned in FORBIDDEN_IMPORTS.items():
@@ -54,6 +58,7 @@ def stage_import_boundaries() -> None:
 
 
 def stage_structure(max_lines: int = 300) -> None:
+    """Garante limite maximo de linhas por arquivo Python e fronteiras hexagonais."""
     print(f"\n>>> Executando: Verificacao estrutural (maximo {max_lines} linhas)")
     violations: list[str] = []
     for path in [*APP_ROOT.rglob("*.py"), REPO_ROOT / "run.py"]:
@@ -79,6 +84,7 @@ def stage_structure(max_lines: int = 300) -> None:
 
 
 def stage_lint() -> None:
+    """Executa Ruff, Vulture, Pylint e verificacao estrutural em modo crash-first."""
     fix_cmd = [sys.executable, "-m", "ruff", "check", "--fix", *LINT_TARGETS]
     print(f"\n>>> Executando: Ruff Check (correcao automatica)\nComando: {' '.join(fix_cmd)}")
     subprocess.run(fix_cmd, check=True, text=True, cwd=REPO_ROOT)
@@ -101,10 +107,18 @@ def stage_lint() -> None:
 
 
 def stage_validate() -> None:
+    """Executa verificacao de tipagem estrita com mypy."""
     run_tool("mypy", ["--config-file", str(PYPROJECT), *MYPY_TARGETS], "mypy --strict", cwd=APP_ROOT)
 
 
 def stage_test(fail_under: int = 100) -> None:
+    """Executa interrogate 100%, pytest e relatorio de cobertura branch."""
+    run_tool(
+        "interrogate",
+        ["-c", str(PYPROJECT), *LINT_TARGETS],
+        "Interrogate - cobertura de docstrings (100%)",
+        cwd=REPO_ROOT,
+    )
     env = os.environ.copy()
     env["COVERAGE_FILE"] = str(Path(tempfile.gettempdir()) / "mcs-coverage")
     subprocess.run(
@@ -125,6 +139,7 @@ def stage_test(fail_under: int = 100) -> None:
 
 
 def stage_security() -> None:
+    """Executa Bandit, Pip-audit e Gitleaks para auditoria de seguranca."""
     ignored_vulns = ["PYSEC-2022-42969"]
     ignore_args: list[str] = []
     for vuln in ignored_vulns:
@@ -148,6 +163,7 @@ def stage_security() -> None:
 
 
 def stage_build() -> None:
+    """Compila o bytecode Python para validacao sintatica do projeto."""
     targets = [str(SRC_ROOT), str(APP_ROOT / "scripts"), str(REPO_ROOT / "run.py")]
     print("\n>>> Executando: compileall (build Python)")
     subprocess.run(

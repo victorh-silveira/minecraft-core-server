@@ -1,3 +1,5 @@
+"""Testes unitarios da camada de apresentacao, CLI e configuracao de logging."""
+
 import json
 import logging
 from pathlib import Path
@@ -20,11 +22,15 @@ from presentation.logging.setup import configure_logging
 
 
 class FakeUseCase:
+    """Duble de SyncRunner para simular resultados ou excecoes na CLI."""
+
     def __init__(self, result: SyncModsResult | None = None, error: Exception | None = None) -> None:
+        """Inicializa o executor falso com resultado ou erro esperado."""
         self._result = result
         self._error = error
 
     def execute(self) -> SyncModsResult:
+        """Retorna o resultado simulado ou lanca a excecao configurada."""
         if self._error is not None:
             raise self._error
         assert self._result is not None
@@ -32,6 +38,7 @@ class FakeUseCase:
 
 
 def _settings(tmp_path: Path, manifest: Path | None = None) -> Settings:
+    """Constroi Settings temporario isolado para testes da CLI."""
     target = manifest or (tmp_path / "mods-manifest.json")
     return Settings(
         repo_root=tmp_path,
@@ -45,6 +52,7 @@ def _settings(tmp_path: Path, manifest: Path | None = None) -> Settings:
 
 
 def test_run_success_and_empty(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    """Valida codigo de saida zero e eventos de log no fluxo bem-sucedido."""
     caplog.set_level(logging.INFO)
     settings = _settings(tmp_path)
     result = SyncModsResult(
@@ -61,6 +69,7 @@ def test_run_success_and_empty(tmp_path: Path, caplog: pytest.LogCaptureFixture)
 
 
 def test_run_failures_and_errors(tmp_path: Path) -> None:
+    """Garante codigo de saida 1 quando o caso de uso falha ou lanca excecoes."""
     settings = _settings(tmp_path)
     failed = SyncModsResult((), (ModSyncFailure("bad", "hash"),))
     assert run(settings, FakeUseCase(failed)) == 1
@@ -72,6 +81,7 @@ def test_run_failures_and_errors(tmp_path: Path) -> None:
 
 
 def test_main_with_empty_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Valida execucao de main() com manifesto vazio e exportacao em presentation.cli."""
     manifest = tmp_path / "mods-manifest.json"
     manifest.write_text(json.dumps({"mods": []}), encoding="utf-8")
     monkeypatch.setenv("SYNC_DISABLE_DOTENV", "1")
@@ -83,6 +93,7 @@ def test_main_with_empty_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
 
 
 def test_main_missing_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Garante codigo de saida 1 em main() quando o manifesto nao existe."""
     monkeypatch.setenv("SYNC_DISABLE_DOTENV", "1")
     monkeypatch.setenv("MODS_MANIFEST_PATH", str(tmp_path / "missing.json"))
     monkeypatch.setenv("MODS_DIR", str(tmp_path / "mods"))
@@ -90,6 +101,7 @@ def test_main_missing_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_build_use_case_and_logging(tmp_path: Path) -> None:
+    """Valida construcao do caso de uso e configuracao de niveis de log."""
     settings = _settings(tmp_path)
     use_case = build_use_case(settings)
     assert isinstance(use_case, SyncModsUseCase)
@@ -100,12 +112,14 @@ def test_build_use_case_and_logging(tmp_path: Path) -> None:
 
 
 def test_cli_main_module_import() -> None:
+    """Garante que presentation.cli.__main__ expoe a funcao main."""
     import presentation.cli.__main__ as module
 
     assert hasattr(module, "main")
 
 
 def test_package_exports() -> None:
+    """Verifica importacao dos pacotes principais e reexportacao de configure_logging."""
     import application
     import domain
     import infrastructure

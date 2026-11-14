@@ -1,3 +1,5 @@
+"""Cliente HTTP resiliente com novas tentativas e backoff exponencial."""
+
 from collections.abc import Callable
 from pathlib import Path
 from secrets import randbelow
@@ -18,6 +20,8 @@ BASE_DELAY_SECONDS = 0.25
 
 
 class RequestsHttpClient:
+    """Cliente HTTP baseado em requests com retry automatico para falhas transitorias."""
+
     def __init__(
         self,
         user_agent: str,
@@ -26,6 +30,7 @@ class RequestsHttpClient:
         max_attempts: int = MAX_ATTEMPTS,
         base_delay_seconds: float = BASE_DELAY_SECONDS,
     ) -> None:
+        """Inicializa o cliente HTTP com User-Agent, transporte e politicas de retry."""
         self._user_agent = user_agent
         self._get: Get = transport or cast(Get, requests.get)
         self._sleep: Sleeper = sleeper or sleep
@@ -33,10 +38,12 @@ class RequestsHttpClient:
         self._base_delay_seconds = base_delay_seconds
 
     def get_json(self, url: str) -> Any:
+        """Executa uma requisicao GET e retorna o payload JSON decodificado."""
         response = self._request(url, stream=False, timeout=60)
         return response.json()
 
     def download(self, url: str, destination: Path) -> None:
+        """Baixa o conteudo remoto em stream para arquivo temporario antes de mover."""
         response = self._request(url, stream=True, timeout=120)
         destination.parent.mkdir(parents=True, exist_ok=True)
         partial = destination.with_name(f"{destination.name}.part")
@@ -51,6 +58,7 @@ class RequestsHttpClient:
             raise
 
     def _request(self, url: str, *, stream: bool, timeout: int) -> Any:
+        """Executa a chamada HTTP aplicando novas tentativas em status transitorios."""
         last_error: Exception | None = None
         for attempt in range(self._max_attempts):
             try:
@@ -79,12 +87,14 @@ class RequestsHttpClient:
         raise ArtifactError(str(last_error) if last_error is not None else "falha HTTP")
 
     def _backoff(self, attempt: int) -> None:
+        """Aplica espera exponencial com jitter criptografico entre tentativas."""
         jitter = (randbelow(1000) / 1000.0) * self._base_delay_seconds
         delay = (self._base_delay_seconds * (2**attempt)) + jitter
         self._sleep(delay)
 
     @staticmethod
     def _close_response(response: object) -> None:
+        """Fecha a resposta HTTP caso o objeto exponha o metodo close."""
         close = getattr(response, "close", None)
         if callable(close):
             close()

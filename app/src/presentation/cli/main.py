@@ -1,3 +1,5 @@
+"""Composition root e ponto de entrada da CLI de sincronizacao de mods."""
+
 import logging
 from typing import Protocol
 
@@ -16,11 +18,15 @@ from presentation.logging.setup import configure_logging
 
 
 class SyncRunner(Protocol):
+    """Contrato minimo para executores do caso de uso de sincronizacao."""
+
     def execute(self) -> SyncModsResult:
+        """Executa a sincronizacao e retorna o resultado consolidado."""
         raise NotImplementedError
 
 
 def build_use_case(settings: Settings) -> SyncModsUseCase:
+    """Instancia e conecta os adaptadores de infraestrutura ao caso de uso."""
     http = RequestsHttpClient(settings.user_agent)
     store = LocalJarStore(settings.mods_dir)
     return SyncModsUseCase(
@@ -35,12 +41,14 @@ def build_use_case(settings: Settings) -> SyncModsUseCase:
 
 
 def _log_items(logger: logging.Logger, result: SyncModsResult) -> None:
+    """Registra em nivel DEBUG o status individual de cada mod processado."""
     for item in result.items:
         event = f"mods.sync.mod.{item.status.value}"
         log_event(logger, logging.DEBUG, event, mod=item.mod_id.value)
 
 
 def run(settings: Settings | None = None, use_case: SyncRunner | None = None) -> int:
+    """Executa o fluxo completo da CLI retornando o codigo de saida."""
     resolved = settings or Settings.from_env()
     logger = configure_logging(resolved.log_level)
     log_event(
@@ -75,4 +83,5 @@ def run(settings: Settings | None = None, use_case: SyncRunner | None = None) ->
 
 
 def main() -> int:
+    """Funcao principal invocada pelos entrypoints da aplicacao."""
     return run()

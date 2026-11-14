@@ -1,3 +1,5 @@
+"""Entidade que representa uma entrada de mod no manifesto."""
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 
@@ -7,6 +9,8 @@ from domain.entities.mod_source import ModSource
 
 @dataclass(frozen=True)
 class ModEntry:
+    """Configuracao validada de um mod declarado no manifesto."""
+
     mod_id: ModId
     version: ModVersion
     source: ModSource
@@ -16,6 +20,7 @@ class ModEntry:
 
     @classmethod
     def from_mapping(cls, payload: object) -> "ModEntry":
+        """Constroi e valida um ModEntry a partir de um mapeamento bruto."""
         if not isinstance(payload, Mapping):
             raise ValueError("entrada de mod invalida")
         raw_id = payload.get("id")

@@ -1,3 +1,5 @@
+"""Configuracao global de ambiente para execucao da suite de testes."""
+
 import os
 
 

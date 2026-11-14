@@ -84,7 +84,7 @@ help:
 # ------------------------------------------------------------------------------
 
 app-install:
-	$(DEV_ENV) python -c "import ruff, pytest, pre_commit, mypy; print('Dependencias Python OK')"
+	$(DEV_ENV) python -c "import ruff, pytest, pre_commit, mypy, interrogate; print('Dependencias Python OK')"
 
 app-lint: app-install
 	$(DEV_ENV) bash -lc "$(OPS) --area all --stage lint"

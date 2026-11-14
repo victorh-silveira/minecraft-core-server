@@ -1,3 +1,5 @@
+"""Orquestrador unificado dos portoes de qualidade por area e estagio."""
+
 import argparse
 import sys
 from collections.abc import Callable
@@ -26,6 +28,7 @@ BASH_AREAS = {
 
 
 def _python(stage: str, coverage_fail_under: int) -> None:
+    """Executa os portoes JSON e Python correspondentes ao estagio informado."""
     json_handlers: dict[str, Callable[[], None]] = {
         "lint": gates_json.stage_lint,
         "security": gates_json.stage_security,
@@ -50,6 +53,7 @@ def _python(stage: str, coverage_fail_under: int) -> None:
 
 
 def _dispatch_area(area: str, stage: str, coverage_fail_under: int) -> None:
+    """Despacha a execucao do estagio para a area Python ou script Bash."""
     if area == "python":
         _python(stage, coverage_fail_under)
         return
@@ -61,6 +65,7 @@ def _dispatch_area(area: str, stage: str, coverage_fail_under: int) -> None:
 
 
 def main() -> None:
+    """Analisa argumentos CLI e executa os portoes de qualidade solicitados."""
     parser = argparse.ArgumentParser(description="Portao de qualidade do servidor Minecraft")
     parser.add_argument("--stage", required=True, choices=[*STAGES, "pytest"], help="Estagio a executar")
     parser.add_argument("--area", default="all", choices=AREAS, help="Area da matriz")

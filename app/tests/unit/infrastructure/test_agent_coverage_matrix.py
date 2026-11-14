@@ -1,13 +1,17 @@
+"""Testes de integridade da matriz de cobertura de agentes, regras e skills."""
+
 import json
 import re
 from pathlib import Path
 
 
 def _get_repo_root() -> Path:
+    """Retorna o diretorio raiz do repositorio a partir deste arquivo de teste."""
     return Path(__file__).resolve().parent.parent.parent.parent.parent
 
 
 def _parse_matrix_rows(coverage_path: Path) -> list[tuple[str, str, str, str]]:
+    """Extrai as linhas da tabela de cobertura em docs/agent-coverage.md."""
     content = coverage_path.read_text(encoding="utf-8")
     lines = content.splitlines()
     in_table = False
@@ -28,6 +32,7 @@ def _parse_matrix_rows(coverage_path: Path) -> list[tuple[str, str, str, str]]:
 
 
 def test_coverage_matrix_table_exists_and_parses() -> None:
+    """Verifica existencia e quantidade minima de linhas da matriz de cobertura."""
     repo_root = _get_repo_root()
     coverage_path = repo_root / "docs" / "agent-coverage.md"
     assert coverage_path.is_file()
@@ -36,6 +41,7 @@ def test_coverage_matrix_table_exists_and_parses() -> None:
 
 
 def test_coverage_matrix_docs_exist() -> None:
+    """Garante que todos os documentos referenciados na matriz existem em disco."""
     repo_root = _get_repo_root()
     coverage_path = repo_root / "docs" / "agent-coverage.md"
     rows = _parse_matrix_rows(coverage_path)
@@ -48,6 +54,7 @@ def test_coverage_matrix_docs_exist() -> None:
 
 
 def test_coverage_matrix_rules_match_filesystem() -> None:
+    """Garante paridade entre regras listadas na matriz e arquivos .mdc em .agents/rules."""
     repo_root = _get_repo_root()
     coverage_path = repo_root / "docs" / "agent-coverage.md"
     rows = _parse_matrix_rows(coverage_path)
@@ -65,6 +72,7 @@ def test_coverage_matrix_rules_match_filesystem() -> None:
 
 
 def test_coverage_matrix_skills_match_filesystem() -> None:
+    """Garante paridade entre skills listadas na matriz e diretorios em .agents/skills."""
     repo_root = _get_repo_root()
     coverage_path = repo_root / "docs" / "agent-coverage.md"
     rows = _parse_matrix_rows(coverage_path)
@@ -83,6 +91,7 @@ def test_coverage_matrix_skills_match_filesystem() -> None:
 
 
 def test_coverage_matrix_subagents_exist() -> None:
+    """Verifica presenca dos subagentes canonicos em .agents/agents."""
     repo_root = _get_repo_root()
     agents_dir = repo_root / ".agents" / "agents"
     assert agents_dir.is_dir()
@@ -96,6 +105,7 @@ def test_coverage_matrix_subagents_exist() -> None:
 
 
 def test_agents_harness_structure() -> None:
+    """Valida estrutura canonica de .agents e ausencia do diretorio legado .cursor."""
     repo_root = _get_repo_root()
     agents_dir = repo_root / ".agents"
     assert agents_dir.is_dir()
@@ -106,6 +116,7 @@ def test_agents_harness_structure() -> None:
 
 
 def test_mcp_config_valid() -> None:
+    """Valida sintaxe JSON e chave raiz mcpServers em .agents/mcp.json."""
     repo_root = _get_repo_root()
     mcp_path = repo_root / ".agents" / "mcp.json"
     assert mcp_path.is_file()

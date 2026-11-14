@@ -1,3 +1,5 @@
+"""Utilitarios compartilhados pelos portoes operacionais do repositorio."""
+
 import subprocess
 import sys
 from pathlib import Path
@@ -10,6 +12,7 @@ RUN_LINUX = BASH / "run-in-linux-env.sh"
 
 
 def run_tool(module: str, args: list[str], description: str, cwd: Path | None = None) -> None:
+    """Executa um modulo Python em modo crash-first exibindo comando e falhas."""
     print(f"\n>>> Executando: {description}")
     command = [sys.executable, "-m", module, *args]
     print(f"Comando: {' '.join(command)}")
@@ -21,6 +24,7 @@ def run_tool(module: str, args: list[str], description: str, cwd: Path | None = 
 
 
 def run_bash_gate(script_name: str, stage: str) -> None:
+    """Executa um script de portao Bash dentro do ambiente Linux/WSL."""
     script = BASH / script_name
     print(f"\n>>> Executando: {script_name} {stage}")
     command = ["bash", str(RUN_LINUX), "bash", str(script), stage]

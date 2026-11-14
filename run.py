@@ -1,3 +1,5 @@
+"""Ponto de entrada da aplicacao CLI para sincronizacao de mods."""
+
 import sys
 from pathlib import Path
 

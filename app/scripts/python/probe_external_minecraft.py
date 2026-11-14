@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Sonda externa de disponibilidade e MOTD do servidor Minecraft via API HTTPS."""
+
 import argparse
 import http.client
 import json
@@ -8,6 +10,7 @@ from typing import Any
 
 
 def motd_text(status: dict[str, Any]) -> str:
+    """Extrai o texto limpo do MOTD a partir do payload de status."""
     motd = status.get("motd", {})
     if not isinstance(motd, dict):
         return ""
@@ -18,6 +21,7 @@ def motd_text(status: dict[str, Any]) -> str:
 
 
 def query(base_url: str, target: str, timeout: float, user_agent: str) -> dict[str, Any]:
+    """Consulta a API externa via HTTPS e retorna o JSON de status do servidor."""
     base = urllib.parse.urlsplit(base_url)
     if base.scheme != "https" or not base.hostname:
         raise ValueError("a API externa deve usar HTTPS")
@@ -35,6 +39,7 @@ def query(base_url: str, target: str, timeout: float, user_agent: str) -> dict[s
 
 
 def main() -> int:
+    """Ponto de entrada CLI da sonda externa de status Minecraft."""
     parser = argparse.ArgumentParser()
     parser.add_argument("target")
     parser.add_argument("--base-url", default="https://api.mcsrvstat.us/3")

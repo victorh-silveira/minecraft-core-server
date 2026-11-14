@@ -1,3 +1,5 @@
+"""Portoes de validacao estrutural, seguranca e integridade do manifesto JSON."""
+
 import json
 import sys
 
@@ -10,6 +12,7 @@ REQUIRED_MOD = {"id", "version", "source"}
 
 
 def stage_validate() -> None:
+    """Valida existencia e sintaxe JSON do arquivo de manifesto de mods."""
     print("\n>>> Executando: JSON validate (parse)")
     if not MANIFEST.is_file():
         print(f"[ERRO] Manifesto ausente: {MANIFEST}")
@@ -23,6 +26,7 @@ def stage_validate() -> None:
 
 
 def stage_lint() -> None:
+    """Valida campos obrigatorios, loader e fontes declaradas no manifesto."""
     print("\n>>> Executando: JSON lint (schema do manifesto)")
     stage_validate()
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -58,6 +62,7 @@ def stage_lint() -> None:
 
 
 def _mods() -> list[dict[str, object]]:
+    """Carrega e retorna a lista de entradas de mods do manifesto."""
     stage_validate()
     data = json.loads(MANIFEST.read_text(encoding="utf-8"))
     mods = data["mods"]
@@ -68,6 +73,7 @@ def _mods() -> list[dict[str, object]]:
 
 
 def stage_security() -> None:
+    """Garante URLs HTTPS e formato valido de SHA-256 nas entradas do manifesto."""
     print("\n>>> Executando: JSON seguranca (https e sha256)")
     for index, entry in enumerate(_mods()):
         url = entry.get("download_url")
@@ -88,6 +94,7 @@ def stage_security() -> None:
 
 
 def stage_test() -> None:
+    """Verifica unicidade dos identificadores de mods no manifesto."""
     print("\n>>> Executando: JSON testes (ids unicos)")
     seen: set[str] = set()
     for index, entry in enumerate(_mods()):
@@ -103,6 +110,7 @@ def stage_test() -> None:
 
 
 def stage_build() -> None:
+    """Exige hash SHA-256 preenchido em todos os mods antes do build."""
     print("\n>>> Executando: JSON build (sha256 obrigatorio)")
     for index, entry in enumerate(_mods()):
         sha_raw = entry.get("sha256")

@@ -1,3 +1,5 @@
+"""Testes unitarios das entidades, objetos de valor e servicos de dominio."""
+
 import pytest
 
 from domain.entities.download_artifact import DownloadArtifact
@@ -16,6 +18,7 @@ SHA_D = "d" * 64
 
 
 def test_mod_id_and_version_strip_and_reject_empty() -> None:
+    """Valida normalizacao e rejeicao de valores vazios em ModId e ModVersion."""
     assert ModId("  example-mod ").value == "example-mod"
     assert ModVersion(" 1.0 ").value == "1.0"
     with pytest.raises(ValueError, match="id do mod"):
@@ -25,6 +28,7 @@ def test_mod_id_and_version_strip_and_reject_empty() -> None:
 
 
 def test_sha256_digest_normalizes_and_presence() -> None:
+    """Valida normalizacao hexadecimal, tamanho e deteccao de presenca do SHA-256."""
     digest = Sha256Digest(f"  {SHA_A.upper()} ")
     assert digest.value == SHA_A
     assert digest.is_present()
@@ -38,6 +42,7 @@ def test_sha256_digest_normalizes_and_presence() -> None:
 
 
 def test_download_artifact_requires_url() -> None:
+    """Garante obrigatoriedade e limpeza de espacos na URL de DownloadArtifact."""
     with pytest.raises(ValueError, match="url de download"):
         DownloadArtifact(" ", Sha256Digest(""))
     artifact = DownloadArtifact(" https://cdn/mod.jar ", Sha256Digest(SHA_A))
@@ -45,6 +50,7 @@ def test_download_artifact_requires_url() -> None:
 
 
 def test_mod_entry_from_mapping_and_unknown_source() -> None:
+    """Valida construcao de ModEntry e erros para campos invalidos ou fonte desconhecida."""
     entry = ModEntry.from_mapping(
         {
             "id": "x",
@@ -72,6 +78,7 @@ def test_mod_entry_from_mapping_and_unknown_source() -> None:
 
 
 def test_mod_manifest_from_mapping_and_validation() -> None:
+    """Valida defaults e restricoes de versao, loader e lista de mods em ModManifest."""
     manifest = ModManifest.from_mapping({"mods": []})
     assert manifest.minecraft_version == "26.3"
     assert manifest.loader == "forge"
@@ -89,6 +96,7 @@ def test_mod_manifest_from_mapping_and_validation() -> None:
 
 
 def test_jar_filename_and_checksum() -> None:
+    """Valida geracao de nome de JAR e comparacao de digest SHA-256."""
     name = jar_filename(ModId("example-mod"), ModVersion("1.0/2"))
     assert name == "example-mod-1.0_2.jar"
     expected = Sha256Digest(SHA_A)

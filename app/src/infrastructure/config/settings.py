@@ -1,9 +1,12 @@
+"""Carregamento de configuracoes e leitura opcional de arquivo .env."""
+
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
 
 def apply_dotenv(path: Path) -> None:
+    """Carrega variaveis de um arquivo .env sem sobrescrever o ambiente atual."""
     if not path.is_file():
         return
     for raw in path.read_text(encoding="utf-8").splitlines():
@@ -18,10 +21,12 @@ def apply_dotenv(path: Path) -> None:
 
 
 def _truthy(value: str) -> bool:
+    """Converte uma string de configuracao booleana para bool."""
     return value.strip().lower() in {"1", "true", "yes"}
 
 
 def _path_or_default(raw: str | None, default: Path) -> Path:
+    """Retorna o Path informado quando nao vazio ou o valor padrao."""
     if raw is None or not str(raw).strip():
         return default
     return Path(raw)
@@ -29,6 +34,8 @@ def _path_or_default(raw: str | None, default: Path) -> Path:
 
 @dataclass(frozen=True)
 class Settings:
+    """Configuracoes imutaveis de execucao do sincronizador de mods."""
+
     repo_root: Path
     manifest_path: Path
     mods_dir: Path
@@ -39,6 +46,7 @@ class Settings:
 
     @classmethod
     def from_env(cls, environ: dict[str, str] | None = None) -> "Settings":
+        """Constroi Settings lendo variaveis de ambiente e arquivo .env."""
         env = os.environ if environ is None else environ
         disable_dotenv = _truthy(str(env.get("SYNC_DISABLE_DOTENV", "")))
         repo_root = Path(env.get("REPO_ROOT", Path(__file__).resolve().parents[4])).resolve()

@@ -1,3 +1,5 @@
+"""Adaptador de resolucao de artefatos via API v2 do Modrinth."""
+
 from domain.entities.download_artifact import DownloadArtifact
 from domain.entities.identifiers import Sha256Digest
 from domain.entities.mod_entry import ModEntry
@@ -9,10 +11,14 @@ MODRINTH_API = "https://api.modrinth.com/v2"
 
 
 class ModrinthResolver:
+    """Resolve URL e digest SHA-256 de mods consultando a API do Modrinth."""
+
     def __init__(self, http: RequestsHttpClient) -> None:
+        """Inicializa o resolvedor com o cliente HTTP configurado."""
         self._http = http
 
     def resolve(self, entry: ModEntry, minecraft_version: str, loader: str) -> DownloadArtifact:
+        """Resolve o artefato de download para versao de Minecraft e loader informados."""
         if entry.download_url:
             return self._require_sha(DownloadArtifact(entry.download_url, entry.sha256), entry.mod_id.value)
         if not entry.project_slug:
@@ -39,6 +45,7 @@ class ModrinthResolver:
 
     @staticmethod
     def _merge_sha(manifest: Sha256Digest, provider: Sha256Digest, mod_id: str) -> Sha256Digest:
+        """Combina e valida consistencia entre o hash do manifesto e do provedor."""
         if manifest.is_present() and provider.is_present() and manifest != provider:
             raise ValueError(f"Mod {mod_id}: sha256 manifesto {manifest.value} diverge do Modrinth {provider.value}")
         if manifest.is_present():
@@ -47,6 +54,7 @@ class ModrinthResolver:
 
     @staticmethod
     def _require_sha(artifact: DownloadArtifact, mod_id: str) -> DownloadArtifact:
+        """Garante que o artefato resolvido possua hash SHA-256 valido."""
         if not artifact.sha256.is_present():
             raise ValueError(f"Mod {mod_id}: sha256 ausente apos resolucao")
         return artifact

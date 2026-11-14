@@ -1,3 +1,5 @@
+"""Rotina de limpeza de caches, artefatos temporarios e logs locais."""
+
 import shutil
 from pathlib import Path
 
@@ -5,6 +7,7 @@ from gates_common import APP_ROOT, REPO_ROOT
 
 
 def _safe_remove(path: Path) -> None:
+    """Remove arquivo ou diretorio tratando eventuais erros de permissao ou I/O."""
     try:
         if path.is_dir():
             shutil.rmtree(path)
@@ -17,6 +20,7 @@ def _safe_remove(path: Path) -> None:
 
 
 def stage_clean() -> None:
+    """Remove caches e artefatos temporarios preservando mundo, manifesto e .env.example."""
     print("\n>>> Executando: Limpeza full-stack")
     for path in REPO_ROOT.rglob("__pycache__"):
         if path.is_dir() and "app" in path.parts:

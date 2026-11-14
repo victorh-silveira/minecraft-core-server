@@ -1,3 +1,5 @@
+"""Testes unitarios do adaptador ModrinthResolver."""
+
 import pytest
 
 from domain.entities.mod_entry import ModEntry
@@ -14,10 +16,12 @@ SHA_TWO = "2" * 64
 
 
 def _client(payload: object) -> RequestsHttpClient:
+    """Cria um cliente HTTP falso retornando o payload JSON informado."""
     return RequestsHttpClient("ua", transport=lambda *_a, **_k: FakeResponse(payload=payload))
 
 
 def test_modrinth_direct_url() -> None:
+    """Valida resolucao direta quando download_url ja esta presente na entrada."""
     entry = ModEntry.from_mapping(
         {
             "id": "x",
@@ -43,12 +47,14 @@ def test_modrinth_direct_url() -> None:
 
 
 def test_modrinth_requires_slug() -> None:
+    """Garante erro quando nem download_url nem project_slug sao informados."""
     entry = ModEntry.from_mapping({"id": "x", "version": "1.0", "source": "modrinth"})
     with pytest.raises(ValueError, match="project_slug"):
         ModrinthResolver(_client([])).resolve(entry, "26.3", "forge")
 
 
 def test_modrinth_invalid_payload_and_missing_version() -> None:
+    """Valida erros para payload nao-lista ou versao ausente na resposta Modrinth."""
     slug = ModEntry.from_mapping({"id": "x", "version": "1.0.0", "source": "modrinth", "project_slug": "example-mod"})
     with pytest.raises(ValueError, match="resposta Modrinth invalida"):
         ModrinthResolver(_client({})).resolve(slug, "26.3", "forge")
@@ -57,6 +63,7 @@ def test_modrinth_invalid_payload_and_missing_version() -> None:
 
 
 def test_modrinth_file_errors() -> None:
+    """Valida erros para lista de arquivos ausente, invalida ou sem URL no Modrinth."""
     slug = ModEntry.from_mapping({"id": "x", "version": "1.0.0", "source": "modrinth", "project_slug": "example-mod"})
     with pytest.raises(ValueError, match="arquivo Modrinth ausente"):
         ModrinthResolver(_client([{"version_number": "1.0.0", "files": []}])).resolve(slug, "26.3", "forge")
@@ -69,6 +76,7 @@ def test_modrinth_file_errors() -> None:
 
 
 def test_modrinth_from_api_hashes() -> None:
+    """Valida combinacao de hashes, divergencias e selecao do arquivo primario."""
     slug = ModEntry.from_mapping({"id": "x", "version": "1.0.0", "source": "modrinth", "project_slug": "example-mod"})
     payload = [
         {

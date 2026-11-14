@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Sonda direta do protocolo Server List Ping do Minecraft via TCP."""
+
 import argparse
 import json
 import socket
@@ -8,6 +10,7 @@ from typing import Any
 
 
 def encode_varint(value: int) -> bytes:
+    """Codifica um inteiro no formato VarInt do protocolo Minecraft."""
     encoded = bytearray()
     while True:
         byte = value & 0x7F
@@ -18,6 +21,7 @@ def encode_varint(value: int) -> bytes:
 
 
 def receive_exact(connection: socket.socket, size: int) -> bytes:
+    """Le exatamente a quantidade solicitada de bytes do socket TCP."""
     chunks = bytearray()
     while len(chunks) < size:
         chunk = connection.recv(size - len(chunks))
@@ -28,6 +32,7 @@ def receive_exact(connection: socket.socket, size: int) -> bytes:
 
 
 def receive_varint(connection: socket.socket) -> int:
+    """Le e decodifica um VarInt diretamente da conexao TCP."""
     value = 0
     for shift in range(0, 35, 7):
         byte = receive_exact(connection, 1)[0]
@@ -38,6 +43,7 @@ def receive_varint(connection: socket.socket) -> int:
 
 
 def decode_varint(payload: bytes, offset: int = 0) -> tuple[int, int]:
+    """Decodifica um VarInt a partir de um buffer de bytes e retorna o novo offset."""
     value = 0
     for shift in range(0, 35, 7):
         byte = payload[offset]
@@ -49,6 +55,7 @@ def decode_varint(payload: bytes, offset: int = 0) -> tuple[int, int]:
 
 
 def flatten_text(component: Any) -> str:
+    """Converte componentes de texto JSON do Minecraft em string simples."""
     if isinstance(component, str):
         return component
     if not isinstance(component, dict):
@@ -58,6 +65,7 @@ def flatten_text(component: Any) -> str:
 
 
 def query_status(host: str, port: int, timeout: float) -> dict[str, Any]:
+    """Executa handshake e requisicao de status SLP contra host e porta."""
     address = host.encode("utf-8")
     handshake = b"\x00" + encode_varint(0) + encode_varint(len(address)) + address
     handshake += struct.pack(">H", port) + b"\x01"
@@ -73,6 +81,7 @@ def query_status(host: str, port: int, timeout: float) -> dict[str, Any]:
 
 
 def main() -> int:
+    """Ponto de entrada CLI da sonda TCP de status Minecraft."""
     parser = argparse.ArgumentParser()
     parser.add_argument("host")
     parser.add_argument("port", type=int)

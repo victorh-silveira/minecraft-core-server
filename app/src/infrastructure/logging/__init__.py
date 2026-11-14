@@ -1,4 +1,1 @@
-from infrastructure.logging.events import log_event, redact_url
-
-
-__all__ = ["log_event", "redact_url"]
+"""Utilitarios de logging estruturado e mascaramento de dados sensiveis."""

@@ -1,3 +1,5 @@
+"""Mapeadores de payload da API do Modrinth para DTOs de arquivo."""
+
 from dataclasses import dataclass
 
 from domain.entities.identifiers import Sha256Digest
@@ -5,11 +7,14 @@ from domain.entities.identifiers import Sha256Digest
 
 @dataclass(frozen=True)
 class ModrinthFileDto:
+    """Representa URL e hash SHA-256 extraidos de um arquivo do Modrinth."""
+
     url: str
     sha256: Sha256Digest
 
 
 def pick_primary_file(files: list[object], mod_id: str) -> dict[str, object]:
+    """Seleciona o arquivo primario da versao no Modrinth ou o primeiro disponivel."""
     if not files:
         raise ValueError(f"Mod {mod_id}: arquivo Modrinth ausente")
     preferred = next(
@@ -23,6 +28,7 @@ def pick_primary_file(files: list[object], mod_id: str) -> dict[str, object]:
 
 
 def map_modrinth_file(primary: dict[str, object], mod_id: str) -> ModrinthFileDto:
+    """Converte o dicionario do arquivo Modrinth em ModrinthFileDto validado."""
     url = primary.get("url")
     if not isinstance(url, str) or not url.strip():
         raise ValueError(f"Mod {mod_id}: url Modrinth ausente")

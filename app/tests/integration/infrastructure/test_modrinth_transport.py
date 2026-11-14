@@ -1,3 +1,5 @@
+"""Testes de integracao do transporte HTTP com o resolvedor Modrinth."""
+
 from domain.entities.mod_entry import ModEntry
 from infrastructure.adapters.http_client import RequestsHttpClient
 from infrastructure.adapters.modrinth_resolver import ModrinthResolver
@@ -7,10 +9,14 @@ SHA_API = "abc123" + "0" * 58
 
 
 class RecordingTransport:
+    """Transporte HTTP falso que registra URLs consultadas pelo cliente."""
+
     def __init__(self) -> None:
+        """Inicializa a lista de URLs registradas."""
         self.urls: list[str] = []
 
     def __call__(self, url: str, **_kwargs: object) -> object:
+        """Registra a URL chamada e devolve uma resposta Modrinth simulada."""
         self.urls.append(url)
 
         class Response:
@@ -37,6 +43,7 @@ class RecordingTransport:
 
 
 def test_modrinth_http_mock_transport() -> None:
+    """Valida integracao entre RequestsHttpClient e ModrinthResolver via transporte falso."""
     transport = RecordingTransport()
     resolver = ModrinthResolver(RequestsHttpClient("minecraft-server-sync/1.0", transport=transport))
     entry = ModEntry.from_mapping(

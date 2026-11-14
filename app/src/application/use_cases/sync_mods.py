@@ -1,3 +1,5 @@
+"""Caso de uso para sincronizacao idempotente de mods a partir do manifesto."""
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
@@ -16,41 +18,54 @@ from domain.services.jar_naming import jar_filename
 
 
 class ModSyncStatus(StrEnum):
+    """Estados finais possiveis para um mod sincronizado."""
+
     SKIPPED_CACHED = "skipped_cached"
     DOWNLOADED = "downloaded"
 
 
 @dataclass(frozen=True)
 class ModSyncItem:
+    """Resultado individual da sincronizacao de um mod."""
+
     mod_id: ModId
     status: ModSyncStatus
 
 
 @dataclass(frozen=True)
 class ModSyncFailure:
+    """Registro de falha ocorrida ao sincronizar um mod especifico."""
+
     mod_id: str
     reason: str
 
 
 @dataclass(frozen=True)
 class SyncModsResult:
+    """Resultado consolidado da execucao do caso de uso de sincronizacao."""
+
     items: tuple[ModSyncItem, ...]
     failures: tuple[ModSyncFailure, ...]
 
     @property
     def ok(self) -> bool:
+        """Indica se todos os mods foram sincronizados sem falhas."""
         return not self.failures
 
     @property
     def skipped(self) -> int:
+        """Quantidade de mods reaproveitados do cache local."""
         return sum(1 for item in self.items if item.status is ModSyncStatus.SKIPPED_CACHED)
 
     @property
     def downloaded(self) -> int:
+        """Quantidade de mods baixados nesta execucao."""
         return sum(1 for item in self.items if item.status is ModSyncStatus.DOWNLOADED)
 
 
 class SyncModsUseCase:
+    """Orquestra resolucao, verificacao de hash e download dos mods."""
+
     def __init__(
         self,
         manifest_loader: ManifestLoader,
@@ -58,12 +73,14 @@ class SyncModsUseCase:
         store: ArtifactStore,
         downloader: ArtifactDownloader,
     ) -> None:
+        """Inicializa o caso de uso com suas portas de infraestrutura."""
         self._manifest_loader = manifest_loader
         self._resolvers = resolvers
         self._store = store
         self._downloader = downloader
 
     def execute(self) -> SyncModsResult:
+        """Executa a sincronizacao de todos os mods declarados no manifesto."""
         manifest = self._manifest_loader.load()
         self._store.prepare()
         items: list[ModSyncItem] = []
@@ -76,6 +93,7 @@ class SyncModsUseCase:
         return SyncModsResult(tuple(items), tuple(failures))
 
     def _sync_one(self, entry: ModEntry, manifest: ModManifest) -> ModSyncItem:
+        """Sincroniza um unico mod validando cache e integridade SHA-256."""
         filename = jar_filename(entry.mod_id, entry.version)
         resolver = self._resolvers.get(entry.source)
         if resolver is None:

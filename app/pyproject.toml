@@ -12,6 +12,7 @@ dependencies = [
 dev = [
     "bandit>=1.9.4",
     "coverage>=7.14.0",
+    "interrogate>=1.7.0",
     "mypy>=1.18.0",
     "pip-audit>=2.10.0",
     "pre-commit>=4.6.0",
@@ -134,3 +135,17 @@ exclude_lines = [
 min_confidence = 70
 paths = ["src"]
 exclude = ["scripts/operations/clean_workspace.py"]
+
+[tool.interrogate]
+ignore-init-method = false
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = true
+ignore-nested-classes = true
+fail-under = 100
+exclude = [".git", ".venv", "venv", "__pycache__", "build", "dist", "runtime"]
+verbose = 1

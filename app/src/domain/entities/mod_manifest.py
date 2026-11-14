@@ -1,3 +1,5 @@
+"""Entidade agregada que representa o manifesto de mods do servidor."""
+
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
@@ -6,11 +8,14 @@ from domain.entities.mod_entry import ModEntry
 
 @dataclass(frozen=True)
 class ModManifest:
+    """Manifesto validado com versao do Minecraft, loader e lista de mods."""
+
     minecraft_version: str
     loader: str
     mods: tuple[ModEntry, ...]
 
     def __post_init__(self) -> None:
+        """Normaliza e valida versao do Minecraft e loader."""
         version = self.minecraft_version.strip()
         loader = self.loader.strip()
         if not version:
@@ -22,6 +27,7 @@ class ModManifest:
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, object]) -> "ModManifest":
+        """Cria um ModManifest validado a partir do dicionario do manifesto."""
         raw_version = payload.get("minecraft_version", "26.3")
         if not isinstance(raw_version, str) or not raw_version.strip():
             raise ValueError("minecraft_version invalida")
@@ -36,4 +42,5 @@ class ModManifest:
 
     @property
     def entries(self) -> Sequence[ModEntry]:
+        """Retorna a sequencia imutavel de mods do manifesto."""
         return self.mods
