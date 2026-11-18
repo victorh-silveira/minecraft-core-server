@@ -19,6 +19,7 @@ module "aks" {
   source                          = "../../modules/aks"
   cluster_name                    = local.aks_cluster_name
   resource_group_name             = data.azurerm_resource_group.this.name
+  node_resource_group             = local.node_resource_group
   location                        = data.azurerm_resource_group.this.location
   dns_prefix                      = local.dns_prefix
   subnet_id                       = module.network.aks_subnet_id

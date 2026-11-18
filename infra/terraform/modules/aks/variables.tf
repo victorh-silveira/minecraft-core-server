@@ -29,6 +29,12 @@ variable "kubernetes_version" {
   default     = null
 }
 
+variable "node_resource_group" {
+  type        = string
+  description = "Nome do grupo de recursos gerenciado pelo AKS para os nos (null usa o padrao do Azure)"
+  default     = null
+}
+
 variable "sku_tier" {
   type        = string
   description = "Tier de cobranca do AKS (Free, Standard)"

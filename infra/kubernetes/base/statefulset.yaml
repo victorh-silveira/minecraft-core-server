@@ -99,8 +99,6 @@ spec:
                 gamerule players_sleeping_percentage 1
                 gamerule command_block_output false
                 gamerule send_command_feedback false
-            - name: RCON_CMDS_ON_CONNECT
-              value: "op AnonymousNoobz"
             - name: RCON_PASSWORD
               valueFrom:
                 secretKeyRef:

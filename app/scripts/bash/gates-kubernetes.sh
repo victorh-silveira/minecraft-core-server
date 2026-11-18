@@ -155,11 +155,15 @@ cmd_test() {
   echo "${rendered}" | grep -q "kind: Service" || { echo "[FAIL] Service ausente"; exit 1; }
   echo "${rendered}" | grep -q "mc-server" || { echo "[FAIL] recurso mc-server ausente"; exit 1; }
   for expected in "gamerule keep_inventory true" "gamerule players_sleeping_percentage 1" \
-    "gamerule command_block_output false" "gamerule send_command_feedback false" "op AnonymousNoobz" \
+    "gamerule command_block_output false" "gamerule send_command_feedback false" \
     "ENFORCE_SECURE_PROFILE" "ENABLE_COMMAND_BLOCK" "OP_PERMISSION_LEVEL" "FUNCTION_PERMISSION_LEVEL" \
     "Minecraft Core Server" "/templates/server-icon.png"; do
     echo "${rendered}" | grep -Fq "${expected}" || { echo "[FAIL] configuracao ausente no K8s: ${expected}"; exit 1; }
   done
+  if echo "${rendered}" | grep -Fq "RCON_CMDS_ON_CONNECT" || echo "${rendered}" | grep -Fq "op AnonymousNoobz"; then
+    echo "[FAIL] auto-promocao de OP via RCON_CMDS_ON_CONNECT deve permanecer removida com ONLINE_MODE=FALSE"
+    exit 1
+  fi
   echo "[OK] smoke k8s estatico"
 }
 

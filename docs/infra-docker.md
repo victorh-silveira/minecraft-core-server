@@ -21,7 +21,7 @@ O bind unico garante que `world`, `world upgraded` e os temporarios de `world/fi
 
 Templates copiados na imagem: `server.properties`, `server-icon.png` e `mods-manifest.json`. A imagem itzg materializa o icone em `/data/server-icon.png`; bind mounts locais prevalecem em runtime.
 
-O Compose fixa `VERSION=26.3`, `TYPE=FORGE` e `FORGE_VERSION=66.0.6` pelos defaults dos templates. Whitelist e perfil seguro ficam desabilitados. No boot, ativa `keepInventory`, permite avancar a noite com um jogador e silencia feedback administrativo; em cada conexao, `op AnonymousNoobz` garante OP nivel 4 ao administrador.
+O Compose fixa `VERSION=26.3`, `TYPE=FORGE` e `FORGE_VERSION=66.0.6` pelos defaults dos templates. Whitelist e perfil seguro ficam desabilitados. No boot, ativa `keepInventory`, permite avancar a noite com um jogador e silencia feedback administrativo; a promocao de OP deve ser feita manualmente via RCON enquanto `ONLINE_MODE=FALSE`.
 
 ## Recursos e escalamento
 

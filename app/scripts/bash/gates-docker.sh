@@ -137,12 +137,16 @@ cmd_test() {
   for expected in 'WHITE_LIST: "FALSE"' 'ENFORCE_WHITELIST: "FALSE"' 'ENFORCE_SECURE_PROFILE: "FALSE"' \
     'ENABLE_COMMAND_BLOCK: "TRUE"' 'OP_PERMISSION_LEVEL: "4"' 'FUNCTION_PERMISSION_LEVEL: "4"' \
     'gamerule keep_inventory true' 'gamerule players_sleeping_percentage 1' \
-    'gamerule command_block_output false' 'gamerule send_command_feedback false' 'op AnonymousNoobz'; do
+    'gamerule command_block_output false' 'gamerule send_command_feedback false'; do
     if ! grep -Fq "${expected}" <<< "${rendered}"; then
       echo "[FAIL] configuracao ausente no Compose: ${expected}"
       failed=1
     fi
   done
+  if grep -Fq 'RCON_CMDS_ON_CONNECT' <<< "${rendered}" || grep -Fq 'op AnonymousNoobz' <<< "${rendered}"; then
+    echo "[FAIL] auto-promocao de OP via RCON_CMDS_ON_CONNECT deve permanecer removida com ONLINE_MODE=FALSE"
+    failed=1
+  fi
   if ! grep -A1 -F 'cap_drop:' <<< "${rendered}" | grep -Fq -- '- ALL'; then
     echo "[FAIL] remocao de capabilities Linux ausente no Compose"
     failed=1

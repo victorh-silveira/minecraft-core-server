@@ -103,7 +103,7 @@ No AKS um unico PVC `mc-data` (**8Gi**, `mc-standard-ssd`, **Retain**) e montado
 | RCON | `25575` (ClusterIP no AKS) | `RCON_PORT` (localhost only) |
 | Online mode | `false` | `ONLINE_MODE` |
 | Whitelist | Desabilitada | Desabilitada |
-| Comandos | OP nivel 4 para `AnonymousNoobz`; gamerules administrativas no boot | Idem |
+| Comandos | Gamerules administrativas no boot via RCON (sem auto-OP ao conectar) | Idem |
 | Flags JVM | `USE_AIKAR_FLAGS=true` | idem |
 | Probes | startup TCP `25565`; readiness/liveness `mc-health` (paridade Compose) | healthcheck `mc-health` |
 

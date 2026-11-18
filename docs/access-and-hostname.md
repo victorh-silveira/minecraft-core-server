@@ -9,11 +9,11 @@ Quem pode entrar no servidor e como conectar de forma estavel (hostname em vez d
 | Conta Mojang | `ONLINE_MODE=false` no `.env` | `ONLINE_MODE=FALSE` no StatefulSet |
 | Whitelist | Desabilitada | Desabilitada |
 | Perfil seguro | `ENFORCE_SECURE_PROFILE=FALSE` | `ENFORCE_SECURE_PROFILE=FALSE` |
-| Comandos | `AnonymousNoobz` recebe OP ao conectar | `AnonymousNoobz` recebe OP ao conectar |
+| Comandos | OP manual via RCON (sem auto-promocao) | OP manual via RCON (sem auto-promocao) |
 | RCON | Porta `127.0.0.1:25575` apenas | Service `mc-server-rcon` ClusterIP + port-forward |
 | Rede (opcional) | Firewall do host | NSG `game_cidr_list` no Terraform |
 
-Servidor em modo offline (`online-mode=false`): nao exige conta Mojang e aceita clientes originais ou launchers paralelos. Qualquer nick pode entrar. `RCON_CMDS_ON_CONNECT=op AnonymousNoobz` concede OP nivel 4 ao administrador, permitindo comandos como `/gamemode`.
+Servidor em modo offline (`online-mode=false`): nao exige conta Mojang e aceita clientes originais ou launchers paralelos. Qualquer nick pode entrar. Por seguranca, a auto-promocao de OP via `RCON_CMDS_ON_CONNECT` fica desabilitada enquanto `ONLINE_MODE=FALSE`; concessoes de OP nivel 4 devem ser executadas manualmente via RCON (`op <nick>`).
 
 No boot, `RCON_CMDS_STARTUP` aplica:
 
@@ -22,7 +22,7 @@ No boot, `RCON_CMDS_STARTUP` aplica:
 - `gamerule command_block_output false`
 - `gamerule send_command_feedback false`
 
-> **Risco critico:** nao existe verificacao de identidade. Qualquer pessoa que use o nick `AnonymousNoobz` recebe administracao completa do mundo. Restrinja `game_cidr_list` no AKS e o firewall do host quando o servidor nao deva ser publico.
+> **Risco critico:** nao existe verificacao de identidade no modo offline. Evite auto-promocao de OP por nickname e restrinja `game_cidr_list` no AKS e o firewall do host quando o servidor nao deva ser publico.
 
 ## Docker local
 

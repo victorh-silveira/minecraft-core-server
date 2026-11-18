@@ -11,7 +11,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   role_based_access_control_enabled = true
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
-  node_resource_group               = "rg-minecraft-server-nodes-prod"
+  node_resource_group               = var.node_resource_group
 
   default_node_pool {
     name                         = "default"

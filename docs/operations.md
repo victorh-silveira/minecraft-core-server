@@ -80,7 +80,7 @@ Para VPN de gerenciamento, substitua `127.0.0.1` pelo CIDR da rede privada.
 - `RCON_PASSWORD` forte e unico no `.env`
 - `ONLINE_MODE=false` (sem autenticacao Mojang)
 - Porta 25565 restrita por firewall/NSG quando o acesso nao for publico
-- `AnonymousNoobz` recebe OP nivel 4 automaticamente; proteja esse nick em modo offline
+- Evitar auto-promocao de OP em `RCON_CMDS_ON_CONNECT` enquanto `ONLINE_MODE=false` (usar `rcon-cli op <nick>` sob demanda)
 - Nunca commitar `.env`
 - Guia completo: [access-and-hostname.md](access-and-hostname.md)
 

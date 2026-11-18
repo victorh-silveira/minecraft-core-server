@@ -24,7 +24,7 @@ Preencha cada valor no formato `VARIAVEL=valor`. Os templates usam placeholders 
 | Servidor | `MINECRAFT_VERSION=26.3`, `SERVER_TYPE=FORGE`, `FORGE_VERSION=66.0.6`, `MINECRAFT_INIT_MEMORY`, `MINECRAFT_MAX_MEMORY`, `EULA_ACCEPTED` |
 | Portas | `GAME_PORT`, `RCON_PORT` |
 | Smoke de rede | `SMOKE_LAN_HOST`, `SMOKE_WAN_PORT`, `SMOKE_DNS_HOST`, `SMOKE_IPIFY_URL`, `SMOKE_CONNECT_TIMEOUT_SEC`, `SMOKE_STARTUP_TIMEOUT_SEC`, `SMOKE_EXPECTED_MOTD`, `SMOKE_EXTERNAL_STATUS_URL`, `SMOKE_USER_AGENT` |
-| Acesso e comandos | `ONLINE_MODE=FALSE`, whitelist/perfil seguro desabilitados e OP para `AnonymousNoobz` |
+| Acesso e comandos | `ONLINE_MODE=FALSE`, whitelist/perfil seguro desabilitados e sem auto-OP ao conectar |
 | Jogo | `DIFFICULTY`, `MAX_PLAYERS` |
 | Segredos | `RCON_PASSWORD` |
 | Container | `UID`, `GID`, `SKIP_CHOWN`, `DOCKER_CPU_LIMIT`, `DOCKER_MEMORY_LIMIT`, `DOCKER_MEMORY_RESERVATION`, `DOCKER_MEMORY_SWAP_LIMIT`, `DOCKER_PIDS_LIMIT`, `DOCKER_TMPFS_LIMIT` |
@@ -41,7 +41,6 @@ Producao AKS nao usa este `.env`; equivalentes estao no StatefulSet e no Secret 
 | `ONLINE_MODE`, `WHITE_LIST`, `ENFORCE_WHITELIST`, `ENFORCE_SECURE_PROFILE` | StatefulSet (todos `FALSE`) |
 | `ENABLE_COMMAND_BLOCK`, niveis OP/function | StatefulSet (habilitado, nivel 4) |
 | `RCON_CMDS_STARTUP` | `keep_inventory=true`, sono com um jogador e feedback administrativo silencioso |
-| `RCON_CMDS_ON_CONNECT` | `op AnonymousNoobz` |
 | `RCON_PASSWORD` | Secret `mc-rcon` (CD) |
 | Limites CPU/RAM | Patch `overlays/prod/patches/resources.yaml` |
 | Propriedades extras | ConfigMap `mc-server-properties` |

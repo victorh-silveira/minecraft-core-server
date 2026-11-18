@@ -82,8 +82,6 @@ services:
         gamerule players_sleeping_percentage 1
         gamerule command_block_output false
         gamerule send_command_feedback false
-      RCON_CMDS_ON_CONNECT: |-
-        op AnonymousNoobz
       UID: "${UID:-1000}"
       GID: "${GID:-1000}"
       USE_AIKAR_FLAGS: "true"
