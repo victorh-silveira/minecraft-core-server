@@ -71,7 +71,7 @@ make docker-logs
 
 Conecte em `localhost:25565` (ou `GAME_PORT` do `.env`).
 
-Docker local e AKS operam sem autenticacao Mojang e sem whitelist, aceitando clientes originais e launchers paralelos. `AnonymousNoobz` recebe OP nivel 4 ao conectar; `keepInventory`, sono com um jogador e feedback silencioso sao configurados no boot.
+Docker local e AKS operam sem autenticacao Mojang e sem whitelist, aceitando clientes originais e launchers paralelos. Concessoes de OP nivel 4 sao feitas sob demanda via `rcon-cli` (sem auto-OP ao conectar); `keepInventory`, sono com um jogador e feedback silencioso sao configurados no boot.
 
 Na lista de servidores, o MOTD exibe **Minecraft Core Server** e os dados do runtime em duas linhas coloridas. O icone versionado e um PNG 64x64. O nome salvo acima do MOTD continua sendo escolhido por cada jogador no cliente Vanilla.
 
