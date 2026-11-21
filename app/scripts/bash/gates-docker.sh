@@ -13,7 +13,7 @@ COMPOSE_FILE="infra/docker/docker-compose.yml"
 DOCKERFILE="infra/docker/Dockerfile"
 ENV_FILE="infra/docker/.env"
 TOOLS_DIR="${REPO_ROOT}/.tools"
-TRIVY_VERSION="${TRIVY_VERSION:-0.74.0}"
+TRIVY_VERSION="${TRIVY_VERSION:-0.76.2}"
 
 synthetic_env() {
   if [[ -f "${REPO_ROOT}/${ENV_FILE}" ]]; then

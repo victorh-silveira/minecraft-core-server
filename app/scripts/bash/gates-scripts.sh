@@ -10,7 +10,7 @@ if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
 fi
 
 TOOLS_DIR="${REPO_ROOT}/.tools"
-SHELLCHECK_VERSION="${SHELLCHECK_VERSION:-v0.10.0}"
+SHELLCHECK_VERSION="${SHELLCHECK_VERSION:-v0.11.0}"
 
 list_scripts() {
   find app/scripts linters/git-hooks -type f -name '*.sh' | sort

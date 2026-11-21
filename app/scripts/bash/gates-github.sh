@@ -10,7 +10,7 @@ if [[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
 fi
 
 TOOLS_DIR="${REPO_ROOT}/.tools"
-ACTIONLINT_VERSION="${ACTIONLINT_VERSION:-1.7.7}"
+ACTIONLINT_VERSION="${ACTIONLINT_VERSION:-1.7.12}"
 
 actionlint_bin() {
   if command -v actionlint &>/dev/null; then

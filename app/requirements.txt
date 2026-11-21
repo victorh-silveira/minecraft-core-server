@@ -1,2 +1,2 @@
 # ---- COMUNICACAO & REDE ----
-requests>=2.31.0               # Cliente HTTP sincrono para resolucao de APIs (Modrinth) e download de JARs
+requests>=2.34.2               # Cliente HTTP sincrono para resolucao de APIs (Modrinth) e download de JARs
